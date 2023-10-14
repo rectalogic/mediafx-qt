@@ -11,21 +11,25 @@
 #include <QUrl>
 #include <QtQmlIntegration>
 #include <QtTypes>
+class QVideoSink;
 
 class Clip : public QObject {
     Q_OBJECT
     Q_PROPERTY(QUrl url READ url WRITE setUrl FINAL)
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
+    Q_PROPERTY(QVideoSink* videoSink READ videoSink WRITE setVideoSink FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 public:
     using QObject::QObject;
-    QUrl url() const;
+    QUrl url() const { return m_url; };
     void setUrl(const QUrl&);
     virtual qint64 duration() const = 0;
-    qint64 clipEnd() const;
+    qint64 clipEnd() const { return m_clipEnd; };
     void setClipEnd(qint64);
+    QVideoSink* videoSink() const;
+    void setVideoSink(QVideoSink*);
 
 protected:
     virtual void loadMedia(const QUrl&) = 0;
@@ -37,6 +41,7 @@ signals:
 private:
     QUrl m_url;
     qint64 m_clipEnd = -1;
+    QVideoSink* m_videoSink = nullptr;
 };
 
 class MediaClip : public Clip {
@@ -47,7 +52,7 @@ public:
     using Clip::Clip;
     MediaClip();
     qint64 duration() const override;
-    qint64 clipBegin() const;
+    qint64 clipBegin() const { return m_clipBegin; };
     void setClipBegin(qint64);
 
 protected:

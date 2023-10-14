@@ -9,11 +9,6 @@
 #include <QMessageLogContext>
 #include <QUrl>
 
-QUrl Clip::url() const
-{
-    return m_url;
-}
-
 void Clip::setUrl(const QUrl& url)
 {
     if (!m_url.isEmpty()) {
@@ -23,9 +18,11 @@ void Clip::setUrl(const QUrl& url)
     m_url = url;
 }
 
-qint64 Clip::clipEnd() const
+void Clip::setVideoSink(QVideoSink* videoSink)
 {
-    return m_clipEnd;
+    if (m_videoSink != videoSink) {
+        m_videoSink = videoSink;
+    }
 }
 
 void Clip::setClipEnd(qint64 clipEnd)
@@ -53,11 +50,6 @@ void MediaClip::onErrorOccurred(QMediaPlayer::Error error, const QString& errorS
 void MediaClip::loadMedia(const QUrl& url)
 {
     mediaPlayer.setSource(url);
-}
-
-qint64 MediaClip::clipBegin() const
-{
-    return m_clipBegin;
 }
 
 void MediaClip::setClipBegin(qint64 clipBegin)
