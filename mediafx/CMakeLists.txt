@@ -9,8 +9,10 @@ qt_policy(SET QTP0001 NEW)
 
 qt_add_executable(mediafx
     main.cpp
+    session.cpp
     mediafx.cpp
     render_control.cpp
+    clip.cpp
 )
 set_property(TARGET mediafx PROPERTY AUTOMOC ON)
 

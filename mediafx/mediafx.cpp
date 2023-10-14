@@ -3,6 +3,6 @@
 // found in the LICENSE file.
 
 #include "mediafx.h"
-#include <QQmlEngine>
+#include <QmlTypeAndRevisionsRegistration>
 
 int MediaFX::typeId = qmlTypeId("stream.mediafx", 1, 0, "MediaFX");

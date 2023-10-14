@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mediafx.h"
-#include "render_control.h"
+#include "session.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QList>
 #include <QMessageLogContext>
-#include <QQmlEngine>
-#include <QQuickView>
 #include <QSize>
 #include <QStringList>
 #include <QUrl>
@@ -45,15 +42,7 @@ int main(int argc, char* argv[])
     }
     QUrl url(args.at(0));
 
-    RenderControl renderControl;
-    QQuickView quickView(QUrl(), &renderControl);
-    quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView.resize(size);
-    renderControl.install(quickView, size);
-    MediaFX* mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
-
-    // XXX load qml
-    // XXX connect to quickview errors, loadfinished etc.
+    Session session(url, size);
 
     return app.exec();
 }

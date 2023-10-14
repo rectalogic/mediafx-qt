@@ -5,15 +5,15 @@
 #pragma once
 
 #include <QObject>
-#include <QQmlEngine>
+#include <QtQmlIntegration>
 
 class MediaFX : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
-    // Q_PROPERTY( ... )
+    // XXX Q_PROPERTY( ... )
 
 public:
     static int typeId;
-    // members, Q_INVOKABLE functions, etc.
+    // XXX members, Q_INVOKABLE functions, etc.
 };
