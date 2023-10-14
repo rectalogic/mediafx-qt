@@ -34,6 +34,8 @@ void Clip::setClipEnd(qint64 clipEnd)
     }
 }
 
+/******************************/
+
 MediaClip::MediaClip()
     : Clip()
 {
@@ -69,6 +71,8 @@ qint64 MediaClip::duration() const
         return mediaPlayer.duration() - clipBegin();
     }
 }
+
+/******************************/
 
 void ImageClip::loadMedia(const QUrl& url)
 {
