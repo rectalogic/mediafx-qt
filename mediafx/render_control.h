@@ -7,9 +7,10 @@
 #include <QObject>
 #include <QQuickRenderControl>
 #include <QScopedPointer>
-#include <QSize>
 #include <QVideoFrame>
 #include <rhi/qrhi.h>
+class QQuickWindow;
+class QSize;
 
 class RenderControl : public QQuickRenderControl {
     Q_OBJECT

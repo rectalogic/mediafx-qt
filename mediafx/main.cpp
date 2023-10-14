@@ -6,8 +6,11 @@
 #include "render_control.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
+#include <QList>
 #include <QMessageLogContext>
+#include <QQmlEngine>
 #include <QQuickView>
+#include <QSize>
 #include <QStringList>
 #include <QUrl>
 #include <stdlib.h>
@@ -45,6 +48,7 @@ int main(int argc, char* argv[])
     RenderControl renderControl;
     QQuickView quickView(QUrl(), &renderControl);
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
+    quickView.resize(size);
     renderControl.install(quickView, size);
     MediaFX* mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
 

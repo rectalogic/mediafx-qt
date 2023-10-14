@@ -1,17 +1,19 @@
+// Copyright (c) 2023 Andrew Wason. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "render_control.h"
-#include <QByteArray> // for QByteArray
-#include <QDebug> // for QDebug
-#include <QImage> // for QImage, QImage::Format_RGBA8888_Premultiplied
-#include <QQuickRenderControl> // for QQuickRenderControl
-#include <QQuickRenderTarget> // for QQuickRenderTarget
-#include <QQuickWindow> // for QQuickWindow
-#include <QSize> // for QSize, operator==
-#include <QVideoFrame>
+#include <QByteArray>
+#include <QDebug>
+#include <QMessageLogContext>
+#include <QQuickRenderTarget>
+#include <QQuickWindow>
+#include <QSize>
 #include <QVideoFrameFormat>
-#include <QtGlobal> // for qDebug
-#include <QtTypes> // for uchar
-#include <functional> // for function
+#include <QtAssert>
+#include <functional>
 #include <rhi/qrhi.h>
+#include <string.h>
 
 bool RenderControl::install(QQuickWindow& window, QSize size)
 {
