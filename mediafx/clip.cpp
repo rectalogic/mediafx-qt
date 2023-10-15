@@ -6,6 +6,7 @@
 #include "mediafx.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <QList>
 #include <QMediaPlayer>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
@@ -22,11 +23,11 @@ void Clip::setUrl(const QUrl& url)
     m_url = url;
 }
 
-void Clip::setVideoSink(QVideoSink* videoSink)
+void Clip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
 {
-    if (m_videoSink != videoSink) {
-        m_videoSink = videoSink;
-        setActive(videoSink);
+    if (m_videoSinks != videoSinks) {
+        m_videoSinks = videoSinks;
+        setActive(!videoSinks.isEmpty());
     }
 }
 
@@ -55,7 +56,7 @@ void Clip::setActive(bool active)
     auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
     // XXX register/deregister from mediaFX
     if (!active) {
-        m_videoSink = nullptr;
+        m_videoSinks.clear();
     }
 }
 
@@ -67,12 +68,14 @@ bool Clip::renderVideoFrame(QMediaTimeRange::Interval& timelineFrameTimeRange)
     if (nextFrameTimeRange().end() == -1) {
         setNextFrameTimeRange(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
     }
-    if (videoSink() && clipTimeRange().contains(nextFrameTimeRange().start())) {
+    if (!videoSinks().isEmpty() && clipTimeRange().contains(nextFrameTimeRange().start())) {
         if (!prepareNextVideoFrame())
             return false;
         m_currentVideoFrame.setStartTime(timelineFrameTimeRange.start());
         m_currentVideoFrame.setEndTime(timelineFrameTimeRange.end());
-        videoSink()->setVideoFrame(m_currentVideoFrame);
+        for (auto videoSink : videoSinks()) {
+            videoSink->setVideoFrame(m_currentVideoFrame);
+        }
         setCurrentTimelineTimeRange(timelineFrameTimeRange);
         setNextFrameTimeRange(nextFrameTimeRange().translated(duration));
         return true;
@@ -131,7 +134,7 @@ void MediaClip::rateControl()
 
 void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
 {
-    if (!videoSink())
+    if (videoSinks().isEmpty())
         return;
 
     auto frameTime = nextFrameTimeRange();

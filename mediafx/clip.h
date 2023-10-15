@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QImage>
+#include <QList>
 #include <QMediaPlayer>
 #include <QMediaTimeRange>
 #include <QObject>
@@ -23,7 +24,7 @@ class Clip : public QObject {
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(qint64 clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
-    Q_PROPERTY(QVideoSink* videoSink READ videoSink WRITE setVideoSink FINAL)
+    Q_PROPERTY(QList<QVideoSink*> videoSinks READ videoSinks WRITE setVideoSinks FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
@@ -49,8 +50,8 @@ public:
     qint64 clipEnd() const { return m_clipTimeRange.end(); };
     void setClipEnd(qint64);
 
-    QVideoSink* videoSink() const { return m_videoSink; };
-    void setVideoSink(QVideoSink*);
+    QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
+    void setVideoSinks(const QList<QVideoSink*>&);
 
     bool renderVideoFrame(QMediaTimeRange::Interval& timelineFrameTimeRange);
     virtual bool prepareNextVideoFrame() = 0;
@@ -80,7 +81,7 @@ private:
     QMediaTimeRange::Interval m_clipTimeRange;
     QMediaTimeRange::Interval m_currentTimelineTimeRange;
     QMediaTimeRange::Interval m_nextFrameTimeRange;
-    QVideoSink* m_videoSink = nullptr;
+    QList<QVideoSink*> m_videoSinks = nullptr;
     QVideoFrame m_currentVideoFrame;
 };
 
