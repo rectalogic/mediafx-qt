@@ -67,5 +67,6 @@ void Session::renderFrame()
 
     // XXX should we post this from Clip when new frames are available? but what about producers
     // XXX need to know when we're done - how do we determine total duration?
+    // XXX QML could signal a mediaFX slot when done
     QCoreApplication::postEvent(this, new QEvent(renderEventType));
 }
