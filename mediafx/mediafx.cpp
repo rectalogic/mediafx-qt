@@ -12,7 +12,7 @@ int MediaFX::typeId = qmlTypeId("stream.mediafx", 1, 0, "MediaFX");
 
 void MediaFX::registerClip(Clip* clip)
 {
-    if (!activeClips.contains(clip)) {
+    if (clip && !activeClips.contains(clip)) {
         activeClips.append(clip);
         // Ensure we don't have multiple clips simultaneously rendering to the same sink
         QSet<const QVideoSink*> set;

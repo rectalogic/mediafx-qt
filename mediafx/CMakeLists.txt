@@ -4,7 +4,6 @@
 
 find_package(Qt6 REQUIRED QUIET COMPONENTS Core Gui Multimedia Qml Quick Quick3D)
 
-set(CMAKE_AUTOMOC ON)
 qt_policy(SET QTP0001 NEW)
 
 qt_add_executable(mediafx
@@ -14,7 +13,6 @@ qt_add_executable(mediafx
     render_control.cpp
     clip.cpp
 )
-set_property(TARGET mediafx PROPERTY AUTOMOC ON)
 
 qt_add_qml_module(mediafx
     URI stream.mediafx
