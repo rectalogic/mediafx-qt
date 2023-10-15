@@ -25,8 +25,10 @@ int main(int argc, char* argv[])
     app.setOrganizationName("mediaFX");
     app.setApplicationName("mediaFX");
 
-    // XXX need encoder settings which include frame size
+    // XXX need encoder settings which include frame size, frame duration
     QSize size(640, 360);
+    qint64 frameDuration = 33333;
+
     QCommandLineParser parser;
     parser.setApplicationDescription("mediaFX");
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
@@ -42,7 +44,7 @@ int main(int argc, char* argv[])
     }
     QUrl url(args.at(0));
 
-    Session session(url, size);
+    Session session(url, size, frameDuration);
 
     return app.exec();
 }

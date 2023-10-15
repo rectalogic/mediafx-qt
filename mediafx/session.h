@@ -5,7 +5,9 @@
 #pragma once
 
 #include "render_control.h"
+#include <QEvent>
 #include <QList>
+#include <QMediaTimeRange>
 #include <QObject>
 #include <QQuickView>
 class MediaFX;
@@ -17,13 +19,20 @@ class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(QUrl& url, QSize size);
+    Session(QUrl& url, QSize& size, qint64 frameDuration);
+
+    void renderFrame();
+
+    bool event(QEvent* event) override;
 
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);
     void engineWarnings(const QList<QQmlError>& warnings);
 
 private:
+    static QEvent::Type renderEventType;
+    qint64 frameDuration;
+    QMediaTimeRange::Interval frameTime;
     RenderControl renderControl;
     QQuickView quickView;
     MediaFX* mediaFX;

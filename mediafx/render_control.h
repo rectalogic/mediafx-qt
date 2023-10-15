@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include <QByteArray>
 #include <QObject>
 #include <QQuickRenderControl>
 #include <QScopedPointer>
-#include <QVideoFrame>
 #include <rhi/qrhi.h>
 class QQuickWindow;
 class QSize;
@@ -16,12 +16,11 @@ class RenderControl : public QQuickRenderControl {
     Q_OBJECT
 public:
     bool install(QQuickWindow& window, QSize size);
-    QVideoFrame& renderFrame();
+    QByteArray renderVideoFrame();
 
 private:
     QScopedPointer<QRhiTexture> texture;
     QScopedPointer<QRhiRenderBuffer> stencilBuffer;
     QScopedPointer<QRhiTextureRenderTarget> textureRenderTarget;
     QScopedPointer<QRhiRenderPassDescriptor> renderPassDescriptor;
-    QVideoFrame videoFrame;
 };

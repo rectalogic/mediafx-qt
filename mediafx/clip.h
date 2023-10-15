@@ -53,7 +53,7 @@ public:
     QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
     void setVideoSinks(const QList<QVideoSink*>&);
 
-    bool renderVideoFrame(QMediaTimeRange::Interval& timelineFrameTimeRange);
+    bool renderVideoFrame(const QMediaTimeRange::Interval& timelineFrameTimeRange);
     virtual bool prepareNextVideoFrame() = 0;
 
     virtual void setActive(bool active);
@@ -81,7 +81,7 @@ private:
     QMediaTimeRange::Interval m_clipTimeRange;
     QMediaTimeRange::Interval m_currentTimelineTimeRange;
     QMediaTimeRange::Interval m_nextFrameTimeRange;
-    QList<QVideoSink*> m_videoSinks = nullptr;
+    QList<QVideoSink*> m_videoSinks;
     QVideoFrame m_currentVideoFrame;
 };
 

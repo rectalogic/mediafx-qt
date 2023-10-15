@@ -9,7 +9,6 @@
 #include <QQuickRenderTarget>
 #include <QQuickWindow>
 #include <QSize>
-#include <QVideoFrameFormat>
 #include <QtAssert>
 #include <functional>
 #include <rhi/qrhi.h>
@@ -56,12 +55,10 @@ bool RenderControl::install(QQuickWindow& window, QSize size)
     // redirect Qt Quick rendering into our texture
     window.setRenderTarget(renderTarget);
 
-    videoFrame = QVideoFrame(QVideoFrameFormat(size, QVideoFrameFormat::Format_RGBA8888));
-
     return true;
 }
 
-QVideoFrame& RenderControl::renderFrame()
+QByteArray RenderControl::renderVideoFrame()
 {
     polishItems();
     beginFrame();
@@ -70,15 +67,11 @@ QVideoFrame& RenderControl::renderFrame()
 
     QRhi* rhi = this->rhi();
 
+    QByteArray frameData;
     QRhiReadbackResult readResult;
-    readResult.completed = [&readResult, &rhi, &videoFrame = this->videoFrame] {
+    readResult.completed = [&readResult, &rhi, &frameData] {
         Q_ASSERT(readResult.format == QRhiTexture::RGBA8);
-        Q_ASSERT(readResult.pixelSize == videoFrame.size());
-        if (videoFrame.map(QVideoFrame::WriteOnly)) {
-            Q_ASSERT(readResult.data.size() == videoFrame.mappedBytes(0));
-            memcpy(videoFrame.bits(0), readResult.data.constData(), videoFrame.mappedBytes(0));
-            videoFrame.unmap();
-        }
+        frameData = readResult.data;
     };
     QRhiResourceUpdateBatch* readbackBatch = rhi->nextResourceUpdateBatch();
     readbackBatch->readBackTexture(texture.data(), &readResult);
@@ -88,5 +81,5 @@ QVideoFrame& RenderControl::renderFrame()
 
     // offscreen frames in QRhi are synchronous, meaning the readback has been finished at this point
 
-    return videoFrame;
+    return frameData;
 }

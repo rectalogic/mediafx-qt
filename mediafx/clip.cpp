@@ -54,13 +54,15 @@ void Clip::setClipEnd(qint64 clipEnd)
 void Clip::setActive(bool active)
 {
     auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
-    // XXX register/deregister from mediaFX
-    if (!active) {
+    if (active) {
+        mediaFX->registerClip(this);
+    } else {
+        mediaFX->unregisterClip(this);
         m_videoSinks.clear();
     }
 }
 
-bool Clip::renderVideoFrame(QMediaTimeRange::Interval& timelineFrameTimeRange)
+bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& timelineFrameTimeRange)
 {
     if (currentTimelineTimeRange() == timelineFrameTimeRange)
         return true;
@@ -137,6 +139,8 @@ void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
     if (videoSinks().isEmpty())
         return;
 
+    // XXX need to attempt to seek - should we do that when clipStart set, or when url set? we don't know which is set first
+
     auto frameTime = nextFrameTimeRange();
     if (frame.endTime() >= frameTime.end())
         return;
@@ -167,7 +171,7 @@ void MediaClip::setActive(bool active)
     if (active) {
         mediaPlayer.play();
     } else {
-        mediaPlayer.stop();
+        mediaPlayer.stop(); // XXX if we stop we should set source to QUrl(), but maybe we should pause (and if so, don't clear queue)? could clip be resumed later?
         frameQueue.clear();
         frameQueue.squeeze();
     }

@@ -4,16 +4,25 @@
 
 #pragma once
 
+#include <QList>
+#include <QMediaTimeRange>
 #include <QObject>
 #include <QtQmlIntegration>
+class Clip;
 
 class MediaFX : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
-    // XXX Q_PROPERTY( ... )
 
 public:
     static int typeId;
-    // XXX members, Q_INVOKABLE functions, etc.
+
+    void registerClip(Clip* clip);
+    void unregisterClip(Clip* clip);
+
+    bool renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange);
+
+private:
+    QList<Clip*> activeClips;
 };
