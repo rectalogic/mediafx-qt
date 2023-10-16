@@ -65,7 +65,7 @@ void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
 
     // XXX need to attempt to seek - should we do that when clipStart set, or when url set? we don't know which is set first
 
-    auto frameTime = nextFrameTimeRange();
+    auto frameTime = nextClipTime();
     if (frame.endTime() >= frameTime.end())
         return;
     if (frame.startTime() >= frameTime.start()) {
@@ -79,7 +79,7 @@ bool MediaClip::prepareNextVideoFrame()
     QVideoFrame videoFrame;
     while (!frameQueue.isEmpty()) {
         videoFrame = frameQueue.dequeue();
-        if (nextFrameTimeRange().contains(videoFrame.startTime())) {
+        if (nextClipTime().contains(videoFrame.startTime())) {
             setCurrentVideoFrame(videoFrame);
             rateControl();
             return true;

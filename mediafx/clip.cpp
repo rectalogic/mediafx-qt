@@ -32,10 +32,10 @@ void Clip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
 
 void Clip::setClipStart(qint64 clipStart)
 {
-    if (m_clipTimeRange.start() != clipStart) {
-        m_clipTimeRange = QMediaTimeRange::Interval(clipStart, m_clipTimeRange.end());
+    if (m_clipSegment.start() != clipStart) {
+        m_clipSegment = QMediaTimeRange::Interval(clipStart, m_clipSegment.end());
         // We don't know frame duration yet
-        setNextFrameTimeRange(QMediaTimeRange::Interval(clipStart, -1));
+        setNextClipTime(QMediaTimeRange::Interval(clipStart, -1));
         emit clipStartChanged();
         emit durationChanged();
     }
@@ -43,8 +43,8 @@ void Clip::setClipStart(qint64 clipStart)
 
 void Clip::setClipEnd(qint64 clipEnd)
 {
-    if (m_clipTimeRange.end() != clipEnd) {
-        m_clipTimeRange = QMediaTimeRange::Interval(m_clipTimeRange.start(), clipEnd);
+    if (m_clipSegment.end() != clipEnd) {
+        m_clipSegment = QMediaTimeRange::Interval(m_clipSegment.start(), clipEnd);
         emit clipEndChanged();
         emit durationChanged();
     }
@@ -61,24 +61,24 @@ void Clip::setActive(bool active)
     }
 }
 
-bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& timelineFrameTimeRange)
+bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
 {
-    if (currentTimelineTimeRange() == timelineFrameTimeRange)
+    if (currentGlobalTime() == globalTime)
         return true;
-    qint64 duration = timelineFrameTimeRange.end() - timelineFrameTimeRange.start();
-    if (nextFrameTimeRange().end() == -1) {
-        setNextFrameTimeRange(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
+    qint64 duration = globalTime.end() - globalTime.start();
+    if (nextClipTime().end() == -1) {
+        setNextClipTime(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
     }
-    if (!videoSinks().isEmpty() && clipTimeRange().contains(nextFrameTimeRange().start())) {
+    if (!videoSinks().isEmpty() && clipTimeRange().contains(nextClipTime().start())) {
         if (!prepareNextVideoFrame())
             return false;
-        m_currentVideoFrame.setStartTime(timelineFrameTimeRange.start());
-        m_currentVideoFrame.setEndTime(timelineFrameTimeRange.end());
+        m_currentVideoFrame.setStartTime(globalTime.start());
+        m_currentVideoFrame.setEndTime(globalTime.end());
         for (auto videoSink : videoSinks()) {
             videoSink->setVideoFrame(m_currentVideoFrame);
         }
-        setCurrentTimelineTimeRange(timelineFrameTimeRange);
-        setNextFrameTimeRange(nextFrameTimeRange().translated(duration));
+        setCurrentGlobalTime(globalTime);
+        setNextClipTime(nextClipTime().translated(duration));
         return true;
     } else {
         setActive(false);
