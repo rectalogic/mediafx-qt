@@ -10,6 +10,7 @@
 #include <QSize>
 #include <QStringList>
 #include <QUrl>
+#include <QtTypes>
 #include <stdlib.h>
 
 int main(int argc, char* argv[])

@@ -4,16 +4,11 @@
 
 #pragma once
 
-#include <QImage>
 #include <QList>
-#include <QMediaPlayer>
 #include <QMediaTimeRange>
 #include <QObject>
-#include <QQueue>
-#include <QString>
 #include <QUrl>
 #include <QVideoFrame>
-#include <QVideoSink>
 #include <QtQmlIntegration>
 #include <QtTypes>
 class QVideoSink;
@@ -83,58 +78,4 @@ private:
     QMediaTimeRange::Interval m_nextFrameTimeRange;
     QList<QVideoSink*> m_videoSinks;
     QVideoFrame m_currentVideoFrame;
-};
-
-/******************************/
-
-class MediaClip : public Clip {
-    Q_OBJECT
-    QML_ELEMENT
-
-public:
-    using Clip::Clip;
-    MediaClip();
-
-    qint64 duration() const override;
-
-    bool prepareNextVideoFrame() override;
-
-    void setActive(bool active) override;
-
-protected:
-    void loadMedia(const QUrl&) override;
-
-private slots:
-    void onErrorOccurred(QMediaPlayer::Error error, const QString& errorString);
-    void onVideoFrameChanged(const QVideoFrame& frame);
-    void onDurationChanged(qint64 duration);
-
-private:
-    void rateControl();
-    static const int MaxFrameQueueSize = 20;
-    static const int MinFrameQueueSize = 5;
-    QMediaPlayer mediaPlayer;
-    QVideoSink mediaPlayerSink;
-    QQueue<QVideoFrame> frameQueue;
-};
-
-/******************************/
-
-class ImageClip : public Clip {
-    Q_OBJECT
-    QML_ELEMENT
-
-public:
-    using Clip::Clip;
-
-    qint64 duration() const override;
-
-    bool prepareNextVideoFrame() override;
-
-protected:
-    void loadMedia(const QUrl&) override;
-
-private:
-    QImage image;
-    QVideoFrame videoFrame;
 };

@@ -10,6 +10,7 @@
 #include <QMediaTimeRange>
 #include <QObject>
 #include <QQuickView>
+#include <QtTypes>
 class MediaFX;
 class QQmlError;
 class QSize;

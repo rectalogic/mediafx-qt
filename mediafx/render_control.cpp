@@ -12,7 +12,6 @@
 #include <QtAssert>
 #include <functional>
 #include <rhi/qrhi.h>
-#include <string.h>
 
 bool RenderControl::install(QQuickWindow& window, QSize size)
 {

@@ -12,6 +12,8 @@ qt_add_executable(mediafx
     mediafx.cpp
     render_control.cpp
     clip.cpp
+    media_clip.cpp
+    image_clip.cpp
 )
 
 qt_add_qml_module(mediafx

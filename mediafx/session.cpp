@@ -4,6 +4,7 @@
 
 #include "session.h"
 #include "mediafx.h"
+#include <QByteArray>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QEvent>
@@ -12,10 +13,10 @@
 #include <QQmlEngine>
 #include <QQmlError>
 #include <QQuickView>
-#include <QSize>
+#include <QUrl>
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
-class QUrl;
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
