@@ -8,7 +8,7 @@
 #include <QSet>
 #include <QmlTypeAndRevisionsRegistration>
 
-int MediaFX::typeId = qmlTypeId("stream.mediafx", 1, 0, "MediaFX");
+int MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
 
 void MediaFX::registerClip(Clip* clip)
 {

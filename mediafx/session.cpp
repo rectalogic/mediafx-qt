@@ -13,6 +13,8 @@
 #include <QQmlError>
 #include <QQuickView>
 #include <QSize>
+#include <string.h>
+#include <unistd.h>
 class QUrl;
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
@@ -21,15 +23,19 @@ Session::Session(QUrl& url, QSize& size, qint64 frameDuration)
     : QObject()
     , frameDuration(frameDuration)
     , frameTime(0, frameDuration)
-    , quickView(url, &renderControl)
+    , quickView(QUrl(), &renderControl)
 {
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.resize(size);
-    renderControl.install(quickView, size);
-    mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
-
+    if (!renderControl.install(quickView, size)) {
+        qCritical() << "Failed to install QQuickRenderControl";
+        QCoreApplication::exit(1);
+        return;
+    }
     connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
+    mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
+    quickView.setSource(url);
 }
 
 void Session::quickViewStatusChanged(QQuickView::Status status)
@@ -62,6 +68,21 @@ void Session::renderFrame()
 {
     if (mediaFX->renderVideoFrame(frameTime)) {
         auto frameData = renderControl.renderVideoFrame();
+
+        /**** XXX ****/
+        size_t bytesIO = 0;
+        auto size = frameData.size();
+        const auto data = frameData.constData();
+        while (bytesIO < size) {
+            ssize_t n = write(STDOUT_FILENO, data + bytesIO, size - bytesIO);
+            if (n == -1) {
+                qCritical() << "write failed: " << strerror(errno);
+                return;
+            }
+            bytesIO = bytesIO + n;
+        }
+        /**** XXX ****/
+
         frameTime = frameTime.translated(frameDuration);
     }
 
