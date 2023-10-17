@@ -2,45 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "media_clip.h"
-#include "clip.h"
+#include "video_clip.h"
+#include "visual_clip.h"
 #include <QCoreApplication>
 #include <QDebug>
 #include <QList>
 #include <QMediaPlayer>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
+#include <QUrl>
 #include <QVideoSink>
-class QUrl;
 
-MediaClip::MediaClip()
-    : Clip()
+VideoClip::VideoClip()
+    : VisualClip()
 {
     // We want frames faster than realtime
     mediaPlayer.setPlaybackRate(1000);
-    connect(&mediaPlayerSink, &QVideoSink::videoFrameChanged, this, &MediaClip::onVideoFrameChanged);
+    connect(&mediaPlayerSink, &QVideoSink::videoFrameChanged, this, &VideoClip::onVideoFrameChanged);
     mediaPlayer.setVideoSink(&mediaPlayerSink);
-    connect(&mediaPlayer, &QMediaPlayer::durationChanged, this, &MediaClip::onDurationChanged);
-    connect(&mediaPlayer, &QMediaPlayer::errorOccurred, this, &MediaClip::onErrorOccurred);
+    connect(&mediaPlayer, &QMediaPlayer::durationChanged, this, &VideoClip::onDurationChanged);
+    connect(&mediaPlayer, &QMediaPlayer::errorOccurred, this, &VideoClip::onErrorOccurred);
 }
 
-void MediaClip::onErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
+void VideoClip::onErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
 {
-    qCritical() << "MediaClip error " << error << " " << errorString;
+    qCritical() << "VideoClip error " << error << " " << errorString;
     QCoreApplication::exit(1);
 }
 
-void MediaClip::loadMedia(const QUrl& url)
+void VideoClip::loadMedia(const QUrl& url)
 {
     mediaPlayer.setSource(url);
 }
 
-void MediaClip::onDurationChanged(qint64 duration)
+void VideoClip::onDurationChanged(qint64 duration)
 {
     setClipEnd(duration); // This will emit durationChanged as well
 }
 
-qint64 MediaClip::duration() const
+qint64 VideoClip::duration() const
 {
     if (clipEnd() != -1)
         return clipEnd() - clipStart();
@@ -49,7 +49,7 @@ qint64 MediaClip::duration() const
     }
 }
 
-void MediaClip::rateControl()
+void VideoClip::rateControl()
 {
     auto size = bufferedFrames.size();
     if (size > MaxFrameQueueSize && mediaPlayer.isPlaying())
@@ -58,7 +58,7 @@ void MediaClip::rateControl()
         mediaPlayer.play();
 }
 
-void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
+void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
 {
     if (videoSinks().isEmpty())
         return;
@@ -74,7 +74,7 @@ void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
     }
 }
 
-bool MediaClip::prepareNextVideoFrame()
+bool VideoClip::prepareNextVideoFrame()
 {
     QVideoFrame videoFrame;
     while (!bufferedFrames.isEmpty()) {
@@ -89,9 +89,9 @@ bool MediaClip::prepareNextVideoFrame()
     return false;
 }
 
-void MediaClip::setActive(bool active)
+void VideoClip::setActive(bool active)
 {
-    Clip::setActive(active);
+    VisualClip::setActive(active);
     if (active) {
         if (mediaPlayer.source().isEmpty()) {
             loadMedia(url());
@@ -102,9 +102,9 @@ void MediaClip::setActive(bool active)
     }
 }
 
-void MediaClip::stop()
+void VideoClip::stop()
 {
-    Clip::stop();
+    VisualClip::stop();
     mediaPlayer.stop();
     mediaPlayer.setSource(QUrl());
     bufferedFrames.clear();

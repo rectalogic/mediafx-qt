@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "image_clip.h"
+#include "visual_clip.h"
 #include <QCoreApplication>
 #include <QDebug>
 #include <QMessageLogContext>
@@ -48,7 +49,7 @@ bool ImageClip::prepareNextVideoFrame()
 
 void ImageClip::setActive(bool active)
 {
-    Clip::setActive(active);
+    VisualClip::setActive(active);
     if (active) {
         if (image.isNull()) {
             loadMedia(url());
@@ -58,7 +59,7 @@ void ImageClip::setActive(bool active)
 
 void ImageClip::stop()
 {
-    Clip::stop();
+    VisualClip::stop();
     image = QImage();
     videoFrame = QVideoFrame();
 }

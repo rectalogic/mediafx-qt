@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "clip.h"
+#include "visual_clip.h"
 #include <QImage>
 #include <QObject>
 #include <QVideoFrame>
@@ -12,12 +12,12 @@
 #include <QtTypes>
 class QUrl;
 
-class ImageClip : public Clip {
+class ImageClip : public VisualClip {
     Q_OBJECT
     QML_ELEMENT
 
 public:
-    using Clip::Clip;
+    using VisualClip::VisualClip;
 
     qint64 duration() const override;
 

@@ -3,15 +3,10 @@
 // found in the LICENSE file.
 
 #include "clip.h"
-#include "mediafx.h"
 #include <QDebug>
-#include <QList>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
-#include <QQmlEngine>
 #include <QUrl>
-#include <QVideoSink>
-#include <QmlTypeAndRevisionsRegistration>
 
 void Clip::setUrl(const QUrl& url)
 {
@@ -20,14 +15,6 @@ void Clip::setUrl(const QUrl& url)
         return;
     }
     m_url = url;
-}
-
-void Clip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
-{
-    if (m_videoSinks != videoSinks) {
-        m_videoSinks = videoSinks;
-        setActive(!videoSinks.isEmpty());
-    }
 }
 
 void Clip::setClipStart(qint64 clipStart)
@@ -50,47 +37,7 @@ void Clip::setClipEnd(qint64 clipEnd)
     }
 }
 
-void Clip::setActive(bool active)
-{
-    auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
-    if (active) {
-        mediaFX->registerClip(this);
-    } else {
-        mediaFX->unregisterClip(this);
-        m_videoSinks.clear();
-    }
-}
-
-bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
-{
-    if (currentGlobalTime() == globalTime)
-        return true;
-    qint64 duration = globalTime.end() - globalTime.start();
-    if (nextClipTime().end() == -1) {
-        setNextClipTime(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
-    }
-    if (!videoSinks().isEmpty() && clipTimeRange().contains(nextClipTime().start())) {
-        if (!prepareNextVideoFrame())
-            return false;
-        m_currentVideoFrame.setStartTime(globalTime.start());
-        m_currentVideoFrame.setEndTime(globalTime.end());
-        for (auto videoSink : videoSinks()) {
-            videoSink->setVideoFrame(m_currentVideoFrame);
-        }
-        setCurrentGlobalTime(globalTime);
-        setNextClipTime(nextClipTime().translated(duration));
-        return true;
-    } else if (clipEnd() < nextClipTime().start()) {
-        stop();
-        return false;
-    } else {
-        setActive(false);
-        return false;
-    }
-}
-
 void Clip::stop()
 {
-    setVideoSinks(QList<QVideoSink*>());
     setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));
 }

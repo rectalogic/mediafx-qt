@@ -4,14 +4,11 @@
 
 #pragma once
 
-#include <QList>
 #include <QMediaTimeRange>
 #include <QObject>
 #include <QUrl>
-#include <QVideoFrame>
 #include <QtQmlIntegration>
 #include <QtTypes>
-class QVideoSink;
 
 class Clip : public QObject {
     Q_OBJECT
@@ -19,7 +16,6 @@ class Clip : public QObject {
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(qint64 clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(qint64 clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
-    Q_PROPERTY(QList<QVideoSink*> videoSinks READ videoSinks WRITE setVideoSinks FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
@@ -45,40 +41,29 @@ public:
     qint64 clipEnd() const { return m_clipSegment.end(); };
     void setClipEnd(qint64);
 
-    QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
-    void setVideoSinks(const QList<QVideoSink*>&);
-
-    bool renderVideoFrame(const QMediaTimeRange::Interval& globalTime);
-
 signals:
     void clipStartChanged();
     void clipEndChanged();
     void durationChanged();
 
 protected:
-    virtual bool prepareNextVideoFrame() = 0;
-
-    virtual void setActive(bool active);
-
-    virtual void loadMedia(const QUrl&) = 0;
-
-    QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
-
-    void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
-
-    virtual void stop();
-
-private:
     QMediaTimeRange::Interval clipTimeRange() const { return m_clipSegment; };
     void setNextClipTime(const QMediaTimeRange::Interval& time) { m_nextClipTime = time; };
 
     QMediaTimeRange::Interval currentGlobalTime() const { return m_currentGlobalTime; };
     void setCurrentGlobalTime(const QMediaTimeRange::Interval& currentTime) { m_currentGlobalTime = currentTime; };
 
+    virtual void setActive(bool active) = 0;
+
+    virtual void loadMedia(const QUrl&) = 0;
+
+    QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
+
+    virtual void stop();
+
+private:
     QUrl m_url;
     QMediaTimeRange::Interval m_clipSegment;
     QMediaTimeRange::Interval m_currentGlobalTime;
     QMediaTimeRange::Interval m_nextClipTime;
-    QList<QVideoSink*> m_videoSinks;
-    QVideoFrame m_currentVideoFrame;
 };

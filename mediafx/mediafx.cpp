@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "mediafx.h"
-#include "clip.h"
+#include "visual_clip.h"
 #include <QDebug>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
@@ -13,13 +13,13 @@ class QVideoSink;
 
 int MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
 
-void MediaFX::registerClip(Clip* clip)
+void MediaFX::registerVisualClip(VisualClip* clip)
 {
-    if (clip && !activeClips.contains(clip)) {
-        activeClips.append(clip);
+    if (clip && !activeVisualClips.contains(clip)) {
+        activeVisualClips.append(clip);
         // Ensure we don't have multiple clips simultaneously rendering to the same sink
         QSet<const QVideoSink*> set;
-        for (const auto clip : activeClips) {
+        for (const auto clip : activeVisualClips) {
             for (const auto sink : clip->videoSinks()) {
                 if (set.contains(sink)) {
                     qWarning() << "Warning: duplicate QVideoSink found on " << clip;
@@ -31,9 +31,9 @@ void MediaFX::registerClip(Clip* clip)
     }
 }
 
-void MediaFX::unregisterClip(Clip* clip)
+void MediaFX::unregisterVisualClip(VisualClip* clip)
 {
-    activeClips.removeOne(clip);
+    activeVisualClips.removeOne(clip);
 }
 
 // XXX need to signal frame time so QML can react (how will QML normalize for transitions etc.?)
@@ -41,7 +41,7 @@ void MediaFX::unregisterClip(Clip* clip)
 bool MediaFX::renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange)
 {
     bool rendered = true;
-    for (auto clip : activeClips) {
+    for (auto clip : activeVisualClips) {
         rendered = rendered && clip->renderVideoFrame(frameTimeRange);
     }
     return rendered;

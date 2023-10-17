@@ -12,7 +12,8 @@ qt_add_executable(mediafx
     mediafx.cpp
     render_control.cpp
     clip.cpp
-    media_clip.cpp
+    visual_clip.cpp
+    video_clip.cpp
     image_clip.cpp
 )
 
