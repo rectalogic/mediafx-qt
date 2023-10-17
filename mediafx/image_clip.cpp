@@ -45,3 +45,20 @@ bool ImageClip::prepareNextVideoFrame()
     setCurrentVideoFrame(videoFrame);
     return true;
 }
+
+void ImageClip::setActive(bool active)
+{
+    Clip::setActive(active);
+    if (active) {
+        if (image.isNull()) {
+            loadMedia(url());
+        }
+    }
+}
+
+void ImageClip::stop()
+{
+    Clip::stop();
+    image = QImage();
+    videoFrame = QVideoFrame();
+}

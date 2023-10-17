@@ -25,12 +25,14 @@ public:
 
     qint64 duration() const override;
 
-    bool prepareNextVideoFrame() override;
-
-    void setActive(bool active) override;
+    void stop() override;
 
 protected:
     void loadMedia(const QUrl&) override;
+
+    bool prepareNextVideoFrame() override;
+
+    void setActive(bool active) override;
 
 private slots:
     void onErrorOccurred(QMediaPlayer::Error error, const QString& errorString);

@@ -85,3 +85,8 @@ bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
         return false;
     }
 }
+
+void Clip::stop()
+{
+    setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));
+}

@@ -93,10 +93,19 @@ void MediaClip::setActive(bool active)
 {
     Clip::setActive(active);
     if (active) {
+        if (mediaPlayer.source().isEmpty()) {
+            loadMedia(url());
+        }
         mediaPlayer.play();
     } else {
-        mediaPlayer.stop(); // XXX if we stop we should set source to QUrl(), but maybe we should pause (and if so, don't clear queue)? could clip be resumed later?
-        frameQueue.clear();
-        frameQueue.squeeze();
+        mediaPlayer.pause();
     }
+}
+
+void MediaClip::stop()
+{
+    Clip::stop();
+    mediaPlayer.setSource(QUrl());
+    frameQueue.clear();
+    frameQueue.squeeze();
 }
