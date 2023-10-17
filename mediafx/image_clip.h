@@ -21,14 +21,14 @@ public:
 
     qint64 duration() const override;
 
-    void stop() override;
-
 protected:
     void loadMedia(const QUrl&) override;
 
     bool prepareNextVideoFrame() override;
 
     void setActive(bool active) override;
+
+    void stop() override;
 
 private:
     QImage image;

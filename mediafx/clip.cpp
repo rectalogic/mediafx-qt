@@ -80,6 +80,9 @@ bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
         setCurrentGlobalTime(globalTime);
         setNextClipTime(nextClipTime().translated(duration));
         return true;
+    } else if (clipEnd() < nextClipTime().start()) {
+        stop();
+        return false;
     } else {
         setActive(false);
         return false;
@@ -88,5 +91,6 @@ bool Clip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
 
 void Clip::stop()
 {
+    setVideoSinks(QList<QVideoSink*>());
     setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));
 }

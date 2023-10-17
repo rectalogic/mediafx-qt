@@ -51,7 +51,7 @@ qint64 MediaClip::duration() const
 
 void MediaClip::rateControl()
 {
-    auto size = frameQueue.size();
+    auto size = bufferedFrames.size();
     if (size > MaxFrameQueueSize && mediaPlayer.isPlaying())
         mediaPlayer.pause();
     else if (size < MinFrameQueueSize && !mediaPlayer.isPlaying())
@@ -69,7 +69,7 @@ void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
     if (frame.endTime() >= frameTime.end())
         return;
     if (frame.startTime() >= frameTime.start()) {
-        frameQueue.enqueue(frame);
+        bufferedFrames.enqueue(frame);
         rateControl();
     }
 }
@@ -77,8 +77,8 @@ void MediaClip::onVideoFrameChanged(const QVideoFrame& frame)
 bool MediaClip::prepareNextVideoFrame()
 {
     QVideoFrame videoFrame;
-    while (!frameQueue.isEmpty()) {
-        videoFrame = frameQueue.dequeue();
+    while (!bufferedFrames.isEmpty()) {
+        videoFrame = bufferedFrames.dequeue();
         if (nextClipTime().contains(videoFrame.startTime())) {
             setCurrentVideoFrame(videoFrame);
             rateControl();
@@ -105,7 +105,8 @@ void MediaClip::setActive(bool active)
 void MediaClip::stop()
 {
     Clip::stop();
+    mediaPlayer.stop();
     mediaPlayer.setSource(QUrl());
-    frameQueue.clear();
-    frameQueue.squeeze();
+    bufferedFrames.clear();
+    bufferedFrames.squeeze();
 }

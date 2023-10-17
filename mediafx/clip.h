@@ -50,8 +50,6 @@ public:
 
     bool renderVideoFrame(const QMediaTimeRange::Interval& globalTime);
 
-    Q_INVOKABLE virtual void stop();
-
 signals:
     void clipStartChanged();
     void clipEndChanged();
@@ -67,6 +65,8 @@ protected:
     QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
 
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
+
+    virtual void stop();
 
 private:
     QMediaTimeRange::Interval clipTimeRange() const { return m_clipSegment; };

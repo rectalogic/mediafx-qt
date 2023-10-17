@@ -25,14 +25,14 @@ public:
 
     qint64 duration() const override;
 
-    void stop() override;
-
 protected:
     void loadMedia(const QUrl&) override;
 
     bool prepareNextVideoFrame() override;
 
     void setActive(bool active) override;
+
+    void stop() override;
 
 private slots:
     void onErrorOccurred(QMediaPlayer::Error error, const QString& errorString);
@@ -45,5 +45,5 @@ private:
     static const int MinFrameQueueSize = 5;
     QMediaPlayer mediaPlayer;
     QVideoSink mediaPlayerSink;
-    QQueue<QVideoFrame> frameQueue;
+    QQueue<QVideoFrame> bufferedFrames;
 };
