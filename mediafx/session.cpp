@@ -49,7 +49,7 @@ void Session::quickViewStatusChanged(QQuickView::Status status)
         engineWarnings(quickView.errors());
         QCoreApplication::exit(1);
     } else if (status == QQuickView::Ready) {
-        renderFrame();
+        render();
     }
 }
 
@@ -63,13 +63,13 @@ void Session::engineWarnings(const QList<QQmlError>& warnings)
 bool Session::event(QEvent* event)
 {
     if (event->type() == renderEventType) {
-        renderFrame();
+        render();
         return true;
     }
     return QObject::event(event);
 }
 
-void Session::renderFrame()
+void Session::render()
 {
     if (mediaFX->renderVideoFrame(frameTime)) {
         auto frameData = renderControl.renderVideoFrame();

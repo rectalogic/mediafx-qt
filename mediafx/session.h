@@ -22,7 +22,7 @@ class Session : public QObject {
 public:
     Session(QUrl& url, QSize& size, qint64 frameDuration);
 
-    void renderFrame();
+    void render();
 
     bool event(QEvent* event) override;
 
