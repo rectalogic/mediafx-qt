@@ -13,9 +13,11 @@
 class Clip : public QObject {
     Q_OBJECT
     Q_PROPERTY(QUrl url READ url WRITE setUrl FINAL)
-    Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(qint64 clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
-    Q_PROPERTY(qint64 clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
+    // QML doesn't support qint64, so declare these as int.
+    // This is what QML MediaPlayer/QMediaPlayer does
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
+    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
+    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
