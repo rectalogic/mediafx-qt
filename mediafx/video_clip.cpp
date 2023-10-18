@@ -20,11 +20,10 @@ VideoClip::VideoClip()
     mediaPlayer.setPlaybackRate(1000);
     connect(&mediaPlayerSink, &QVideoSink::videoFrameChanged, this, &VideoClip::onVideoFrameChanged);
     mediaPlayer.setVideoSink(&mediaPlayerSink);
-    connect(&mediaPlayer, &QMediaPlayer::durationChanged, this, &VideoClip::onDurationChanged);
-    connect(&mediaPlayer, &QMediaPlayer::errorOccurred, this, &VideoClip::onErrorOccurred);
+    connect(&mediaPlayer, &QMediaPlayer::errorOccurred, this, &VideoClip::onMediaPlayerErrorOccurred);
 }
 
-void VideoClip::onErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
+void VideoClip::onMediaPlayerErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
 {
     qCritical() << "VideoClip error " << error << " " << errorString;
     QCoreApplication::exit(1);
@@ -33,11 +32,6 @@ void VideoClip::onErrorOccurred(QMediaPlayer::Error error, const QString& errorS
 void VideoClip::loadMedia(const QUrl& url)
 {
     mediaPlayer.setSource(url);
-}
-
-void VideoClip::onDurationChanged(qint64 duration)
-{
-    setClipEnd(duration); // This will emit durationChanged as well
 }
 
 qint64 VideoClip::duration() const
@@ -64,6 +58,7 @@ void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
         return;
 
     // XXX need to attempt to seek - should we do that when clipStart set, or when url set? we don't know which is set first
+    // XXX seek doesn't work until we are playing, so need to do it here
 
     auto frameTime = nextClipTime();
     if (frame.endTime() >= frameTime.end())
@@ -94,7 +89,7 @@ void VideoClip::setActive(bool active)
     VisualClip::setActive(active);
     if (active) {
         if (mediaPlayer.source().isEmpty()) {
-            loadMedia(url());
+            loadMedia(source());
         }
         mediaPlayer.play();
     } else {

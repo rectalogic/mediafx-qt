@@ -6,18 +6,20 @@
 
 #include <QMediaTimeRange>
 #include <QObject>
+#include <QQmlParserStatus>
 #include <QUrl>
 #include <QtQmlIntegration>
 #include <QtTypes>
 
-class Clip : public QObject {
+class Clip : public QObject, public QQmlParserStatus {
     Q_OBJECT
-    Q_PROPERTY(QUrl url READ url WRITE setUrl FINAL)
+    Q_INTERFACES(QQmlParserStatus)
+    Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
     // QML doesn't support qint64, so declare these as int.
     // This is what QML MediaPlayer/QMediaPlayer does
-    Q_PROPERTY(int duration READ duration NOTIFY durationChanged)
-    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
-    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
+    Q_PROPERTY(int duration READ duration)
+    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart FINAL)
+    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
@@ -26,32 +28,31 @@ public:
 
     Clip()
         : QObject()
-        , m_clipSegment(0, -1)
+        , m_clipStart(-1)
+        , m_clipEnd(-1)
         , m_currentGlobalTime(-1, -1)
         , m_nextClipTime(0, -1)
     {
     }
 
-    QUrl url() const { return m_url; };
-    void setUrl(const QUrl&);
+    QUrl source() const { return m_source; };
+    void setSource(const QUrl&);
 
     virtual qint64 duration() const = 0;
 
-    qint64 clipStart() const { return m_clipSegment.start(); };
+    qint64 clipStart() const { return m_clipStart; };
     void setClipStart(qint64);
 
-    qint64 clipEnd() const { return m_clipSegment.end(); };
+    qint64 clipEnd() const { return m_clipEnd; };
     void setClipEnd(qint64);
 
     bool render(const QMediaTimeRange::Interval& globalTime);
 
-signals:
-    void clipStartChanged();
-    void clipEndChanged();
-    void durationChanged();
+    void classBegin() override;
+    void componentComplete() override;
 
 protected:
-    QMediaTimeRange::Interval clipTimeRange() const { return m_clipSegment; };
+    QMediaTimeRange::Interval clipSegment() const { return QMediaTimeRange::Interval(m_clipStart, m_clipEnd); };
     void setNextClipTime(const QMediaTimeRange::Interval& time) { m_nextClipTime = time; };
 
     QMediaTimeRange::Interval currentGlobalTime() const { return m_currentGlobalTime; };
@@ -68,9 +69,13 @@ protected:
 
     virtual void stop();
 
+    bool isComponentComplete() { return m_componentComplete; };
+
 private:
-    QUrl m_url;
-    QMediaTimeRange::Interval m_clipSegment;
+    bool m_componentComplete = false;
+    QUrl m_source;
+    qint64 m_clipStart;
+    qint64 m_clipEnd;
     QMediaTimeRange::Interval m_currentGlobalTime;
     QMediaTimeRange::Interval m_nextClipTime;
 };

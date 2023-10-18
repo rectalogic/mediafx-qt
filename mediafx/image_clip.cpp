@@ -34,11 +34,7 @@ void ImageClip::loadMedia(const QUrl& url)
 
 qint64 ImageClip::duration() const
 {
-    auto ce = clipEnd();
-    // XXX can we make this property required in the subclass?
-    if (ce == -1)
-        qCritical() << "ImageClip must have clipEnd set";
-    return ce;
+    return clipEnd();
 }
 
 bool ImageClip::prepareNextVideoFrame()
@@ -52,7 +48,7 @@ void ImageClip::setActive(bool active)
     VisualClip::setActive(active);
     if (active) {
         if (image.isNull()) {
-            loadMedia(url());
+            loadMedia(source());
         }
     }
 }

@@ -8,33 +8,31 @@
 #include <QMessageLogContext>
 #include <QUrl>
 
-void Clip::setUrl(const QUrl& url)
+void Clip::setSource(const QUrl& url)
 {
-    if (!m_url.isEmpty()) {
-        qWarning() << "Clip url is a write-once property and cannot be changed";
+    if (!m_source.isEmpty()) {
+        qWarning() << "Clip source is a write-once property and cannot be changed";
         return;
     }
-    m_url = url;
+    m_source = url;
 }
 
 void Clip::setClipStart(qint64 clipStart)
 {
-    if (m_clipSegment.start() != clipStart) {
-        m_clipSegment = QMediaTimeRange::Interval(clipStart, m_clipSegment.end());
-        // We don't know frame duration yet
-        setNextClipTime(QMediaTimeRange::Interval(clipStart, -1));
-        emit clipStartChanged();
-        emit durationChanged();
+    if (m_clipStart != -1) {
+        qWarning() << "Clip clipStart is a write-once property and cannot be changed";
+        return;
     }
+    m_clipStart = clipStart;
 }
 
 void Clip::setClipEnd(qint64 clipEnd)
 {
-    if (m_clipSegment.end() != clipEnd) {
-        m_clipSegment = QMediaTimeRange::Interval(m_clipSegment.start(), clipEnd);
-        emit clipEndChanged();
-        emit durationChanged();
+    if (m_clipEnd != -1) {
+        qWarning() << "Clip clipEnd is a write-once property and cannot be changed";
+        return;
     }
+    m_clipEnd = clipEnd;
 }
 
 bool Clip::render(const QMediaTimeRange::Interval& globalTime)
@@ -47,7 +45,7 @@ bool Clip::render(const QMediaTimeRange::Interval& globalTime)
     if (nextClipTime().end() == -1) {
         setNextClipTime(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
     }
-    if (active() && clipTimeRange().contains(nextClipTime().start())) {
+    if (active() && clipSegment().contains(nextClipTime().start())) {
         if (renderClip(globalTime)) {
             setCurrentGlobalTime(globalTime);
             setNextClipTime(nextClipTime().translated(duration));
@@ -66,5 +64,27 @@ bool Clip::render(const QMediaTimeRange::Interval& globalTime)
 
 void Clip::stop()
 {
+    setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));
+}
+
+void Clip::classBegin()
+{
+}
+
+void Clip::componentComplete()
+{
+    m_componentComplete = true;
+    // Clip can return clipEnd() if no intrinsic duration, ensure it is set
+    if (duration() == -1) {
+        qCritical() << "Clip has no intrinsic duration, set clipEnd property";
+        QCoreApplication::exit();
+        return;
+    }
+    if (clipStart() == -1)
+        setClipStart(0);
+    if (clipEnd() == -1) {
+        setClipEnd(duration() - clipStart());
+    }
+    // We don't know frame duration yet, it will be initialized on first render, set to -1
     setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));
 }

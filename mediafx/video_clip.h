@@ -35,9 +35,8 @@ protected:
     void stop() override;
 
 private slots:
-    void onErrorOccurred(QMediaPlayer::Error error, const QString& errorString);
+    void onMediaPlayerErrorOccurred(QMediaPlayer::Error error, const QString& errorString);
     void onVideoFrameChanged(const QVideoFrame& frame);
-    void onDurationChanged(qint64 duration);
 
 private:
     void rateControl();
