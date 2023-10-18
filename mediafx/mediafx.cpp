@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "mediafx.h"
-#include "visual_clip.h"
+#include "clip.h"
 #include <QDebug>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
@@ -23,13 +23,15 @@ MediaFX::MediaFX()
     MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
 }
 
-void MediaFX::registerVisualClip(VisualClip* clip)
+void MediaFX::registerClip(Clip* clip)
 {
-    if (clip && !activeVisualClips.contains(clip)) {
-        activeVisualClips.append(clip);
-        // Ensure we don't have multiple clips simultaneously rendering to the same sink
+    if (clip && !activeClips.contains(clip)) {
+        activeClips.append(clip);
+#if 0 // XXX how should we deal with this? same issue for main audio, don't want to mix audio buffers from different Clips
+//XXX move this into Clip subclasses setActive, so they can query other activeClips and check?
+      // Ensure we don't have multiple clips simultaneously rendering to the same sink
         QSet<const QVideoSink*> set;
-        for (const auto clip : activeVisualClips) {
+        for (const auto clip : activeClips) {
             for (const auto sink : clip->videoSinks()) {
                 if (set.contains(sink)) {
                     qWarning() << "Warning: duplicate QVideoSink found on " << clip;
@@ -38,12 +40,13 @@ void MediaFX::registerVisualClip(VisualClip* clip)
                 set.insert(sink);
             }
         }
+#endif
     }
 }
 
-void MediaFX::unregisterVisualClip(VisualClip* clip)
+void MediaFX::unregisterClip(Clip* clip)
 {
-    activeVisualClips.removeOne(clip);
+    activeClips.removeOne(clip);
 }
 
 // XXX need to signal frame time so QML can react (how will QML normalize for transitions etc.?)
@@ -51,8 +54,8 @@ void MediaFX::unregisterVisualClip(VisualClip* clip)
 bool MediaFX::renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange)
 {
     bool rendered = true;
-    for (auto clip : activeVisualClips) {
-        rendered = rendered && clip->renderVideoFrame(frameTimeRange);
+    for (auto clip : activeClips) {
+        rendered = rendered && clip->render(frameTimeRange);
     }
     return rendered;
 }

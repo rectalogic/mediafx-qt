@@ -24,13 +24,12 @@ public:
     QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
     void setVideoSinks(const QList<QVideoSink*>&);
 
-    bool renderVideoFrame(const QMediaTimeRange::Interval& globalTime);
-
 protected:
     void setActive(bool active) override;
+    bool active() override;
 
+    bool renderClip(const QMediaTimeRange::Interval& globalTime) override;
     virtual bool prepareNextVideoFrame() = 0;
-
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
 
     virtual void stop() override;

@@ -8,7 +8,7 @@
 #include <QMediaTimeRange>
 #include <QObject>
 #include <QtQmlIntegration>
-class VisualClip;
+class Clip;
 
 class MediaFX : public QObject {
     Q_OBJECT
@@ -19,11 +19,11 @@ public:
     MediaFX();
     static int typeId;
 
-    void registerVisualClip(VisualClip* clip);
-    void unregisterVisualClip(VisualClip* clip);
+    void registerClip(Clip* clip);
+    void unregisterClip(Clip* clip);
 
     bool renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange);
 
 private:
-    QList<VisualClip*> activeVisualClips;
+    QList<Clip*> activeClips;
 };

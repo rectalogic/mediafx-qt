@@ -37,6 +37,33 @@ void Clip::setClipEnd(qint64 clipEnd)
     }
 }
 
+bool Clip::render(const QMediaTimeRange::Interval& globalTime)
+{
+    // Already rendered for this time
+    if (currentGlobalTime() == globalTime)
+        return true;
+
+    qint64 duration = globalTime.end() - globalTime.start();
+    if (nextClipTime().end() == -1) {
+        setNextClipTime(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
+    }
+    if (active() && clipTimeRange().contains(nextClipTime().start())) {
+        if (renderClip(globalTime)) {
+            setCurrentGlobalTime(globalTime);
+            setNextClipTime(nextClipTime().translated(duration));
+            return true;
+        } else {
+            return false;
+        }
+    } else if (clipEnd() < nextClipTime().start()) {
+        stop();
+        return false;
+    } else {
+        setActive(false);
+        return false;
+    }
+}
+
 void Clip::stop()
 {
     setNextClipTime(QMediaTimeRange::Interval(clipStart(), -1));

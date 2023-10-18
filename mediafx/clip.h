@@ -41,6 +41,8 @@ public:
     qint64 clipEnd() const { return m_clipSegment.end(); };
     void setClipEnd(qint64);
 
+    bool render(const QMediaTimeRange::Interval& globalTime);
+
 signals:
     void clipStartChanged();
     void clipEndChanged();
@@ -54,8 +56,11 @@ protected:
     void setCurrentGlobalTime(const QMediaTimeRange::Interval& currentTime) { m_currentGlobalTime = currentTime; };
 
     virtual void setActive(bool active) = 0;
+    virtual bool active() = 0;
 
     virtual void loadMedia(const QUrl&) = 0;
+
+    virtual bool renderClip(const QMediaTimeRange::Interval& globalTime) = 0;
 
     QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
 

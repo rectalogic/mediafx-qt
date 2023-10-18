@@ -19,43 +19,32 @@ void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
     }
 }
 
+bool VisualClip::active()
+{
+    return !m_videoSinks.isEmpty();
+}
+
 void VisualClip::setActive(bool active)
 {
     auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
     if (active) {
-        mediaFX->registerVisualClip(this);
+        mediaFX->registerClip(this);
     } else {
-        mediaFX->unregisterVisualClip(this);
+        mediaFX->unregisterClip(this);
         m_videoSinks.clear();
     }
 }
 
-bool VisualClip::renderVideoFrame(const QMediaTimeRange::Interval& globalTime)
+bool VisualClip::renderClip(const QMediaTimeRange::Interval& globalTime)
 {
-    if (currentGlobalTime() == globalTime)
-        return true;
-    qint64 duration = globalTime.end() - globalTime.start();
-    if (nextClipTime().end() == -1) {
-        setNextClipTime(QMediaTimeRange::Interval(clipStart(), clipStart() + duration));
-    }
-    if (!videoSinks().isEmpty() && clipTimeRange().contains(nextClipTime().start())) {
-        if (!prepareNextVideoFrame())
-            return false;
-        m_currentVideoFrame.setStartTime(globalTime.start());
-        m_currentVideoFrame.setEndTime(globalTime.end());
-        for (auto videoSink : videoSinks()) {
-            videoSink->setVideoFrame(m_currentVideoFrame);
-        }
-        setCurrentGlobalTime(globalTime);
-        setNextClipTime(nextClipTime().translated(duration));
-        return true;
-    } else if (clipEnd() < nextClipTime().start()) {
-        stop();
+    if (!prepareNextVideoFrame())
         return false;
-    } else {
-        setActive(false);
-        return false;
+    m_currentVideoFrame.setStartTime(globalTime.start());
+    m_currentVideoFrame.setEndTime(globalTime.end());
+    for (auto videoSink : videoSinks()) {
+        videoSink->setVideoFrame(m_currentVideoFrame);
     }
+    return true;
 }
 
 void VisualClip::stop()
