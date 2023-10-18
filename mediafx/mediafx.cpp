@@ -7,11 +7,21 @@
 #include <QDebug>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
+#include <QObject>
 #include <QSet>
 #include <QmlTypeAndRevisionsRegistration>
 class QVideoSink;
 
-int MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
+// Can't use this, so we defer setting typeId
+// https://bugreports.qt.io/browse/QTBUG-118165
+// int MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
+int MediaFX::typeId = -1;
+
+MediaFX::MediaFX()
+    : QObject()
+{
+    MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
+}
 
 void MediaFX::registerVisualClip(VisualClip* clip)
 {

@@ -35,7 +35,11 @@ Session::Session(QUrl& url, QSize& size, qint64 frameDuration)
     }
     connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
-    mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
+
+    // Workaround https://bugreports.qt.io/browse/QTBUG-118165
+    // mediaFX = quickView.engine()->singletonInstance<MediaFX*>(MediaFX::typeId);
+    mediaFX = quickView.engine()->singletonInstance<MediaFX*>("stream.mediafx", "MediaFX");
+
     quickView.setSource(url);
 }
 

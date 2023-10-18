@@ -16,6 +16,7 @@ class MediaFX : public QObject {
     QML_SINGLETON
 
 public:
+    MediaFX();
     static int typeId;
 
     void registerVisualClip(VisualClip* clip);
