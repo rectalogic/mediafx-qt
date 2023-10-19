@@ -12,7 +12,6 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 #include <QtQmlIntegration>
-#include <QtTypes>
 class QUrl;
 
 class VideoClip : public VisualClip {

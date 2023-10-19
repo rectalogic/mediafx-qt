@@ -14,6 +14,7 @@
 #include <QQmlError>
 #include <QQuickView>
 #include <QUrl>
+#include <Qt>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>

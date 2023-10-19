@@ -4,13 +4,7 @@
 
 #include "mediafx.h"
 #include "clip.h"
-#include <QDebug>
 #include <QMediaTimeRange>
-#include <QMessageLogContext>
-#include <QObject>
-#include <QSet>
-#include <QmlTypeAndRevisionsRegistration>
-class QVideoSink;
 
 int MediaFX::typeId = -1;
 

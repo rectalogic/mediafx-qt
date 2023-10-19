@@ -10,7 +10,6 @@
 #include <QQuickWindow>
 #include <QSize>
 #include <QtAssert>
-#include <functional>
 #include <rhi/qrhi.h>
 
 bool RenderControl::install(QQuickWindow& window)
@@ -22,6 +21,21 @@ bool RenderControl::install(QQuickWindow& window)
     QSize size = window.size();
 
     QRhi* rhi = this->rhi();
+    if (!rhi) {
+        qCritical() << "No Rhi on QQuickRenderControl";
+        return false;
+    }
+
+#ifdef MEDIAFX_ENABLE_VULKAN
+    if (window.rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
+        vulkanInstance.setExtensions(QQuickGraphicsConfiguration::preferredInstanceExtensions());
+        if (!vulkanInstance.create()) {
+            qCritical() << "Failed to initialize Vulkan";
+            return false;
+        }
+        window.setVulkanInstance(&vulkanInstance);
+    }
+#endif
 
     texture.reset(rhi->newTexture(QRhiTexture::RGBA8, size, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
     if (!texture->create()) {
@@ -38,17 +52,17 @@ bool RenderControl::install(QQuickWindow& window)
         return false;
     }
 
-    QRhiTextureRenderTargetDescription renderTargetDescription((QRhiColorAttachment(texture.data())));
-    renderTargetDescription.setDepthStencilBuffer(stencilBuffer.data());
+    QRhiTextureRenderTargetDescription renderTargetDescription((QRhiColorAttachment(texture.get())));
+    renderTargetDescription.setDepthStencilBuffer(stencilBuffer.get());
     textureRenderTarget.reset(rhi->newTextureRenderTarget(renderTargetDescription));
     renderPassDescriptor.reset(textureRenderTarget->newCompatibleRenderPassDescriptor());
-    textureRenderTarget->setRenderPassDescriptor(renderPassDescriptor.data());
+    textureRenderTarget->setRenderPassDescriptor(renderPassDescriptor.get());
     if (!textureRenderTarget->create()) {
         qCritical() << "Failed to create render target";
         return false;
     }
 
-    auto renderTarget = QQuickRenderTarget::fromRhiRenderTarget(textureRenderTarget.data());
+    auto renderTarget = QQuickRenderTarget::fromRhiRenderTarget(textureRenderTarget.get());
     if (rhi->isYUpInFramebuffer())
         renderTarget.setMirrorVertically(true);
 
@@ -67,19 +81,14 @@ QByteArray RenderControl::renderVideoFrame()
 
     QRhi* rhi = this->rhi();
 
-    QByteArray frameData;
     QRhiReadbackResult readResult;
-    readResult.completed = [&readResult, &rhi, &frameData] {
-        Q_ASSERT(readResult.format == QRhiTexture::RGBA8);
-        frameData = readResult.data;
-    };
     QRhiResourceUpdateBatch* readbackBatch = rhi->nextResourceUpdateBatch();
-    readbackBatch->readBackTexture(texture.data(), &readResult);
+    readbackBatch->readBackTexture(texture.get(), &readResult);
     this->commandBuffer()->resourceUpdate(readbackBatch);
 
+    // offscreen frames in QRhi are synchronous, meaning the readback has been finished after endFrame()
     endFrame();
 
-    // offscreen frames in QRhi are synchronous, meaning the readback has been finished at this point
-
-    return frameData;
+    Q_ASSERT(readResult.format == QRhiTexture::RGBA8);
+    return readResult.data;
 }

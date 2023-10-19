@@ -9,7 +9,6 @@
 #include <QObject>
 #include <QVideoFrame>
 #include <QtQmlIntegration>
-#include <QtTypes>
 class QUrl;
 
 class ImageClip : public VisualClip {

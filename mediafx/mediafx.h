@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <QJSEngine>
 #include <QList>
 #include <QMediaTimeRange>
 #include <QObject>
-#include <QQmlEngine>
+#include <QtAssert>
+#include <QtQml>
 #include <QtQmlIntegration>
 class Clip;
 class Session;

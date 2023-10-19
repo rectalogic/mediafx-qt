@@ -6,11 +6,11 @@
 #include "mediafx.h"
 #include "session.h"
 #include "visual_clip.h"
-#include <QCoreApplication>
-#include <QDebug>
 #include <QMessageLogContext>
+#include <QQmlEngine>
 #include <QUrl>
 #include <QVideoFrameFormat>
+#include <QmlTypeAndRevisionsRegistration>
 #include <string.h>
 
 void ImageClip::loadMedia(const QUrl& url)

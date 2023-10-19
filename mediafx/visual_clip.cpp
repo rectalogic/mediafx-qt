@@ -3,12 +3,18 @@
 // found in the LICENSE file.
 
 #include "visual_clip.h"
+#include "mediafx.h"
+#include "session.h"
+#include "video_clip.h"
+#include <QDebug>
 #include <QList>
+#include <QMediaPlayer>
 #include <QMediaTimeRange>
+#include <QMessageLogContext>
 #include <QQmlEngine>
+#include <QUrl>
 #include <QVideoSink>
 #include <QmlTypeAndRevisionsRegistration>
-#include <QtTypes>
 
 void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
 {
