@@ -20,7 +20,7 @@
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
-Session::Session(QUrl& url, QSize& size, qint64 frameDuration)
+Session::Session(QSize& size, qint64 frameDuration)
     : QObject()
     , m_frameDuration(frameDuration)
     , frameTime(0, frameDuration)
@@ -32,19 +32,22 @@ Session::Session(QUrl& url, QSize& size, qint64 frameDuration)
 
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.resize(size);
-    if (!renderControl.install(quickView, size)) {
-        qCritical() << "Failed to install QQuickRenderControl";
-        emit exitApp(1);
-        return;
-    }
     connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
 
     // Workaround https://bugreports.qt.io/browse/QTBUG-118165 - we can't just use qmlTypeId()
     // This will call MediaFXForeign::create() which will initialize typeId
     mediaFX = quickView.engine()->singletonInstance<MediaFX*>("stream.mediafx", "MediaFX");
+}
 
+bool Session::initialize(QUrl& url)
+{
+    if (!renderControl.install(quickView)) {
+        qCritical() << "Failed to install QQuickRenderControl";
+        return false;
+    }
     quickView.setSource(url);
+    return true;
 }
 
 void Session::quickViewStatusChanged(QQuickView::Status status)
@@ -52,7 +55,7 @@ void Session::quickViewStatusChanged(QQuickView::Status status)
     if (status == QQuickView::Error) {
         emit exitApp(1);
     } else if (status == QQuickView::Ready) {
-        render();
+        QCoreApplication::postEvent(this, new QEvent(renderEventType));
     }
 }
 

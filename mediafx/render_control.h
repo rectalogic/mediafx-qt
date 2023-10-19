@@ -10,12 +10,11 @@
 #include <QScopedPointer>
 #include <rhi/qrhi.h>
 class QQuickWindow;
-class QSize;
 
 class RenderControl : public QQuickRenderControl {
     Q_OBJECT
 public:
-    bool install(QQuickWindow& window, QSize size);
+    bool install(QQuickWindow& window);
     QByteArray renderVideoFrame();
 
 private:

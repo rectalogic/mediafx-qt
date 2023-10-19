@@ -45,7 +45,10 @@ int main(int argc, char* argv[])
     }
     QUrl url(args.at(0));
 
-    Session session(url, size, frameDuration);
-
+    Session session(size, frameDuration);
+    if (!session.initialize(url)) {
+        qCritical("Failed to initialize session");
+        exit(1);
+    }
     return app.exec();
 }

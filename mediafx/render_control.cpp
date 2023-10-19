@@ -13,12 +13,13 @@
 #include <functional>
 #include <rhi/qrhi.h>
 
-bool RenderControl::install(QQuickWindow& window, QSize size)
+bool RenderControl::install(QQuickWindow& window)
 {
     if (!initialize()) {
         qCritical() << "Failed to initialize render control";
         return false;
     }
+    QSize size = window.size();
 
     QRhi* rhi = this->rhi();
 

@@ -20,7 +20,8 @@ class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(QUrl& url, QSize& size, qint64 frameDuration);
+    Session(QSize& size, qint64 frameDuration);
+    bool initialize(QUrl& url);
 
     qint64 frameDuration() { return m_frameDuration; };
 
@@ -29,7 +30,7 @@ public:
     bool event(QEvent* event) override;
 
 signals:
-    void exitApp(int returnCode = 0);
+    void exitApp(int);
 
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);
