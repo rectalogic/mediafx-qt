@@ -17,11 +17,14 @@ class Clip : public QObject, public QQmlParserStatus {
     Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
     // QML doesn't support qint64, so declare these as int.
     // This is what QML MediaPlayer/QMediaPlayer does
-    Q_PROPERTY(int duration READ duration)
-    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart FINAL)
-    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd FINAL)
+    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
+    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
+
+signals:
+    void clipStartChanged();
+    void clipEndChanged();
 
 public:
     using QObject::QObject;
@@ -38,8 +41,6 @@ public:
     QUrl source() const { return m_source; };
     void setSource(const QUrl&);
 
-    virtual qint64 duration() const = 0;
-
     qint64 clipStart() const { return m_clipStart; };
     void setClipStart(qint64);
 
@@ -53,19 +54,19 @@ public:
 
 protected:
     QMediaTimeRange::Interval clipSegment() const { return QMediaTimeRange::Interval(m_clipStart, m_clipEnd); };
+
+    QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
     void setNextClipTime(const QMediaTimeRange::Interval& time) { m_nextClipTime = time; };
 
     QMediaTimeRange::Interval currentGlobalTime() const { return m_currentGlobalTime; };
     void setCurrentGlobalTime(const QMediaTimeRange::Interval& currentTime) { m_currentGlobalTime = currentTime; };
 
-    virtual void setActive(bool active) = 0;
+    virtual void setActive(bool active);
     virtual bool active() = 0;
 
     virtual void loadMedia(const QUrl&) = 0;
 
     virtual bool renderClip(const QMediaTimeRange::Interval& globalTime) = 0;
-
-    QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
 
     virtual void stop();
 

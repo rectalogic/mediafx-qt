@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "video_clip.h"
+#include "mediafx.h"
+#include "session.h"
 #include "visual_clip.h"
 #include <QCoreApplication>
 #include <QDebug>
@@ -10,6 +12,7 @@
 #include <QMediaPlayer>
 #include <QMediaTimeRange>
 #include <QMessageLogContext>
+#include <QQmlEngine>
 #include <QUrl>
 #include <QVideoSink>
 
@@ -26,21 +29,12 @@ VideoClip::VideoClip()
 void VideoClip::onMediaPlayerErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
 {
     qCritical() << "VideoClip error " << error << " " << errorString;
-    QCoreApplication::exit(1);
+    emit qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session()->exitApp(1);
 }
 
 void VideoClip::loadMedia(const QUrl& url)
 {
     mediaPlayer.setSource(url);
-}
-
-qint64 VideoClip::duration() const
-{
-    if (clipEnd() != -1)
-        return clipEnd() - clipStart();
-    else {
-        return mediaPlayer.duration() - clipStart();
-    }
 }
 
 void VideoClip::rateControl()
@@ -104,4 +98,12 @@ void VideoClip::stop()
     mediaPlayer.setSource(QUrl());
     bufferedFrames.clear();
     bufferedFrames.squeeze();
+}
+
+void VideoClip::componentComplete()
+{
+    VisualClip::componentComplete();
+    if (clipEnd() == -1) {
+        setClipEnd(mediaPlayer.duration());
+    }
 }

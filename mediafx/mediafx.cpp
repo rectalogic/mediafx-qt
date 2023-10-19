@@ -12,16 +12,7 @@
 #include <QmlTypeAndRevisionsRegistration>
 class QVideoSink;
 
-// Can't use this, so we defer setting typeId
-// https://bugreports.qt.io/browse/QTBUG-118165
-// int MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
 int MediaFX::typeId = -1;
-
-MediaFX::MediaFX()
-    : QObject()
-{
-    MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
-}
 
 void MediaFX::registerClip(Clip* clip)
 {
@@ -34,7 +25,7 @@ void MediaFX::registerClip(Clip* clip)
         for (const auto clip : activeClips) {
             for (const auto sink : clip->videoSinks()) {
                 if (set.contains(sink)) {
-                    qWarning() << "Warning: duplicate QVideoSink found on " << clip;
+                    qmlWarning(clip) << "Warning: duplicate QVideoSink found";
                     return;
                 }
                 set.insert(sink);

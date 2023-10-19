@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "visual_clip.h"
-#include "mediafx.h"
 #include <QList>
 #include <QMediaTimeRange>
 #include <QQmlEngine>
@@ -26,11 +25,8 @@ bool VisualClip::active()
 
 void VisualClip::setActive(bool active)
 {
-    auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
-    if (active) {
-        mediaFX->registerClip(this);
-    } else {
-        mediaFX->unregisterClip(this);
+    Clip::setActive(active);
+    if (!active) {
         m_videoSinks.clear();
     }
 }
@@ -39,8 +35,6 @@ bool VisualClip::renderClip(const QMediaTimeRange::Interval& globalTime)
 {
     if (!prepareNextVideoFrame())
         return false;
-    m_currentVideoFrame.setStartTime(globalTime.start());
-    m_currentVideoFrame.setEndTime(globalTime.end());
     for (auto videoSink : videoSinks()) {
         videoSink->setVideoFrame(m_currentVideoFrame);
     }

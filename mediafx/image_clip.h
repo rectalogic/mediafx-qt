@@ -19,8 +19,6 @@ class ImageClip : public VisualClip {
 public:
     using VisualClip::VisualClip;
 
-    qint64 duration() const override;
-
 protected:
     void loadMedia(const QUrl&) override;
 

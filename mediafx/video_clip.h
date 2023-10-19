@@ -23,7 +23,7 @@ public:
     using VisualClip::VisualClip;
     VideoClip();
 
-    qint64 duration() const override;
+    void componentComplete() override;
 
 protected:
     void loadMedia(const QUrl&) override;

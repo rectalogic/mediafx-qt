@@ -22,9 +22,14 @@ class Session : public QObject {
 public:
     Session(QUrl& url, QSize& size, qint64 frameDuration);
 
+    qint64 frameDuration() { return m_frameDuration; };
+
     void render();
 
     bool event(QEvent* event) override;
+
+signals:
+    void exitApp(int returnCode = 0);
 
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);
@@ -32,7 +37,7 @@ private slots:
 
 private:
     static QEvent::Type renderEventType;
-    qint64 frameDuration;
+    qint64 m_frameDuration;
     QMediaTimeRange::Interval frameTime;
     RenderControl renderControl;
     QQuickView quickView;
