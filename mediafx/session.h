@@ -15,6 +15,7 @@ class MediaFX;
 class QQmlError;
 class QSize;
 class QUrl;
+class AnimationDriver;
 
 class Session : public QObject {
     Q_OBJECT
@@ -43,4 +44,5 @@ private:
     RenderControl renderControl;
     QQuickView quickView;
     MediaFX* mediaFX;
+    AnimationDriver* animationDriver;
 };

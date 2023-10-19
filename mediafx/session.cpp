@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "session.h"
+#include "animation.h"
 #include "mediafx.h"
 #include <QByteArray>
 #include <QCoreApplication>
@@ -26,8 +27,11 @@ Session::Session(QSize& size, qint64 frameDuration)
     , m_frameDuration(frameDuration)
     , frameTime(0, frameDuration)
     , quickView(QUrl(), &renderControl)
+    , animationDriver(new AnimationDriver(frameDuration, this))
 {
     connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
+
+    animationDriver->install();
 
     MediaFXForeign::s_singletonInstance = new MediaFX(this, this);
 
@@ -95,6 +99,7 @@ void Session::render()
         }
         /**** XXX ****/
 
+        animationDriver->advance();
         frameTime = frameTime.translated(frameDuration());
     }
 
