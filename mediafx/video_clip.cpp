@@ -54,10 +54,11 @@ void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
     // XXX need to attempt to seek - should we do that when clipStart set, or when url set? we don't know which is set first
     // XXX seek doesn't work until we are playing, so need to do it here
 
-    auto frameTime = nextClipTime();
-    if (frame.endTime() >= frameTime.end())
+    auto frameTimeStart = nextClipTime().start();
+    if (frame.endTime() < frameTimeStart) {
         return;
-    if (frame.startTime() >= frameTime.start()) {
+    }
+    if (frame.startTime() >= frameTimeStart) {
         bufferedFrames.enqueue(frame);
         rateControl();
     }
@@ -65,10 +66,18 @@ void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
 
 bool VideoClip::prepareNextVideoFrame()
 {
-    QVideoFrame videoFrame;
+    auto nextFrameTime = nextClipTime();
+    // clipEnd may be beyond duration, if so we just keep last frame rendered
+    if (nextFrameTime.start() >= mediaPlayer.duration() * 1000) {
+        return true;
+    }
+    QVideoFrame videoFrame = currentVideoFrame();
+    if (videoFrame.isValid() && nextFrameTime.contains(videoFrame.startTime())) {
+        return true;
+    }
     while (!bufferedFrames.isEmpty()) {
         videoFrame = bufferedFrames.dequeue();
-        if (nextClipTime().contains(videoFrame.startTime())) {
+        if (nextFrameTime.contains(videoFrame.startTime())) {
             setCurrentVideoFrame(videoFrame);
             rateControl();
             return true;
@@ -81,13 +90,14 @@ bool VideoClip::prepareNextVideoFrame()
 void VideoClip::setActive(bool active)
 {
     VisualClip::setActive(active);
-    if (active) {
-        if (mediaPlayer.source().isEmpty()) {
-            loadMedia(source());
+    if (isComponentComplete()) {
+        if (active) {
+            if (mediaPlayer.source().isEmpty())
+                loadMedia(source());
+            mediaPlayer.play();
+        } else {
+            mediaPlayer.pause();
         }
-        mediaPlayer.play();
-    } else {
-        mediaPlayer.pause();
     }
 }
 
@@ -102,8 +112,9 @@ void VideoClip::stop()
 
 void VideoClip::componentComplete()
 {
-    VisualClip::componentComplete();
-    if (clipEnd() == -1) {
-        setClipEnd(mediaPlayer.duration());
+    loadMedia(source());
+    if (clipEndMicros() == -1) {
+        setClipEndMicros(mediaPlayer.duration() * 1000);
     }
+    VisualClip::componentComplete();
 }

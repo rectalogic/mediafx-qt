@@ -37,7 +37,7 @@ void ImageClip::loadMedia(const QUrl& url)
 
 bool ImageClip::prepareNextVideoFrame()
 {
-    // XXX timestamp frame based on nextClipTime() ?
+    // XXX timestamp frame based on nextClipTime() ? (in microseconds, not milliseconds)
     setCurrentVideoFrame(videoFrame);
     return true;
 }

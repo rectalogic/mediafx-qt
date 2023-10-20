@@ -20,23 +20,33 @@ void Clip::setSource(const QUrl& url)
     m_source = url;
 }
 
-void Clip::setClipStart(qint64 clipStart)
+void Clip::setClipStart(qint64 millis)
+{
+    setClipStartMicros(millis * 1000);
+}
+
+void Clip::setClipEnd(qint64 millis)
+{
+    setClipEndMicros(millis * 1000);
+}
+
+void Clip::setClipStartMicros(qint64 micros)
 {
     if (m_clipStart != -1) {
         qmlWarning(this) << "Clip clipStart is a write-once property and cannot be changed";
         return;
     }
-    m_clipStart = clipStart;
+    m_clipStart = micros;
     emit clipStartChanged();
 }
 
-void Clip::setClipEnd(qint64 clipEnd)
+void Clip::setClipEndMicros(qint64 micros)
 {
     if (m_clipEnd != -1) {
         qmlWarning(this) << "Clip clipEnd is a write-once property and cannot be changed";
         return;
     }
-    m_clipEnd = clipEnd;
+    m_clipEnd = micros;
     emit clipEndChanged();
 }
 
@@ -46,11 +56,10 @@ bool Clip::render(const QMediaTimeRange::Interval& globalTime)
     if (currentGlobalTime() == globalTime)
         return true;
 
-    qint64 frameDuration = globalTime.end() - globalTime.start();
     if (active() && clipSegment().contains(nextClipTime().start())) {
         if (renderClip(globalTime)) {
             setCurrentGlobalTime(globalTime);
-            setNextClipTime(nextClipTime().translated(frameDuration));
+            setNextClipTime(nextClipTime().translated(MediaFX::singletonInstance()->session()->frameDuration()));
             return true;
         } else {
             return false;
@@ -64,11 +73,16 @@ bool Clip::render(const QMediaTimeRange::Interval& globalTime)
     }
 }
 
-void Clip::stop()
+void Clip::initializeNextClipTime()
 {
     setNextClipTime(QMediaTimeRange::Interval(
-        clipStart(),
+        clipStartMicros(),
         MediaFX::singletonInstance()->session()->frameDuration()));
+}
+
+void Clip::stop()
+{
+    initializeNextClipTime();
 }
 
 void Clip::setActive(bool active)
@@ -88,15 +102,13 @@ void Clip::classBegin()
 void Clip::componentComplete()
 {
     m_componentComplete = true;
-    if (clipEnd() == -1) {
+    if (clipEndMicros() == -1) {
         qmlWarning(this) << "Clip has no intrinsic duration, set clipEnd property";
         emit MediaFX::singletonInstance()->session()->exitApp(1);
         return;
     }
-    if (clipStart() == -1)
-        setClipStart(0);
+    if (clipStartMicros() == -1)
+        setClipStartMicros(0);
 
-    setNextClipTime(QMediaTimeRange::Interval(
-        clipStart(),
-        MediaFX::singletonInstance()->session()->frameDuration()));
+    initializeNextClipTime();
 }

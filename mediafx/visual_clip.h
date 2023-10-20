@@ -30,6 +30,7 @@ protected:
 
     bool renderClip(const QMediaTimeRange::Interval& globalTime) override;
     virtual bool prepareNextVideoFrame() = 0;
+    QVideoFrame currentVideoFrame() const { return m_currentVideoFrame; };
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
 
     virtual void stop() override;
