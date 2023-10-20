@@ -68,12 +68,12 @@ void Clip::stop()
 {
     setNextClipTime(QMediaTimeRange::Interval(
         clipStart(),
-        qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session()->frameDuration()));
+        MediaFX::singletonInstance()->session()->frameDuration()));
 }
 
 void Clip::setActive(bool active)
 {
-    auto mediaFX = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId);
+    auto mediaFX = MediaFX::singletonInstance();
     if (active) {
         mediaFX->registerClip(this);
     } else {
@@ -90,7 +90,7 @@ void Clip::componentComplete()
     m_componentComplete = true;
     if (clipEnd() == -1) {
         qmlWarning(this) << "Clip has no intrinsic duration, set clipEnd property";
-        emit qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session()->exitApp(1);
+        emit MediaFX::singletonInstance()->session()->exitApp(1);
         return;
     }
     if (clipStart() == -1)
@@ -98,5 +98,5 @@ void Clip::componentComplete()
 
     setNextClipTime(QMediaTimeRange::Interval(
         clipStart(),
-        qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session()->frameDuration()));
+        MediaFX::singletonInstance()->session()->frameDuration()));
 }

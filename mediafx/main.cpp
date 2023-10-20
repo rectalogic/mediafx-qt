@@ -41,14 +41,14 @@ int main(int argc, char* argv[])
     const QStringList args = parser.positionalArguments();
     if (args.size() != 1) {
         qCritical("Missing required source url");
-        exit(1);
+        return 1;
     }
     QUrl url(args.at(0));
 
     Session session(size, frameDuration);
     if (!session.initialize(url)) {
         qCritical("Failed to initialize session");
-        exit(1);
+        return 1;
     }
     return app.exec();
 }

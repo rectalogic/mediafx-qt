@@ -6,7 +6,10 @@
 #include "clip.h"
 #include <QMediaTimeRange>
 
-int MediaFX::typeId = -1;
+MediaFX* MediaFX::singletonInstance()
+{
+    return MediaFXForeign::s_singletonInstance;
+}
 
 void MediaFX::registerClip(Clip* clip)
 {

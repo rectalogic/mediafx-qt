@@ -29,7 +29,7 @@ VideoClip::VideoClip()
 void VideoClip::onMediaPlayerErrorOccurred(QMediaPlayer::Error error, const QString& errorString)
 {
     qCritical() << "VideoClip error " << error << " " << errorString;
-    emit qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session()->exitApp(1);
+    emit MediaFX::singletonInstance()->session()->exitApp(1);
 }
 
 void VideoClip::loadMedia(const QUrl& url)

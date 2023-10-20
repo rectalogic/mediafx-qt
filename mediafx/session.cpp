@@ -33,16 +33,13 @@ Session::Session(QSize& size, qint64 frameDuration)
 
     animationDriver->install();
 
-    MediaFXForeign::s_singletonInstance = new MediaFX(this, this);
+    mediaFX = new MediaFX(this, this);
+    MediaFXForeign::s_singletonInstance = mediaFX;
 
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.resize(size);
     connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
-
-    // Workaround https://bugreports.qt.io/browse/QTBUG-118165 - we can't just use qmlTypeId()
-    // This will call MediaFXForeign::create() which will initialize typeId
-    mediaFX = quickView.engine()->singletonInstance<MediaFX*>("stream.mediafx", "MediaFX");
 }
 
 bool Session::initialize(QUrl& url)
@@ -52,7 +49,10 @@ bool Session::initialize(QUrl& url)
         return false;
     }
     quickView.setSource(url);
-    return true;
+    if (quickView.status() == QQuickView::Error)
+        return false;
+    else
+        return true;
 }
 
 void Session::quickViewStatusChanged(QQuickView::Status status)

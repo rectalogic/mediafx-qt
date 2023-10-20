@@ -15,7 +15,7 @@
 
 void ImageClip::loadMedia(const QUrl& url)
 {
-    auto session = qmlEngine(this)->singletonInstance<MediaFX*>(MediaFX::typeId)->session();
+    auto session = MediaFX::singletonInstance()->session();
     QImage image;
     if (!url.isLocalFile() || !image.load(url.toLocalFile())) {
         qCritical("ImageClip can only load local file urls");

@@ -13,6 +13,7 @@
 #include <QtQmlIntegration>
 class Clip;
 class Session;
+struct MediaFXForeign;
 
 class MediaFX : public QObject {
     Q_OBJECT
@@ -27,14 +28,14 @@ public:
     {
     }
 
+    static MediaFX* singletonInstance();
+
     Session* session() { return m_session; };
 
     void registerClip(Clip* clip);
     void unregisterClip(Clip* clip);
 
     bool renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange);
-
-    static int typeId;
 
 private:
     Session* m_session;
@@ -48,8 +49,6 @@ struct MediaFXForeign {
     QML_SINGLETON
     QML_NAMED_ELEMENT(MediaFX)
 public:
-    // Initialize this using myObject where you would previously
-    // call qmlRegisterSingletonInstance().
     inline static MediaFX* s_singletonInstance = nullptr;
 
     static MediaFX* create(QQmlEngine*, QJSEngine* engine)
@@ -65,8 +64,6 @@ public:
             Q_ASSERT(engine == s_engine);
         else
             s_engine = engine;
-
-        MediaFX::typeId = qmlTypeId("stream.mediafx", 254, 254, "MediaFX");
 
         // Explicitly specify C++ ownership so that the engine doesn't delete
         // the instance.
