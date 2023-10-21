@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Quick3D)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Quick3D QUIET OPTIONAL_COMPONENTS WebEngineQuick)
 
 qt_policy(SET QTP0001 NEW)
 
@@ -23,6 +23,7 @@ qt_add_executable(mediafx
     mediafx.cpp
     render_control.cpp
     clip.cpp
+    audio_clip.cpp
     visual_clip.cpp
     video_clip.cpp
     image_clip.cpp
@@ -33,5 +34,10 @@ qt_add_qml_module(mediafx
 )
 
 target_link_libraries(mediafx PRIVATE Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
+
+if(${Qt6WebEngineQuick_FOUND})
+    target_link_libraries(mediafx PRIVATE Qt6::WebEngineQuick)
+    add_definitions(-DWEBENGINEQUICK)
+endif()
 
 install(TARGETS mediafx RUNTIME DESTINATION)
