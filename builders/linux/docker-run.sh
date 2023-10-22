@@ -16,5 +16,6 @@
 
 MOUNT="$(dirname $(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"))"
 
+TARGET=${TARGET:-mediafx}
 docker run ${DOCKER_OPTS} --rm --init \
-    --mount="type=bind,src=${MOUNT},dst=/mediafx,consistency=cached" mediafx "$@"
+    --mount="type=bind,src=${MOUNT},dst=/mediafx,consistency=cached" $TARGET "$@"

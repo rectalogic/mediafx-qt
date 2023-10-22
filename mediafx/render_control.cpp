@@ -24,6 +24,9 @@
 #include <QSize>
 #include <QtAssert>
 #include <rhi/qrhi.h>
+#ifdef MEDIAFX_ENABLE_VULKAN
+#include <QQuickGraphicsConfiguration>
+#endif
 
 bool RenderControl::install(QQuickWindow& window)
 {

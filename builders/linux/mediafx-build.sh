@@ -14,5 +14,5 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-cd /webvfx/build/linux
+cd /mediafx/build/linux
 cmake --install-prefix /usr/local/Qt/${QT_VER}/gcc_64 ../.. && cmake --build . && sudo cmake --install .

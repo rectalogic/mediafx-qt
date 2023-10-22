@@ -15,4 +15,5 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 ROOT=$(dirname "${BASH_SOURCE[0]}")
-docker buildx build --platform linux/amd64 --memory-swap -1 --load --tag mediafx "$ROOT"
+TARGET=${TARGET:-mediafx}
+docker buildx build --target $TARGET --platform linux/amd64 --memory-swap -1 --load --tag $TARGET "$ROOT"
