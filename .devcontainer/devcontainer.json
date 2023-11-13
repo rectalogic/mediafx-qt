@@ -1,7 +1,8 @@
 {
     "name": "mediaFX",
     "build": {
-        "dockerfile": "../builders/linux/Dockerfile"
+        "dockerfile": "../builders/linux/Dockerfile",
+        "target": "mediafx"
     },
     "init": true,
     "customizations": {
