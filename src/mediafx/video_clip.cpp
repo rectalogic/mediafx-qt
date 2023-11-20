@@ -99,13 +99,11 @@ bool VideoClip::prepareNextVideoFrame()
     return false;
 }
 
-void VideoClip::setActive(bool active)
+void VideoClip::setActive(bool bactive)
 {
-    VisualClip::setActive(active);
+    VisualClip::setActive(bactive);
     if (isComponentComplete()) {
-        if (active) {
-            if (mediaPlayer.source().isEmpty())
-                loadMedia(source());
+        if (active()) {
             mediaPlayer.play();
         } else {
             mediaPlayer.pause();
@@ -129,4 +127,6 @@ void VideoClip::componentComplete()
         setClipEndMicros(mediaPlayer.duration() * 1000);
     }
     VisualClip::componentComplete();
+    if (active())
+        mediaPlayer.play();
 }

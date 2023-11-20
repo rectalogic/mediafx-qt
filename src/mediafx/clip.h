@@ -76,7 +76,7 @@ protected:
     Interval nextClipTime() const { return m_nextClipTime; };
 
     virtual void setActive(bool active);
-    virtual bool active() = 0;
+    bool active() const { return m_active; };
 
     virtual void loadMedia(const QUrl&) = 0;
 
@@ -93,6 +93,8 @@ private:
     void setNextClipTime(const Interval& time) { m_nextClipTime = time; };
 
     bool m_componentComplete = false;
+    bool m_active = false;
+    bool m_stopped = false;
     QUrl m_source;
     qint64 m_clipStart;
     qint64 m_clipEnd;

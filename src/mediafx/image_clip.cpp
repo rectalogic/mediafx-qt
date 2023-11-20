@@ -55,19 +55,15 @@ bool ImageClip::prepareNextVideoFrame()
     return true;
 }
 
-void ImageClip::setActive(bool active)
-{
-    VisualClip::setActive(active);
-    if (active) {
-        if (image.isNull()) {
-            loadMedia(source());
-        }
-    }
-}
-
 void ImageClip::stop()
 {
     VisualClip::stop();
     image = QImage();
     videoFrame = QVideoFrame();
+}
+
+void ImageClip::componentComplete()
+{
+    loadMedia(source());
+    VisualClip::componentComplete();
 }

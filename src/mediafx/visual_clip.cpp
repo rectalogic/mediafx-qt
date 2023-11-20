@@ -37,19 +37,6 @@ void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
     }
 }
 
-bool VisualClip::active()
-{
-    return !m_videoSinks.isEmpty();
-}
-
-void VisualClip::setActive(bool active)
-{
-    Clip::setActive(active);
-    if (!active) {
-        m_videoSinks.clear();
-    }
-}
-
 bool VisualClip::renderClip(const Interval& globalTime)
 {
     if (!prepareNextVideoFrame())
@@ -58,10 +45,4 @@ bool VisualClip::renderClip(const Interval& globalTime)
         videoSink->setVideoFrame(m_currentVideoFrame);
     }
     return true;
-}
-
-void VisualClip::stop()
-{
-    Clip::stop();
-    setVideoSinks(QList<QVideoSink*>());
 }

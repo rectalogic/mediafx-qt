@@ -32,7 +32,6 @@ public:
 
 protected:
     void setActive(bool active) override;
-    bool active() override;
 
     void loadMedia(const QUrl&) override;
     bool renderClip(const Interval& globalTime) override;

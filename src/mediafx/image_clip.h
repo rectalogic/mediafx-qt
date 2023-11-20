@@ -31,12 +31,12 @@ class ImageClip : public VisualClip {
 public:
     using VisualClip::VisualClip;
 
+    void componentComplete() override;
+
 protected:
     void loadMedia(const QUrl&) override;
 
     bool prepareNextVideoFrame() override;
-
-    void setActive(bool active) override;
 
     void stop() override;
 

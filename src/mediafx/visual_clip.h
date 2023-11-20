@@ -40,15 +40,10 @@ public:
     void setVideoSinks(const QList<QVideoSink*>&);
 
 protected:
-    void setActive(bool active) override;
-    bool active() override;
-
     bool renderClip(const Interval& globalTime) override;
     virtual bool prepareNextVideoFrame() = 0;
     QVideoFrame currentVideoFrame() const { return m_currentVideoFrame; };
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
-
-    virtual void stop() override;
 
 private:
     QList<QVideoSink*> m_videoSinks;

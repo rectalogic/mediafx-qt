@@ -78,6 +78,7 @@ bool Clip::render(const Interval& globalTime)
             return false;
         }
     } else if (clipEnd() < nextClipTime().start()) {
+        // XXX add support for looping, just initializeNextClipTime() instead of stop()
         stop();
         return false;
     } else {
@@ -96,10 +97,13 @@ void Clip::initializeNextClipTime()
 void Clip::stop()
 {
     initializeNextClipTime();
+    setActive(false);
+    m_stopped = true;
 }
 
 void Clip::setActive(bool active)
 {
+    m_active = active && !m_stopped;
     auto mediaFX = MediaFX::singletonInstance();
     if (active) {
         mediaFX->registerClip(this);

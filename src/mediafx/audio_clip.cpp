@@ -18,12 +18,6 @@
 #include "audio_clip.h"
 #include "interval.h"
 
-bool AudioClip::active()
-{
-    // XXX
-    return false;
-}
-
 void AudioClip::setActive(bool active)
 {
     Clip::setActive(active);
