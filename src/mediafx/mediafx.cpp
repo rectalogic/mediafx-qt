@@ -17,7 +17,7 @@
 
 #include "mediafx.h"
 #include "clip.h"
-#include <QMediaTimeRange>
+#include "interval.h"
 
 MediaFX* MediaFX::singletonInstance()
 {
@@ -52,7 +52,7 @@ void MediaFX::unregisterClip(Clip* clip)
 
 // XXX need to signal frame time so QML can react (how will QML normalize for transitions etc.?)
 // XXX signaling time will advance QTimeline and may activate/deactivate Clips
-bool MediaFX::renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange)
+bool MediaFX::renderVideoFrame(const Interval& frameTimeRange)
 {
     bool rendered = true;
     for (auto clip : activeClips) {

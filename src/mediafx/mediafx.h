@@ -17,9 +17,9 @@
 
 #pragma once
 
+#include "interval.h"
 #include <QJSEngine>
 #include <QList>
-#include <QMediaTimeRange>
 #include <QObject>
 #include <QtAssert>
 #include <QtQml>
@@ -48,7 +48,7 @@ public:
     void registerClip(Clip* clip);
     void unregisterClip(Clip* clip);
 
-    bool renderVideoFrame(const QMediaTimeRange::Interval& frameTimeRange);
+    bool renderVideoFrame(const Interval& frameTimeRange);
 
 private:
     Session* m_session;

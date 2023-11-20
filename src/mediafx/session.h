@@ -17,10 +17,10 @@
 
 #pragma once
 
+#include "interval.h"
 #include "render_control.h"
 #include <QEvent>
 #include <QList>
-#include <QMediaTimeRange>
 #include <QObject>
 #include <QQuickView>
 #include <QtTypes>
@@ -53,7 +53,7 @@ private slots:
 private:
     static QEvent::Type renderEventType;
     qint64 m_frameDuration;
-    QMediaTimeRange::Interval frameTime;
+    Interval frameTime;
     RenderControl renderControl;
     QQuickView quickView;
     MediaFX* mediaFX;

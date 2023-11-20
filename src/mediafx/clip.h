@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <QMediaTimeRange>
+#include "interval.h"
 #include <QObject>
 #include <QQmlParserStatus>
 #include <QUrl>
@@ -41,8 +41,8 @@ signals:
 public:
     using QObject::QObject;
 
-    Clip()
-        : QObject()
+    explicit Clip(QObject* parent = nullptr)
+        : QObject(parent)
         , m_clipStart(-1)
         , m_clipEnd(-1)
         , m_currentGlobalTime(-1, -1)
@@ -59,7 +59,7 @@ public:
     qint64 clipEnd() const { return m_clipEnd / 1000; };
     void setClipEnd(qint64 millis);
 
-    bool render(const QMediaTimeRange::Interval& globalTime);
+    bool render(const Interval& globalTime);
 
     void classBegin() override;
     void componentComplete() override;
@@ -71,16 +71,16 @@ protected:
     qint64 clipEndMicros() const { return m_clipEnd; };
     void setClipEndMicros(qint64 micros);
 
-    QMediaTimeRange::Interval clipSegment() const { return QMediaTimeRange::Interval(m_clipStart, m_clipEnd); };
+    Interval clipSegment() const { return Interval(m_clipStart, m_clipEnd); };
 
-    QMediaTimeRange::Interval nextClipTime() const { return m_nextClipTime; };
+    Interval nextClipTime() const { return m_nextClipTime; };
 
     virtual void setActive(bool active);
     virtual bool active() = 0;
 
     virtual void loadMedia(const QUrl&) = 0;
 
-    virtual bool renderClip(const QMediaTimeRange::Interval& globalTime) = 0;
+    virtual bool renderClip(const Interval& globalTime) = 0;
 
     virtual void stop();
 
@@ -88,14 +88,14 @@ protected:
 
 private:
     void initializeNextClipTime();
-    QMediaTimeRange::Interval currentGlobalTime() const { return m_currentGlobalTime; };
-    void setCurrentGlobalTime(const QMediaTimeRange::Interval& currentTime) { m_currentGlobalTime = currentTime; };
-    void setNextClipTime(const QMediaTimeRange::Interval& time) { m_nextClipTime = time; };
+    Interval currentGlobalTime() const { return m_currentGlobalTime; };
+    void setCurrentGlobalTime(const Interval& currentTime) { m_currentGlobalTime = currentTime; };
+    void setNextClipTime(const Interval& time) { m_nextClipTime = time; };
 
     bool m_componentComplete = false;
     QUrl m_source;
     qint64 m_clipStart;
     qint64 m_clipEnd;
-    QMediaTimeRange::Interval m_currentGlobalTime;
-    QMediaTimeRange::Interval m_nextClipTime;
+    Interval m_currentGlobalTime;
+    Interval m_nextClipTime;
 };

@@ -16,13 +16,13 @@
  */
 
 #include "visual_clip.h"
+#include "interval.h"
 #include "mediafx.h"
 #include "session.h"
 #include "video_clip.h"
 #include <QDebug>
 #include <QList>
 #include <QMediaPlayer>
-#include <QMediaTimeRange>
 #include <QMessageLogContext>
 #include <QQmlEngine>
 #include <QUrl>
@@ -50,7 +50,7 @@ void VisualClip::setActive(bool active)
     }
 }
 
-bool VisualClip::renderClip(const QMediaTimeRange::Interval& globalTime)
+bool VisualClip::renderClip(const Interval& globalTime)
 {
     if (!prepareNextVideoFrame())
         return false;

@@ -16,9 +16,9 @@
  */
 
 #include "clip.h"
+#include "interval.h"
 #include "mediafx.h"
 #include "session.h"
-#include <QMediaTimeRange>
 #include <QQmlEngine>
 #include <QQmlInfo>
 #include <QUrl>
@@ -63,7 +63,7 @@ void Clip::setClipEndMicros(qint64 micros)
     emit clipEndChanged();
 }
 
-bool Clip::render(const QMediaTimeRange::Interval& globalTime)
+bool Clip::render(const Interval& globalTime)
 {
     // Already rendered for this time
     if (currentGlobalTime() == globalTime)
@@ -88,7 +88,7 @@ bool Clip::render(const QMediaTimeRange::Interval& globalTime)
 
 void Clip::initializeNextClipTime()
 {
-    setNextClipTime(QMediaTimeRange::Interval(
+    setNextClipTime(Interval(
         clipStartMicros(),
         MediaFX::singletonInstance()->session()->frameDuration()));
 }

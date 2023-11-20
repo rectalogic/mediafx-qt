@@ -16,7 +16,7 @@
  */
 
 #include "audio_clip.h"
-#include <QMediaTimeRange>
+#include "interval.h"
 
 bool AudioClip::active()
 {
@@ -30,7 +30,12 @@ void AudioClip::setActive(bool active)
     // XXX
 }
 
-bool AudioClip::renderClip(const QMediaTimeRange::Interval& globalTime)
+void AudioClip::loadMedia(const QUrl&)
+{
+    // XXX
+}
+
+bool AudioClip::renderClip(const Interval& globalTime)
 {
     // XXX
     return true;

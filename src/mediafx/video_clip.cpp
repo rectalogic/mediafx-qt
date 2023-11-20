@@ -23,14 +23,13 @@
 #include <QDebug>
 #include <QList>
 #include <QMediaPlayer>
-#include <QMediaTimeRange>
 #include <QMessageLogContext>
 #include <QQmlEngine>
 #include <QUrl>
 #include <QVideoSink>
 
-VideoClip::VideoClip()
-    : VisualClip()
+VideoClip::VideoClip(QObject* parent)
+    : VisualClip(parent)
 {
     // We want frames faster than realtime
     mediaPlayer.setPlaybackRate(1000);

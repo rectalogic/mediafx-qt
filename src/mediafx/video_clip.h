@@ -33,7 +33,7 @@ class VideoClip : public VisualClip {
 
 public:
     using VisualClip::VisualClip;
-    VideoClip();
+    explicit VideoClip(QObject* parent = nullptr);
 
     void componentComplete() override;
 

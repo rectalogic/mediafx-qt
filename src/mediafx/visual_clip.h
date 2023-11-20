@@ -18,8 +18,8 @@
 #pragma once
 
 #include "clip.h"
+#include "interval.h"
 #include <QList>
-#include <QMediaTimeRange>
 #include <QObject>
 #include <QVideoFrame>
 #include <QtQmlIntegration>
@@ -33,6 +33,8 @@ class VisualClip : public Clip {
 
 public:
     using Clip::Clip;
+    explicit VisualClip(QObject* parent = nullptr)
+        : Clip(parent) {};
 
     QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
     void setVideoSinks(const QList<QVideoSink*>&);
@@ -41,7 +43,7 @@ protected:
     void setActive(bool active) override;
     bool active() override;
 
-    bool renderClip(const QMediaTimeRange::Interval& globalTime) override;
+    bool renderClip(const Interval& globalTime) override;
     virtual bool prepareNextVideoFrame() = 0;
     QVideoFrame currentVideoFrame() const { return m_currentVideoFrame; };
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };

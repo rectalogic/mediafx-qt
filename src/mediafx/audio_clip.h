@@ -18,7 +18,7 @@
 #pragma once
 
 #include "clip.h"
-#include <QMediaTimeRange>
+#include "interval.h"
 #include <QtQmlIntegration>
 
 class AudioClip : public Clip {
@@ -27,12 +27,15 @@ class AudioClip : public Clip {
 
 public:
     using Clip::Clip;
+    explicit AudioClip(QObject* parent = nullptr)
+        : Clip(parent) {};
 
 protected:
     void setActive(bool active) override;
     bool active() override;
 
-    bool renderClip(const QMediaTimeRange::Interval& globalTime) override;
+    void loadMedia(const QUrl&) override;
+    bool renderClip(const Interval& globalTime) override;
 
     virtual void stop() override;
 
