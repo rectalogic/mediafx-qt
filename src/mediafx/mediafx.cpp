@@ -28,20 +28,6 @@ void MediaFX::registerClip(Clip* clip)
 {
     if (clip && !activeClips.contains(clip)) {
         activeClips.append(clip);
-#if 0 // XXX how should we deal with this? same issue for main audio, don't want to mix audio buffers from different Clips
-//XXX move this into Clip subclasses setActive, so they can query other activeClips and check?
-      // Ensure we don't have multiple clips simultaneously rendering to the same sink
-        QSet<const QVideoSink*> set;
-        for (const auto clip : activeClips) {
-            for (const auto sink : clip->videoSinks()) {
-                if (set.contains(sink)) {
-                    qmlWarning(clip) << "Warning: duplicate QVideoSink found";
-                    return;
-                }
-                set.insert(sink);
-            }
-        }
-#endif
     }
 }
 
@@ -50,8 +36,6 @@ void MediaFX::unregisterClip(Clip* clip)
     activeClips.removeOne(clip);
 }
 
-// XXX need to signal frame time so QML can react (how will QML normalize for transitions etc.?)
-// XXX signaling time will advance QTimeline and may activate/deactivate Clips
 bool MediaFX::renderVideoFrame(const Interval& frameTimeRange)
 {
     bool rendered = true;

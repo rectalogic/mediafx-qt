@@ -50,6 +50,7 @@ void VideoClip::loadMedia(const QUrl& url)
 
 void VideoClip::rateControl()
 {
+    // XXX adjust the rate instead of play/pause? mediaPlayer.setPlaybackRate()
     auto size = bufferedFrames.size();
     if (size > MaxFrameQueueSize && mediaPlayer.isPlaying())
         mediaPlayer.pause();

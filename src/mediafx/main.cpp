@@ -23,9 +23,38 @@
 #include <QStringList>
 #include <QUrl>
 #include <QtTypes>
+#include <stdio.h>
 #ifdef WEBENGINEQUICK
 #include <QtWebEngineQuick>
 #endif
+
+#define qSL QStringLiteral
+
+qint64 computeFrameDuration(const QString& frameRate)
+{
+    auto frameRateF = frameRate.toDouble();
+    if (frameRateF <= 0) {
+        float num = 0, den = 0;
+        if (sscanf(frameRate.toUtf8().data(), "%f/%f", &num, &den) == 2 && den > 0) {
+            frameRateF = num / den;
+        }
+    }
+    qint64 frameDuration = 0;
+    if (frameRateF > 0) {
+        return 1000000 / frameRateF; // frame duration in microseconds
+    } else {
+        return -1;
+    }
+}
+
+QSize parseFrameSize(const QString& frameSize)
+{
+    QSize size;
+    if (sscanf(frameSize.toUtf8().data(), "%dx%d", &size.rwidth(), &size.rheight()) == 2 && size.width() > 0 && size.height() > 0) {
+        return size;
+    }
+    return QSize();
+}
 
 int main(int argc, char* argv[])
 {
@@ -45,21 +74,27 @@ int main(int argc, char* argv[])
 
     QGuiApplication app(argc, argv);
 
-    app.setOrganizationDomain("mediafx.stream");
-    app.setOrganizationName("mediaFX");
-    app.setApplicationName("mediaFX");
-
-    // XXX need encoder settings which include frame size, frame duration
-    QSize size(640, 360);
-    qint64 frameDuration = 33333; // XXX duration in microseconds
+    app.setOrganizationDomain(qSL("mediafx.stream"));
+    app.setOrganizationName(qSL("mediaFX"));
+    app.setApplicationName(qSL("mediaFX"));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("mediaFX");
+    parser.setApplicationDescription(qSL("mediaFX"));
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
-    parser.addPositionalArgument("source", "QML source URL.");
+    parser.addOption({ { qSL("f"), qSL("frameRate") }, qSL("Output frames per second, can be float or rational e.g. 30000/1001"), qSL("frameRate"), qSL("30") });
+    parser.addOption({ { qSL("s"), qSL("size") }, qSL("Frame size, WxH"), qSL("size"), qSL("640x360") });
+    parser.addPositionalArgument(qSL("source"), qSL("QML source URL."));
 
     parser.process(app);
+
+    qint64 frameDuration = computeFrameDuration(parser.value(qSL("frameRate")));
+    if (frameDuration <= 0)
+        parser.showHelp(1);
+
+    QSize size = parseFrameSize(parser.value(qSL("size")));
+    if (size.isEmpty())
+        parser.showHelp(1);
 
     const QStringList args = parser.positionalArguments();
     if (args.size() != 1) {
