@@ -16,18 +16,11 @@
  */
 
 #include "visual_clip.h"
-#include "interval.h"
-#include "mediafx.h"
-#include "session.h"
-#include "video_clip.h"
-#include <QDebug>
 #include <QList>
-#include <QMediaPlayer>
 #include <QMessageLogContext>
-#include <QQmlEngine>
-#include <QUrl>
+#include <QMetaObject>
 #include <QVideoSink>
-#include <QmlTypeAndRevisionsRegistration>
+struct Interval;
 
 void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
 {
@@ -45,4 +38,37 @@ bool VisualClip::renderClip(const Interval& globalTime)
         videoSink->setVideoFrame(m_currentVideoFrame);
     }
     return true;
+}
+
+VisualSinkAttached* VisualSink::qmlAttachedProperties(QObject* object)
+{
+    QVideoSink* videoSink = nullptr;
+    auto* mo = object->metaObject();
+    mo->invokeMethod(object, "videoSink", Q_RETURN_ARG(QVideoSink*, videoSink));
+    if (videoSink)
+        return new VisualSinkAttached(videoSink, object);
+    else {
+        qCritical("VisualSink must be attached to an object with a videoSink property");
+        return nullptr;
+    }
+}
+
+void VisualSinkAttached::setClip(VisualClip* clip)
+{
+    if (clip != m_clip) {
+        if (m_clip) {
+            auto sinks = m_clip->videoSinks();
+            if (sinks.removeOne(m_videoSink)) {
+                m_clip->setVideoSinks(sinks);
+            }
+        }
+        if (clip) {
+            auto sinks = clip->videoSinks();
+            if (!sinks.contains(m_videoSink)) {
+                sinks.append(m_videoSink);
+                clip->setVideoSinks(sinks);
+            }
+        }
+        emit clipChanged();
+    }
 }

@@ -22,7 +22,6 @@
 #include <QQuickRenderTarget>
 #include <QQuickWindow>
 #include <QSize>
-#include <QtAssert>
 #include <rhi/qrhi.h>
 #ifdef MEDIAFX_ENABLE_VULKAN
 #include <QQuickGraphicsConfiguration>

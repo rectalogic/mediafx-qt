@@ -17,7 +17,7 @@
 
 #include "mediafx.h"
 #include "clip.h"
-#include "interval.h"
+struct Interval;
 
 MediaFX* MediaFX::singletonInstance()
 {

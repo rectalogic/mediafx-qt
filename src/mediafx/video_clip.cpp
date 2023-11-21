@@ -16,15 +16,14 @@
  */
 
 #include "video_clip.h"
+#include "interval.h"
 #include "mediafx.h"
 #include "session.h"
 #include "visual_clip.h"
-#include <QCoreApplication>
 #include <QDebug>
 #include <QList>
 #include <QMediaPlayer>
 #include <QMessageLogContext>
-#include <QQmlEngine>
 #include <QUrl>
 #include <QVideoSink>
 

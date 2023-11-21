@@ -18,8 +18,10 @@
 #pragma once
 
 #include "clip.h"
-#include "interval.h"
+#include <QObject>
 #include <QtQmlIntegration>
+class QUrl;
+struct Interval;
 
 class AudioClip : public Clip {
     Q_OBJECT

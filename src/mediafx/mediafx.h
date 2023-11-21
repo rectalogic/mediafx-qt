@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "interval.h"
 #include <QJSEngine>
 #include <QList>
 #include <QObject>
@@ -26,7 +25,7 @@
 #include <QtQmlIntegration>
 class Clip;
 class Session;
-struct MediaFXForeign;
+struct Interval;
 
 class MediaFX : public QObject {
     Q_OBJECT

@@ -18,13 +18,11 @@
 #include "session.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
-#include <QList>
 #include <QMessageLogContext>
 #include <QSize>
 #include <QStringList>
 #include <QUrl>
 #include <QtTypes>
-#include <stdlib.h>
 #ifdef WEBENGINEQUICK
 #include <QtWebEngineQuick>
 #endif

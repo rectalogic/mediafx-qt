@@ -25,7 +25,7 @@ ENV LC_ALL=C.UTF-8
 RUN apt-get -y update \
     && apt-get -y install sudo build-essential cmake ninja-build git clang clang-13 clang-format iwyu \
     libglx-mesa0 libglvnd-dev libxkbcommon-dev libxkbcommon-x11-0 libpulse-dev libxcb1 libx11-xcb1 libxcb-glx0 libxcb-cursor0 \
-    libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 \
+    libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     python3 python3-pip \
     curl xz-utils xvfb pkg-config \
     fontconfig fonts-liberation

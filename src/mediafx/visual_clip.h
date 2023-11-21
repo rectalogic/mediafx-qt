@@ -18,16 +18,15 @@
 #pragma once
 
 #include "clip.h"
-#include "interval.h"
 #include <QList>
 #include <QObject>
 #include <QVideoFrame>
 #include <QtQmlIntegration>
 class QVideoSink;
+struct Interval;
 
 class VisualClip : public Clip {
     Q_OBJECT
-    Q_PROPERTY(QList<QVideoSink*> videoSinks READ videoSinks WRITE setVideoSinks FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("VisualClip is an abstract base class.")
 
@@ -36,16 +35,49 @@ public:
     explicit VisualClip(QObject* parent = nullptr)
         : Clip(parent) {};
 
+protected:
     QList<QVideoSink*> videoSinks() const { return m_videoSinks; };
     void setVideoSinks(const QList<QVideoSink*>&);
 
-protected:
     bool renderClip(const Interval& globalTime) override;
     virtual bool prepareNextVideoFrame() = 0;
     QVideoFrame currentVideoFrame() const { return m_currentVideoFrame; };
     void setCurrentVideoFrame(const QVideoFrame& videoFrame) { m_currentVideoFrame = videoFrame; };
 
+    friend class VisualSinkAttached;
+
 private:
     QList<QVideoSink*> m_videoSinks;
     QVideoFrame m_currentVideoFrame;
+};
+
+class VisualSinkAttached : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(VisualClip* clip READ clip WRITE setClip NOTIFY clipChanged)
+    QML_ANONYMOUS
+
+public:
+    explicit VisualSinkAttached(QVideoSink* videoSink, QObject* parent = nullptr)
+        : QObject(parent)
+        , m_videoSink(videoSink) {};
+    VisualClip* clip() const { return m_clip; };
+    void setClip(VisualClip* clip);
+
+signals:
+    void clipChanged();
+
+private:
+    VisualClip* m_clip = nullptr;
+    QVideoSink* m_videoSink;
+};
+
+class VisualSink : public QObject {
+    Q_OBJECT
+    QML_ATTACHED(VisualSinkAttached)
+    QML_ELEMENT
+
+public:
+    explicit VisualSink(QObject* parent = nullptr)
+        : QObject(parent) {};
+    static VisualSinkAttached* qmlAttachedProperties(QObject* object);
 };

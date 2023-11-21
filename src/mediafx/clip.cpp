@@ -19,10 +19,8 @@
 #include "interval.h"
 #include "mediafx.h"
 #include "session.h"
-#include <QQmlEngine>
 #include <QQmlInfo>
 #include <QUrl>
-#include <QmlTypeAndRevisionsRegistration>
 
 void Clip::setSource(const QUrl& url)
 {

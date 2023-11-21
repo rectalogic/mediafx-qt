@@ -16,7 +16,8 @@
  */
 
 #include "audio_clip.h"
-#include "interval.h"
+class QUrl;
+struct Interval;
 
 void AudioClip::setActive(bool active)
 {
