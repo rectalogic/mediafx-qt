@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <QDebug>
+#include <QDebugStateSaver>
 #include <QtTypes>
 #include <utility>
 
@@ -57,3 +59,10 @@ private:
     qint64 s = 0;
     qint64 e = 0;
 };
+
+QDebug inline operator<<(QDebug dbg, const Interval& interval)
+{
+    QDebugStateSaver saver(dbg);
+    dbg.nospace() << "(" << interval.start() << ", " << interval.end() << ")";
+    return dbg;
+}

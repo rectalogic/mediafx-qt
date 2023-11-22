@@ -89,7 +89,7 @@ void Clip::initializeNextClipTime()
 {
     setNextClipTime(Interval(
         clipStartMicros(),
-        MediaFX::singletonInstance()->session()->frameDuration()));
+        clipStartMicros() + MediaFX::singletonInstance()->session()->frameDuration()));
 }
 
 void Clip::stop()

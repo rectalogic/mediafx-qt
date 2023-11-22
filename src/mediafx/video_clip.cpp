@@ -63,9 +63,6 @@ void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
     if (videoSinks().isEmpty())
         return;
 
-    // XXX need to attempt to seek - should we do that when clipStart set, or when url set? we don't know which is set first
-    // XXX seek doesn't work until we are playing, so need to do it here
-
     auto frameTimeStart = nextClipTime().start();
     if (frame.endTime() < frameTimeStart) {
         return;
@@ -104,10 +101,19 @@ void VideoClip::setActive(bool bactive)
     VisualClip::setActive(bactive);
     if (isComponentComplete()) {
         if (active()) {
-            mediaPlayer.play();
+            play();
         } else {
             mediaPlayer.pause();
         }
+    }
+}
+
+void VideoClip::play()
+{
+    bool initialPlay = mediaPlayer.playbackState() == QMediaPlayer::StoppedState;
+    mediaPlayer.play();
+    if (initialPlay && clipStart() > 0 && mediaPlayer.isSeekable()) {
+        mediaPlayer.setPosition(clipStart());
     }
 }
 
@@ -128,5 +134,5 @@ void VideoClip::componentComplete()
     }
     VisualClip::componentComplete();
     if (active())
-        mediaPlayer.play();
+        play();
 }

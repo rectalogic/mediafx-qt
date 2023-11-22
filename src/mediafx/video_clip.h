@@ -51,6 +51,7 @@ private slots:
     void onVideoFrameChanged(const QVideoFrame& frame);
 
 private:
+    void play();
     void rateControl();
     static const int MaxFrameQueueSize = 20;
     static const int MinFrameQueueSize = 5;
