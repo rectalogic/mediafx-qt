@@ -19,9 +19,9 @@
 class QUrl;
 struct Interval;
 
-void AudioClip::setActive(bool active)
+void AudioClip::onActiveChanged(bool active)
 {
-    Clip::setActive(active);
+    Clip::onActiveChanged(active);
     // XXX
 }
 

@@ -31,24 +31,22 @@ class Clip : public QObject, public QQmlParserStatus {
     // Times are qint64 milliseconds, but stored internally as microseconds to match QVideoFrame times
     Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
+    Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
 signals:
     void clipStartChanged();
     void clipEndChanged();
+    void activeChanged(bool);
+
+protected slots:
+    virtual void onActiveChanged(bool active) {};
 
 public:
     using QObject::QObject;
 
-    explicit Clip(QObject* parent = nullptr)
-        : QObject(parent)
-        , m_clipStart(-1)
-        , m_clipEnd(-1)
-        , m_currentGlobalTime(-1, -1)
-        , m_nextClipTime(0, -1)
-    {
-    }
+    explicit Clip(QObject* parent = nullptr);
 
     QUrl source() const { return m_source; };
     void setSource(const QUrl&);
@@ -58,6 +56,9 @@ public:
 
     qint64 clipEnd() const { return m_clipEnd / 1000; };
     void setClipEnd(qint64 millis);
+
+    void setActive(bool active);
+    bool active() const { return m_active; };
 
     bool render(const Interval& globalTime);
 
@@ -74,9 +75,6 @@ protected:
     Interval clipSegment() const { return Interval(m_clipStart, m_clipEnd); };
 
     Interval nextClipTime() const { return m_nextClipTime; };
-
-    virtual void setActive(bool active);
-    bool active() const { return m_active; };
 
     virtual void loadMedia(const QUrl&) = 0;
 

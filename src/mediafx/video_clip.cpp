@@ -96,11 +96,11 @@ bool VideoClip::prepareNextVideoFrame()
     return false;
 }
 
-void VideoClip::setActive(bool bactive)
+void VideoClip::onActiveChanged(bool active)
 {
-    VisualClip::setActive(bactive);
+    VisualClip::onActiveChanged(active);
     if (isComponentComplete()) {
-        if (active()) {
+        if (active) {
             play();
         } else {
             mediaPlayer.pause();

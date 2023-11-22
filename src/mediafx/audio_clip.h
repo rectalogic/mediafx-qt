@@ -33,7 +33,7 @@ public:
         : Clip(parent) {};
 
 protected:
-    void setActive(bool active) override;
+    void onActiveChanged(bool active) override;
 
     void loadMedia(const QUrl&) override;
     bool renderClip(const Interval& globalTime) override;

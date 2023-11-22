@@ -19,8 +19,19 @@
 #include "interval.h"
 #include "mediafx.h"
 #include "session.h"
+#include <QObject>
 #include <QQmlInfo>
 #include <QUrl>
+
+Clip::Clip(QObject* parent)
+    : QObject(parent)
+    , m_clipStart(-1)
+    , m_clipEnd(-1)
+    , m_currentGlobalTime(-1, -1)
+    , m_nextClipTime(0, -1)
+{
+    connect(this, &Clip::activeChanged, this, &Clip::onActiveChanged);
+}
 
 void Clip::setSource(const QUrl& url)
 {
@@ -101,12 +112,16 @@ void Clip::stop()
 
 void Clip::setActive(bool active)
 {
-    m_active = active && !m_stopped;
-    auto mediaFX = MediaFX::singletonInstance();
-    if (active) {
-        mediaFX->registerClip(this);
-    } else {
-        mediaFX->unregisterClip(this);
+    active = active && !m_stopped;
+    if (m_active != active) {
+        m_active = active;
+        auto mediaFX = MediaFX::singletonInstance();
+        if (active) {
+            mediaFX->registerClip(this);
+        } else {
+            mediaFX->unregisterClip(this);
+        }
+        emit onActiveChanged(active);
     }
 }
 

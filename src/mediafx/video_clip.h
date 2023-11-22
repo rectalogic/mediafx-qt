@@ -42,7 +42,7 @@ protected:
 
     bool prepareNextVideoFrame() override;
 
-    void setActive(bool active) override;
+    void onActiveChanged(bool active) override;
 
     void stop() override;
 
