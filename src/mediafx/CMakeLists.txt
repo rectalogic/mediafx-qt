@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Quick3D QUIET OPTIONAL_COMPONENTS WebEngineQuick)
-
 qt_policy(SET QTP0001 NEW)
 
 qt_add_library(libmediafx STATIC
@@ -28,6 +26,7 @@ qt_add_library(libmediafx STATIC
     image_clip.cpp
 )
 set_property(TARGET libmediafx PROPERTY OUTPUT_NAME mediafx)
+target_include_directories(libmediafx PUBLIC ./)
 
 qt_add_executable(mediafx
     main.cpp

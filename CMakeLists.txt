@@ -17,8 +17,10 @@ cmake_minimum_required(VERSION 3.21)
 
 project(mediaFX VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Quick3D QUIET OPTIONAL_COMPONENTS WebEngineQuick)
+
 qt_standard_project_setup()
+enable_testing(true)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,3 +37,4 @@ if(NOT "${isSystemDir}" STREQUAL "-1")
 endif()
 
 add_subdirectory(src/mediafx)
+add_subdirectory(tests)
