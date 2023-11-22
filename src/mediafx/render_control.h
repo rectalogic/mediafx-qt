@@ -21,8 +21,8 @@
 #include <QObject>
 #include <QQuickRenderControl>
 #include <QtCore>
-#include <QtGlobal>
 #include <memory>
+#include <qtgui-config.h>
 #include <rhi/qrhi.h>
 class QQuickWindow;
 #if (QT_CONFIG(vulkan) && __has_include(<vulkan/vulkan.h>))

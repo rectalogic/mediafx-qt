@@ -17,8 +17,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Quick3D QUIET
 
 qt_policy(SET QTP0001 NEW)
 
-qt_add_executable(mediafx
-    main.cpp
+qt_add_library(libmediafx STATIC
     session.cpp
     mediafx.cpp
     render_control.cpp
@@ -28,16 +27,23 @@ qt_add_executable(mediafx
     video_clip.cpp
     image_clip.cpp
 )
+set_property(TARGET libmediafx PROPERTY OUTPUT_NAME mediafx)
+
+qt_add_executable(mediafx
+    main.cpp
+)
 
 qt_add_qml_module(mediafx
     URI stream.mediafx
 )
 
-target_link_libraries(mediafx PRIVATE Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
+target_link_libraries(libmediafx PUBLIC Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
 
 if(${Qt6WebEngineQuick_FOUND})
-    target_link_libraries(mediafx PRIVATE Qt6::WebEngineQuick)
+    target_link_libraries(libmediafx PUBLIC Qt6::WebEngineQuick)
     add_definitions(-DWEBENGINEQUICK)
 endif()
+
+target_link_libraries(mediafx PRIVATE libmediafx)
 
 install(TARGETS mediafx RUNTIME DESTINATION)

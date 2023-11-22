@@ -16,45 +16,21 @@
  */
 
 #include "session.h"
+#include "util.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QMessageLogContext>
 #include <QSize>
 #include <QStringList>
+#include <QStringLiteral>
 #include <QUrl>
 #include <QtTypes>
-#include <stdio.h>
+
 #ifdef WEBENGINEQUICK
 #include <QtWebEngineQuick>
 #endif
 
 #define qSL QStringLiteral
-
-qint64 computeFrameDuration(const QString& frameRate)
-{
-    auto frameRateF = frameRate.toDouble();
-    if (frameRateF <= 0) {
-        float num = 0, den = 0;
-        if (sscanf(frameRate.toUtf8().data(), "%f/%f", &num, &den) == 2 && den > 0) {
-            frameRateF = num / den;
-        }
-    }
-    qint64 frameDuration = 0;
-    if (frameRateF > 0) {
-        return 1000000 / frameRateF; // frame duration in microseconds
-    } else {
-        return -1;
-    }
-}
-
-QSize parseFrameSize(const QString& frameSize)
-{
-    QSize size;
-    if (sscanf(frameSize.toUtf8().data(), "%dx%d", &size.rwidth(), &size.rheight()) == 2 && size.width() > 0 && size.height() > 0) {
-        return size;
-    }
-    return QSize();
-}
 
 int main(int argc, char* argv[])
 {
@@ -83,7 +59,7 @@ int main(int argc, char* argv[])
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
     parser.addOption({ { qSL("f"), qSL("frameRate") }, qSL("Output frames per second, can be float or rational e.g. 30000/1001"), qSL("frameRate"), qSL("30") });
-    parser.addOption({ { qSL("s"), qSL("size") }, qSL("Frame size, WxH"), qSL("size"), qSL("640x360") });
+    parser.addOption({ { qSL("s"), qSL("size") }, qSL("Output video frame size, WxH"), qSL("size"), qSL("640x360") });
     parser.addPositionalArgument(qSL("source"), qSL("QML source URL."));
 
     parser.process(app);
