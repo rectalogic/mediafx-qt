@@ -78,7 +78,7 @@ bool Clip::render(const Interval& globalTime)
     if (currentGlobalTime() == globalTime)
         return true;
 
-    if (active() && clipSegment().contains(nextClipTime().start())) {
+    if (isActive() && clipSegment().contains(nextClipTime().start())) {
         if (renderClip(globalTime)) {
             setCurrentGlobalTime(globalTime);
             setNextClipTime(nextClipTime().translated(MediaFX::singletonInstance()->session()->frameDuration()));
@@ -87,7 +87,7 @@ bool Clip::render(const Interval& globalTime)
             return false;
         }
     } else if (clipEnd() < nextClipTime().start()) {
-        // XXX add support for looping, just initializeNextClipTime() instead of stop()
+        // XXX add support for looping, just initializeNextClipTime() instead of stop() and set loop on player
         stop();
         return false;
     } else {

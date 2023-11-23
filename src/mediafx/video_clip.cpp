@@ -133,6 +133,6 @@ void VideoClip::componentComplete()
         setClipEndMicros(mediaPlayer.duration() * 1000);
     }
     VisualClip::componentComplete();
-    if (active())
+    if (isActive())
         play();
 }

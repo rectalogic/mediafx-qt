@@ -31,7 +31,7 @@ class Clip : public QObject, public QQmlParserStatus {
     // Times are qint64 milliseconds, but stored internally as microseconds to match QVideoFrame times
     Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
-    Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged FINAL)
+    Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged FINAL)
     QML_ELEMENT
     QML_UNCREATABLE("Clip is an abstract base class.")
 
@@ -58,7 +58,7 @@ public:
     void setClipEnd(qint64 millis);
 
     void setActive(bool active);
-    bool active() const { return m_active; };
+    bool isActive() const { return m_active; };
 
     bool render(const Interval& globalTime);
 

@@ -18,7 +18,6 @@
 #pragma once
 
 #include "visual_clip.h"
-#include <QImage>
 #include <QObject>
 #include <QVideoFrame>
 #include <QtQmlIntegration>
@@ -41,6 +40,5 @@ protected:
     void stop() override;
 
 private:
-    QImage image;
     QVideoFrame videoFrame;
 };

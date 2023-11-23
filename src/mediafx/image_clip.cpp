@@ -19,6 +19,7 @@
 #include "mediafx.h"
 #include "session.h"
 #include "visual_clip.h"
+#include <QImage>
 #include <QMessageLogContext>
 #include <QUrl>
 #include <QVideoFrameFormat>
@@ -56,7 +57,6 @@ bool ImageClip::prepareNextVideoFrame()
 void ImageClip::stop()
 {
     VisualClip::stop();
-    image = QImage();
     videoFrame = QVideoFrame();
 }
 
