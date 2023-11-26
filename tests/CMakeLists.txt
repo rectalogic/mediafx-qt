@@ -20,5 +20,8 @@ set(CMAKE_AUTOMOC ON)
 
 qt_add_executable(interval tst_interval.cpp)
 add_test(NAME interval COMMAND interval)
+target_link_libraries(interval PRIVATE mediafx Qt::Test)
 
-target_link_libraries(interval PRIVATE libmediafx Qt::Test)
+qt_add_executable(encoder tst_encoder.cpp)
+add_test(NAME encoder COMMAND encoder)
+target_link_libraries(encoder PRIVATE mediafx Qt::Test)

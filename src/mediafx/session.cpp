@@ -17,6 +17,7 @@
 
 #include "session.h"
 #include "animation.h"
+#include "encoder.h"
 #include "mediafx.h"
 #include <QByteArray>
 #include <QCoreApplication>
@@ -35,12 +36,13 @@
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
-Session::Session(QSize& size, qint64 frameDuration)
-    : QObject()
-    , m_frameDuration(frameDuration)
-    , frameTime(0, frameDuration)
+Session::Session(Encoder* encoder, QObject* parent)
+    : QObject(parent)
+    , encoder(encoder)
+    , m_frameDuration(encoder->frameRate().toFrameDurationMicros())
+    , frameTime(0, m_frameDuration)
     , quickView(QUrl(), &renderControl)
-    , animationDriver(new AnimationDriver(frameDuration, this))
+    , animationDriver(new AnimationDriver(m_frameDuration, this))
 {
     connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
@@ -50,12 +52,12 @@ Session::Session(QSize& size, qint64 frameDuration)
     MediaFXForeign::s_singletonInstance = mediaFX;
 
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView.resize(size);
+    quickView.resize(encoder->frameSize().toSize());
     connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
 }
 
-bool Session::initialize(QUrl& url)
+bool Session::initialize(const QUrl& url)
 {
     if (!renderControl.install(quickView)) {
         qCritical() << "Failed to install QQuickRenderControl";
@@ -93,24 +95,27 @@ bool Session::event(QEvent* event)
     return QObject::event(event);
 }
 
+int write(int fd, qsizetype size, const char* data)
+{
+    size_t bytesIO = 0;
+    while (bytesIO < size) {
+        ssize_t n = write(fd, data + bytesIO, size - bytesIO);
+        if (n == -1) {
+            qCritical() << "write failed: " << strerror(errno);
+            return -1;
+        }
+        bytesIO = bytesIO + n;
+    }
+    return size;
+}
+
 void Session::render()
 {
     if (mediaFX->renderVideoFrame(frameTime)) {
         auto frameData = renderControl.renderVideoFrame();
 
-        /**** XXX ****/
-        size_t bytesIO = 0;
-        auto size = frameData.size();
-        const auto data = frameData.constData();
-        while (bytesIO < size) {
-            ssize_t n = write(STDOUT_FILENO, data + bytesIO, size - bytesIO);
-            if (n == -1) {
-                qCritical() << "write failed: " << strerror(errno);
-                return;
-            }
-            bytesIO = bytesIO + n;
-        }
-        /**** XXX ****/
+        if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
+            return;
 
         animationDriver->advance();
         frameTime = frameTime.translated(frameDuration());

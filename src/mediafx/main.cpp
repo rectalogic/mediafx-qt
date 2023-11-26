@@ -15,16 +15,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "encoder.h"
 #include "session.h"
-#include "util.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QMessageLogContext>
-#include <QSize>
 #include <QStringList>
 #include <QStringLiteral>
 #include <QUrl>
-#include <QtTypes>
 
 #ifdef WEBENGINEQUICK
 #include <QtWebEngineQuick>
@@ -60,26 +58,52 @@ int main(int argc, char* argv[])
     parser.addHelpOption();
     parser.addOption({ { qSL("f"), qSL("frameRate") }, qSL("Output frames per second, can be float or rational e.g. 30000/1001"), qSL("frameRate"), qSL("30") });
     parser.addOption({ { qSL("s"), qSL("size") }, qSL("Output video frame size, WxH"), qSL("size"), qSL("640x360") });
+    parser.addOption({ { qSL("o"), qSL("output") }, qSL("Output filename"), qSL("output") });
+    parser.addOption({ { qSL("c"), qSL("command") }, qSL("Encoder commandline"), qSL("command") });
     parser.addPositionalArgument(qSL("source"), qSL("QML source URL."));
 
     parser.process(app);
 
-    qint64 frameDuration = computeFrameDuration(parser.value(qSL("frameRate")));
-    if (frameDuration <= 0)
+    Encoder::FrameRate frameRate = Encoder::FrameRate::parse(parser.value(qSL("frameRate")));
+    if (frameRate.isEmpty())
         parser.showHelp(1);
 
-    QSize size = parseFrameSize(parser.value(qSL("size")));
-    if (size.isEmpty())
+    Encoder::FrameSize frameSize = Encoder::FrameSize::parse(parser.value(qSL("size")));
+    if (frameSize.isEmpty())
         parser.showHelp(1);
+
+    QString command;
+    if (parser.isSet(qSL("command"))) {
+        command = parser.value(qSL("command"));
+        if (command == "ffplay") {
+            // XXX need to handle audio eventually
+            command = qSL("ffplay -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
+        } else if (command == "ffmpeg") {
+            if (!parser.isSet(qSL("output"))) {
+                parser.showHelp(1);
+            }
+            // XXX quicktime no longer supports qtrle
+            command = qSL("ffmpeg -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD} -f mov -vcodec rawvideo -pix_fmt uyvy422 -vtag yuvs -framerate ${MEDIAFX_FRAMERATE} -y ${MEDIAFX_OUTPUT}");
+        }
+    }
+    QString output;
+    if (parser.isSet(qSL("output"))) {
+        output = parser.value(qSL("output"));
+    }
 
     const QStringList args = parser.positionalArguments();
     if (args.size() != 1) {
         qCritical("Missing required source url");
-        return 1;
+        parser.showHelp(1);
     }
     QUrl url(args.at(0));
 
-    Session session(size, frameDuration);
+    Encoder encoder(frameSize, frameRate);
+    if (!encoder.initialize(output, command)) {
+        qCritical("Failed to initialize encoder");
+        return 1;
+    }
+    Session session(&encoder);
     if (!session.initialize(url)) {
         qCritical("Failed to initialize session");
         return 1;

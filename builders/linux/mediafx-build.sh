@@ -15,7 +15,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 cd /mediafx/build/linux
-cmake --install-prefix /usr/local/Qt/${QT_VER}/gcc_64 ../.. && cmake --build . && sudo cmake --install .
+(cmake --install-prefix /usr/local/Qt/${QT_VER}/gcc_64 ../.. && cmake --build . && sudo cmake --install .) || exit 1
 if [ "${MEDIAFX_TEST:-}" ]; then
-    make test
+    make test || exit 1
 fi

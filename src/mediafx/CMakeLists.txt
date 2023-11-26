@@ -15,9 +15,10 @@
 
 qt_policy(SET QTP0001 NEW)
 
-qt_add_library(libmediafx STATIC
+qt_add_library(mediafx STATIC
     session.cpp
     mediafx.cpp
+    encoder.cpp
     render_control.cpp
     clip.cpp
     audio_clip.cpp
@@ -25,24 +26,24 @@ qt_add_library(libmediafx STATIC
     video_clip.cpp
     image_clip.cpp
 )
-set_property(TARGET libmediafx PROPERTY OUTPUT_NAME mediafx)
-target_include_directories(libmediafx PUBLIC ./)
+target_include_directories(mediafx PUBLIC ./)
 
-qt_add_executable(mediafx
+qt_add_executable(mediafxtool
     main.cpp
 )
+set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 
 qt_add_qml_module(mediafx
-    URI stream.mediafx
+    URI mediafx
 )
 
-target_link_libraries(libmediafx PUBLIC Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
+target_link_libraries(mediafx PUBLIC Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
 
 if(${Qt6WebEngineQuick_FOUND})
-    target_link_libraries(libmediafx PUBLIC Qt6::WebEngineQuick)
+    target_link_libraries(mediafx PUBLIC Qt6::WebEngineQuick)
     add_definitions(-DWEBENGINEQUICK)
 endif()
 
-target_link_libraries(mediafx PRIVATE libmediafx)
+target_link_libraries(mediafxtool PRIVATE mediafx mediafxplugin)
 
-install(TARGETS mediafx RUNTIME DESTINATION)
+install(TARGETS mediafxtool RUNTIME DESTINATION)

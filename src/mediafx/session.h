@@ -24,18 +24,18 @@
 #include <QObject>
 #include <QQuickView>
 #include <QtTypes>
+class AnimationDriver;
+class Encoder;
 class MediaFX;
 class QQmlError;
-class QSize;
 class QUrl;
-class AnimationDriver;
 
 class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(QSize& size, qint64 frameDuration);
-    bool initialize(QUrl& url);
+    Session(Encoder* encoder, QObject* parent = nullptr);
+    bool initialize(const QUrl& url);
 
     qint64 frameDuration() { return m_frameDuration; };
 
@@ -52,6 +52,7 @@ private slots:
 
 private:
     static QEvent::Type renderEventType;
+    Encoder* encoder;
     qint64 m_frameDuration;
     Interval frameTime;
     RenderControl renderControl;
