@@ -39,6 +39,7 @@ signals:
     void clipStartChanged();
     void clipEndChanged();
     void activeChanged(bool);
+    void clipEnded();
 
 protected slots:
     virtual void onActiveChanged(bool active) {};

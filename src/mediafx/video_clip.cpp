@@ -92,6 +92,11 @@ bool VideoClip::prepareNextVideoFrame()
             return true;
         }
     }
+    // No buffered frames and state is ended
+    if (mediaPlayer.mediaStatus() == QMediaPlayer::EndOfMedia) {
+        stop();
+        return false;
+    }
     rateControl();
     return false;
 }

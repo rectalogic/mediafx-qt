@@ -19,7 +19,6 @@
 #include <QDebug>
 #include <QMessageLogContext>
 #include <QString>
-#include <QStringLiteral>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>

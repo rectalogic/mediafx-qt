@@ -108,6 +108,7 @@ void Clip::stop()
     initializeNextClipTime();
     setActive(false);
     m_stopped = true;
+    emit clipEnded();
 }
 
 void Clip::setActive(bool active)

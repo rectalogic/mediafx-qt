@@ -29,16 +29,10 @@ struct Interval;
 
 class MediaFX : public QObject {
     Q_OBJECT
-    QML_ELEMENT
-    QML_SINGLETON
 
 public:
     using QObject::QObject;
-    MediaFX(Session* session, QObject* parent = nullptr)
-        : QObject(parent)
-        , m_session(session)
-    {
-    }
+    MediaFX(Session* session, QObject* parent = nullptr);
 
     static MediaFX* singletonInstance();
 
@@ -48,6 +42,9 @@ public:
     void unregisterClip(Clip* clip);
 
     bool renderVideoFrame(const Interval& frameTimeRange);
+
+signals:
+    void finishEncoding();
 
 private:
     Session* m_session;

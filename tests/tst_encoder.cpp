@@ -16,9 +16,7 @@
  */
 
 #include "encoder.h"
-#include <QDebug>
 #include <QObject>
-#include <QString>
 #include <QStringLiteral>
 #include <QtTest>
 
