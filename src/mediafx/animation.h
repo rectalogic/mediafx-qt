@@ -18,10 +18,12 @@
 #pragma once
 
 #include <QAnimationDriver>
+#include <chrono>
+using namespace std::chrono;
 
 class AnimationDriver : public QAnimationDriver {
 public:
-    AnimationDriver(qint64 frameDuration, QObject* parent = nullptr)
+    AnimationDriver(const microseconds& frameDuration, QObject* parent = nullptr)
         : QAnimationDriver(parent)
         , m_frameDuration(frameDuration)
     {
@@ -35,10 +37,10 @@ public:
 
     qint64 elapsed() const override
     {
-        return m_elapsed;
+        return m_elapsed.count();
     }
 
 private:
-    qint64 m_frameDuration;
-    qint64 m_elapsed = 0;
+    microseconds m_frameDuration;
+    microseconds m_elapsed = microseconds::zero();
 };

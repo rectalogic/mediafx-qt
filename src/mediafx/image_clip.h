@@ -22,6 +22,7 @@
 #include <QVideoFrame>
 #include <QtQmlIntegration>
 class QUrl;
+struct Interval;
 
 class ImageClip : public VisualClip {
     Q_OBJECT
@@ -35,7 +36,7 @@ public:
 protected:
     void loadMedia(const QUrl&) override;
 
-    bool prepareNextVideoFrame() override;
+    bool prepareNextVideoFrame(const Interval& globalTime) override;
 
     void stop() override;
 

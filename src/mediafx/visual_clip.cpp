@@ -32,7 +32,7 @@ void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
 
 bool VisualClip::renderClip(const Interval& globalTime)
 {
-    if (!prepareNextVideoFrame())
+    if (!prepareNextVideoFrame(globalTime))
         return false;
     for (auto videoSink : videoSinks()) {
         videoSink->setVideoFrame(m_currentVideoFrame);

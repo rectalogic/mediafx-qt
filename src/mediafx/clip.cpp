@@ -22,13 +22,18 @@
 #include <QObject>
 #include <QQmlInfo>
 #include <QUrl>
+#include <chrono>
+#include <compare>
+#include <type_traits>
+using namespace std::chrono;
+using namespace std::chrono_literals;
 
 Clip::Clip(QObject* parent)
     : QObject(parent)
     , m_clipStart(-1)
     , m_clipEnd(-1)
-    , m_currentGlobalTime(-1, -1)
-    , m_nextClipTime(0, -1)
+    , m_currentGlobalTime(-1us, -1us)
+    , m_nextClipTime(0us, -1us)
 {
     connect(this, &Clip::activeChanged, this, &Clip::onActiveChanged);
 }
@@ -42,33 +47,33 @@ void Clip::setSource(const QUrl& url)
     m_source = url;
 }
 
-void Clip::setClipStart(qint64 millis)
+void Clip::setClipStart(qint64 ms)
 {
-    setClipStartMicros(millis * 1000);
+    setClipStart_us(milliseconds(ms));
 }
 
-void Clip::setClipEnd(qint64 millis)
+void Clip::setClipEnd(qint64 ms)
 {
-    setClipEndMicros(millis * 1000);
+    setClipEnd_us(milliseconds(ms));
 }
 
-void Clip::setClipStartMicros(qint64 micros)
+void Clip::setClipStart_us(microseconds us)
 {
-    if (m_clipStart != -1) {
+    if (m_clipStart != -1us) {
         qmlWarning(this) << "Clip clipStart is a write-once property and cannot be changed";
         return;
     }
-    m_clipStart = micros;
+    m_clipStart = us;
     emit clipStartChanged();
 }
 
-void Clip::setClipEndMicros(qint64 micros)
+void Clip::setClipEnd_us(microseconds useconds_t)
 {
-    if (m_clipEnd != -1) {
+    if (m_clipEnd != -1us) {
         qmlWarning(this) << "Clip clipEnd is a write-once property and cannot be changed";
         return;
     }
-    m_clipEnd = micros;
+    m_clipEnd = useconds_t;
     emit clipEndChanged();
 }
 
@@ -86,7 +91,7 @@ bool Clip::render(const Interval& globalTime)
         } else {
             return false;
         }
-    } else if (clipEnd() < nextClipTime().start()) {
+    } else if (clipEnd_us() < nextClipTime().start()) {
         // XXX add support for looping, just initializeNextClipTime() instead of stop() and set loop on player
         stop();
         return false;
@@ -99,8 +104,8 @@ bool Clip::render(const Interval& globalTime)
 void Clip::initializeNextClipTime()
 {
     setNextClipTime(Interval(
-        clipStartMicros(),
-        clipStartMicros() + MediaFX::singletonInstance()->session()->frameDuration()));
+        clipStart_us(),
+        clipStart_us() + MediaFX::singletonInstance()->session()->frameDuration()));
 }
 
 void Clip::stop()
@@ -133,13 +138,13 @@ void Clip::classBegin()
 void Clip::componentComplete()
 {
     m_componentComplete = true;
-    if (clipEndMicros() == -1) {
+    if (clipEnd_us() == -1us) {
         qmlWarning(this) << "Clip has no intrinsic duration, set clipEnd property";
         emit MediaFX::singletonInstance()->session()->exitApp(1);
         return;
     }
-    if (clipStartMicros() == -1)
-        setClipStartMicros(0);
+    if (clipStart_us() == -1us)
+        setClipStart_us(microseconds::zero());
 
     initializeNextClipTime();
 }

@@ -30,17 +30,20 @@
 #include <QQuickView>
 #include <QUrl>
 #include <Qt>
+#include <QtTypes>
+#include <chrono>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+using namespace std::chrono;
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
 Session::Session(Encoder* encoder, QObject* parent)
     : QObject(parent)
     , encoder(encoder)
-    , m_frameDuration(encoder->frameRate().toFrameDurationMicros())
-    , frameTime(0, m_frameDuration)
+    , m_frameDuration(encoder->frameRate().toFrameDuration())
+    , frameTime(microseconds::zero(), m_frameDuration)
     , quickView(QUrl(), &renderControl)
     , animationDriver(new AnimationDriver(m_frameDuration, this))
 {
@@ -121,7 +124,5 @@ void Session::render()
         frameTime = frameTime.translated(frameDuration());
     }
 
-    // XXX need to know when we're done - how do we determine total duration?
-    // XXX QML could signal a mediaFX slot when done
     QCoreApplication::postEvent(this, new QEvent(renderEventType));
 }

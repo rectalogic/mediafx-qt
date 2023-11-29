@@ -23,12 +23,13 @@
 #include <QList>
 #include <QObject>
 #include <QQuickView>
-#include <QtTypes>
+#include <chrono>
 class AnimationDriver;
 class Encoder;
 class MediaFX;
 class QQmlError;
 class QUrl;
+using namespace std::chrono;
 
 class Session : public QObject {
     Q_OBJECT
@@ -37,7 +38,7 @@ public:
     Session(Encoder* encoder, QObject* parent = nullptr);
     bool initialize(const QUrl& url);
 
-    qint64 frameDuration() { return m_frameDuration; };
+    microseconds frameDuration() const noexcept { return m_frameDuration; };
 
     void render();
 
@@ -53,7 +54,7 @@ private slots:
 private:
     static QEvent::Type renderEventType;
     Encoder* encoder;
-    qint64 m_frameDuration;
+    microseconds m_frameDuration;
     Interval frameTime;
     RenderControl renderControl;
     QQuickView quickView;

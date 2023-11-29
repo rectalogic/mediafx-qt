@@ -21,18 +21,23 @@
 #include "session.h"
 #include "visual_clip.h"
 #include <QDebug>
-#include <QList>
 #include <QMediaPlayer>
 #include <QMessageLogContext>
+#include <QMutexLocker>
 #include <QUrl>
 #include <QVideoSink>
+#include <Qt>
+#include <chrono>
+#include <compare>
+#include <type_traits>
+using namespace std::chrono;
+using namespace std::chrono_literals;
 
 VideoClip::VideoClip(QObject* parent)
     : VisualClip(parent)
+    , rateControl(MediaFX::singletonInstance()->session()->frameDuration())
 {
-    // We want frames faster than realtime
-    mediaPlayer.setPlaybackRate(1000);
-    connect(&mediaPlayerSink, &QVideoSink::videoFrameChanged, this, &VideoClip::onVideoFrameChanged);
+    connect(&mediaPlayerSink, &QVideoSink::videoFrameChanged, this, &VideoClip::onVideoFrameChanged, Qt::DirectConnection);
     mediaPlayer.setVideoSink(&mediaPlayerSink);
     connect(&mediaPlayer, &QMediaPlayer::errorOccurred, this, &VideoClip::onMediaPlayerErrorOccurred);
 }
@@ -48,56 +53,56 @@ void VideoClip::loadMedia(const QUrl& url)
     mediaPlayer.setSource(url);
 }
 
-void VideoClip::rateControl()
+void VideoClip::onRateControl()
 {
-    // XXX adjust the rate instead of play/pause? mediaPlayer.setPlaybackRate()
-    auto size = bufferedFrames.size();
-    if (size > MaxFrameQueueSize && mediaPlayer.isPlaying())
-        mediaPlayer.pause();
-    else if (size < MinFrameQueueSize && !mediaPlayer.isPlaying())
-        mediaPlayer.play();
+    auto rate = rateControl.playbackRate();
+    mediaPlayer.setPlaybackRate(rate);
 }
 
 void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
 {
-    if (videoSinks().isEmpty())
-        return;
-
+    QMutexLocker locker(&mutex);
     auto frameTimeStart = nextClipTime().start();
-    if (frame.endTime() < frameTimeStart) {
+    if (microseconds(frame.endTime()) < frameTimeStart) {
         return;
     }
-    if (frame.startTime() >= frameTimeStart) {
-        bufferedFrames.enqueue(frame);
-        rateControl();
+    if (microseconds(frame.startTime()) >= frameTimeStart) {
+        rateControl.enqueue(frame);
     }
 }
 
-bool VideoClip::prepareNextVideoFrame()
+bool VideoClip::prepareNextVideoFrame(const Interval& globalTime)
 {
+    QMutexLocker locker(&mutex);
     auto nextFrameTime = nextClipTime();
     // clipEnd may be beyond duration, if so we just keep last frame rendered
-    if (nextFrameTime.start() >= mediaPlayer.duration() * 1000) {
+    if (nextFrameTime.start() >= milliseconds(mediaPlayer.duration())) {
         return true;
     }
     QVideoFrame videoFrame = currentVideoFrame();
-    if (videoFrame.isValid() && nextFrameTime.contains(videoFrame.startTime())) {
+    if (videoFrame.isValid() && nextFrameTime.contains(microseconds(videoFrame.startTime()))) {
         return true;
     }
-    while (!bufferedFrames.isEmpty()) {
-        videoFrame = bufferedFrames.dequeue();
-        if (nextFrameTime.contains(videoFrame.startTime())) {
-            setCurrentVideoFrame(videoFrame);
-            rateControl();
+
+    if (lastRequestedGlobalTime != globalTime) {
+        rateControl.onVideoFrameRequired();
+        lastRequestedGlobalTime = globalTime;
+    }
+    while (!rateControl.isEmpty()) {
+        QVideoFrame frame = rateControl.dequeue();
+        if (nextFrameTime.contains(microseconds(frame.startTime()))) {
+            setCurrentVideoFrame(frame);
+            onRateControl();
             return true;
         }
     }
+
     // No buffered frames and state is ended
     if (mediaPlayer.mediaStatus() == QMediaPlayer::EndOfMedia) {
         stop();
         return false;
     }
-    rateControl();
+    onRateControl();
     return false;
 }
 
@@ -127,15 +132,14 @@ void VideoClip::stop()
     VisualClip::stop();
     mediaPlayer.stop();
     mediaPlayer.setSource(QUrl());
-    bufferedFrames.clear();
-    bufferedFrames.squeeze();
+    rateControl.reset();
 }
 
 void VideoClip::componentComplete()
 {
     loadMedia(source());
-    if (clipEndMicros() == -1) {
-        setClipEndMicros(mediaPlayer.duration() * 1000);
+    if (clipEnd_us() == -1us) {
+        setClipEnd_us(milliseconds(mediaPlayer.duration()));
     }
     VisualClip::componentComplete();
     if (isActive())

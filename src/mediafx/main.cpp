@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     parser.setApplicationDescription(qSL("mediaFX"));
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
-    parser.addOption({ { qSL("f"), qSL("frameRate") }, qSL("Output frames per second, can be float or rational e.g. 30000/1001"), qSL("frameRate"), qSL("30") });
+    parser.addOption({ { qSL("f"), qSL("fps") }, qSL("Output frames per second, can be float or rational e.g. 30000/1001"), qSL("fps"), qSL("30") });
     parser.addOption({ { qSL("s"), qSL("size") }, qSL("Output video frame size, WxH"), qSL("size"), qSL("640x360") });
     parser.addOption({ { qSL("o"), qSL("output") }, qSL("Output filename"), qSL("output") });
     parser.addOption({ { qSL("c"), qSL("command") }, qSL("Encoder commandline"), qSL("command") });
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     parser.process(app);
 
-    Encoder::FrameRate frameRate = Encoder::FrameRate::parse(parser.value(qSL("frameRate")));
+    Encoder::FrameRate frameRate = Encoder::FrameRate::parse(parser.value(qSL("fps")));
     if (frameRate.isEmpty())
         parser.showHelp(1);
 

@@ -17,10 +17,12 @@
 
 #pragma once
 
+#include "interval.h"
+#include "rate_control.h"
 #include "visual_clip.h"
 #include <QMediaPlayer>
+#include <QMutex>
 #include <QObject>
-#include <QQueue>
 #include <QString>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -40,7 +42,7 @@ public:
 protected:
     void loadMedia(const QUrl&) override;
 
-    bool prepareNextVideoFrame() override;
+    bool prepareNextVideoFrame(const Interval& globalTime) override;
 
     void onActiveChanged(bool active) override;
 
@@ -49,13 +51,13 @@ protected:
 private slots:
     void onMediaPlayerErrorOccurred(QMediaPlayer::Error error, const QString& errorString);
     void onVideoFrameChanged(const QVideoFrame& frame);
+    void onRateControl();
 
 private:
     void play();
-    void rateControl();
-    static const int MaxFrameQueueSize = 20;
-    static const int MinFrameQueueSize = 5;
     QMediaPlayer mediaPlayer;
     QVideoSink mediaPlayerSink;
-    QQueue<QVideoFrame> bufferedFrames;
+    QMutex mutex;
+    RateControl rateControl;
+    Interval lastRequestedGlobalTime;
 };

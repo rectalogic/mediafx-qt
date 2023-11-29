@@ -24,6 +24,7 @@
 #include <QUrl>
 #include <QVideoFrameFormat>
 #include <string.h>
+struct Interval;
 
 void ImageClip::loadMedia(const QUrl& url)
 {
@@ -47,9 +48,8 @@ void ImageClip::loadMedia(const QUrl& url)
     videoFrame.unmap();
 }
 
-bool ImageClip::prepareNextVideoFrame()
+bool ImageClip::prepareNextVideoFrame(const Interval& globalTime)
 {
-    // XXX timestamp frame based on nextClipTime() ? (in microseconds, not milliseconds)
     setCurrentVideoFrame(videoFrame);
     return true;
 }

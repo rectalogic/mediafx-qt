@@ -32,11 +32,11 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
     - name: Install mediaFX
-      run: DOCKER_OPTS="-e MEDIAFX_TEST=1" builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
+      run: sudo rm -rf build/linux && DOCKER_OPTS="-e MEDIAFX_TEST=1" builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
     - name: Install mediaFX vulkan
-      run: DOCKER_OPTS="-e MEDIAFX_TEST=1" TARGET=mediafx-vulkan builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
+      run: sudo rm -rf build/linux && DOCKER_OPTS="-e MEDIAFX_TEST=1" TARGET=mediafx-vulkan builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
     - name: iwyu
-      run: builders/linux/docker-run.sh /mediafx/builders/linux/iwyu.sh
+      run: sudo rm -rf build/linux && builders/linux/docker-run.sh /mediafx/builders/linux/iwyu.sh
 
   macos:
     runs-on: macos-13

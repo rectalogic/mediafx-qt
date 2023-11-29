@@ -23,12 +23,14 @@
 #include <QUrl>
 #include <QtQmlIntegration>
 #include <QtTypes>
+#include <chrono>
+using namespace std::chrono;
 
 class Clip : public QObject, public QQmlParserStatus {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
-    // Times are qint64 milliseconds, but stored internally as microseconds to match QVideoFrame times
+    // Times are qint64 milliseconds (ms), but stored internally as microseconds (us) to match QVideoFrame times
     Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
     Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged FINAL)
@@ -52,11 +54,11 @@ public:
     QUrl source() const { return m_source; };
     void setSource(const QUrl&);
 
-    qint64 clipStart() const { return m_clipStart / 1000; };
-    void setClipStart(qint64 millis);
+    qint64 clipStart() const { return duration_cast<milliseconds>(m_clipStart).count(); };
+    void setClipStart(qint64 ms);
 
-    qint64 clipEnd() const { return m_clipEnd / 1000; };
-    void setClipEnd(qint64 millis);
+    qint64 clipEnd() const { return duration_cast<milliseconds>(m_clipEnd).count(); };
+    void setClipEnd(qint64 ms);
 
     void setActive(bool active);
     bool isActive() const { return m_active; };
@@ -67,11 +69,11 @@ public:
     void componentComplete() override;
 
 protected:
-    qint64 clipStartMicros() const { return m_clipStart; };
-    void setClipStartMicros(qint64 micros);
+    microseconds clipStart_us() const { return m_clipStart; };
+    void setClipStart_us(microseconds us);
 
-    qint64 clipEndMicros() const { return m_clipEnd; };
-    void setClipEndMicros(qint64 micros);
+    microseconds clipEnd_us() const { return m_clipEnd; };
+    void setClipEnd_us(microseconds us);
 
     Interval clipSegment() const { return Interval(m_clipStart, m_clipEnd); };
 
@@ -95,8 +97,8 @@ private:
     bool m_active = false;
     bool m_stopped = false;
     QUrl m_source;
-    qint64 m_clipStart;
-    qint64 m_clipEnd;
+    microseconds m_clipStart;
+    microseconds m_clipEnd;
     Interval m_currentGlobalTime;
     Interval m_nextClipTime;
 };

@@ -25,6 +25,7 @@ qt_add_library(mediafx STATIC
     visual_clip.cpp
     video_clip.cpp
     image_clip.cpp
+    rate_control.cpp
 )
 target_include_directories(mediafx PUBLIC ./)
 
