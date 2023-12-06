@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QMediaPlayer>
 #include <QMessageLogContext>
+#include <QMetaObject>
 #include <QMutexLocker>
 #include <QUrl>
 #include <QVideoSink>
@@ -68,6 +69,7 @@ void VideoClip::onVideoFrameChanged(const QVideoFrame& frame)
     }
     if (microseconds(frame.startTime()) >= frameTimeStart) {
         rateControl.enqueue(frame);
+        QMetaObject::invokeMethod(this, &VideoClip::onRateControl, Qt::QueuedConnection);
     }
 }
 

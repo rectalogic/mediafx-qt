@@ -18,7 +18,6 @@
 #pragma once
 
 #include <QElapsedTimer>
-#include <QObject>
 #include <QQueue>
 #include <QVideoFrame>
 #include <QtTypes>
@@ -26,12 +25,10 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-class RateControl : public QObject {
-    Q_OBJECT
+class RateControl {
 public:
-    explicit RateControl(const microseconds& targetFrameDuration, QObject* parent = nullptr)
-        : QObject(parent)
-        , targetFrameDuration(targetFrameDuration) {};
+    explicit RateControl(const microseconds& targetFrameDuration)
+        : targetFrameDuration(targetFrameDuration) {};
 
     void enqueue(const QVideoFrame& videoFrame);
     QVideoFrame dequeue() { return bufferedFrames.dequeue(); };

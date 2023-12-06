@@ -27,7 +27,7 @@ RUN apt-get -y update \
     libglx-mesa0 libglvnd-dev libxkbcommon-dev libxkbcommon-x11-0 libpulse-dev libxcb1 libx11-xcb1 libxcb-glx0 libxcb-cursor0 \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     python3 python3-pip \
-    curl xz-utils xvfb pkg-config \
+    curl xz-utils xvfb pkg-config ffmpeg \
     fontconfig fonts-liberation
 
 ARG QT_VER=6.6.0

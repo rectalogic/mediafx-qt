@@ -43,9 +43,9 @@ void RateControl::onVideoFrameRequired()
 void RateControl::enqueue(const QVideoFrame& videoFrame)
 {
     if (videoFrame.startTime() != -1 && videoFrame.endTime() != -1) {
-        microseconds sourceFrameDuration(videoFrame.endTime() - videoFrame.startTime());
-        rateScalar = targetFrameDuration / duration<double, microseconds::period>(sourceFrameDuration);
-        sourceFrameDuration = sourceFrameDuration;
+        microseconds frameDuration(videoFrame.endTime() - videoFrame.startTime());
+        rateScalar = targetFrameDuration / duration<double, microseconds::period>(frameDuration);
+        sourceFrameDuration = frameDuration;
     }
     bufferedFrames.enqueue(videoFrame);
 }

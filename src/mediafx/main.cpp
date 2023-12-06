@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         command = parser.value(qSL("command"));
         if (command == "ffplay") {
             // XXX need to handle audio eventually
-            command = qSL("ffplay -autoexit -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
+            command = qSL("ffplay -autoexit -infbuf -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
         } else if (command == "ffmpeg") {
             if (!parser.isSet(qSL("output"))) {
                 parser.showHelp(1);
