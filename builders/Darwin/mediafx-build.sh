@@ -28,5 +28,5 @@ PATH=$INSTALL_ROOT/bin:$PATH
 cd "$MEDIAFX_BUILD"
 (cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE --install-prefix "$INSTALL_ROOT" "$MEDIAFX_ROOT" && cmake --build . && cmake --install .) || exit 1
 if [[ -v MEDIAFX_TEST ]]; then
-    make test CTEST_OUTPUT_ON_FAILURE=1 ARGS="${MEDIAFX_TEST}"|| exit 1
+    make test CTEST_OUTPUT_ON_FAILURE=1 ARGS="${MEDIAFX_TEST}" || exit 1
 fi

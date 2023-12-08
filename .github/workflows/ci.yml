@@ -47,6 +47,8 @@ jobs:
     env:
       XCODE_VER: "15.0"
     steps:
+    - name: Upgrade bash
+      run: brew install bash
     - name: Checkout
       uses: actions/checkout@v4
       with:
