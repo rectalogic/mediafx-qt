@@ -14,4 +14,4 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-ffmpeg -loglevel error -i ${1:?video file required} -f hash -hash md5 -
+ffmpeg -loglevel error -i ${1:?video file required} -c copy -f hash -hash md5 -

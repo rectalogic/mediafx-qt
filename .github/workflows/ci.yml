@@ -11,12 +11,14 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Setup buildx
       uses: docker/setup-buildx-action@v3
     - name: Build mediafx image
       uses: docker/build-push-action@v5
       with:
-        context: builders/linux
+        context: builders/Linux
         tags: mediafx
         load: true
         target: mediafx
@@ -25,18 +27,20 @@ jobs:
     - name: Build mediafx-vulkan image
       uses: docker/build-push-action@v5
       with:
-        context: builders/linux
+        context: builders/Linux
         tags: mediafx-vulkan
         load: true
         target: mediafx-vulkan  
         cache-from: type=gha
         cache-to: type=gha,mode=max
     - name: Install mediaFX
-      run: sudo rm -rf build/linux && DOCKER_OPTS="-e MEDIAFX_TEST=1" builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
+      run: sudo rm -rf build/Linux && DOCKER_OPTS="-e MEDIAFX_TEST=" builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: Install mediaFX vulkan
-      run: sudo rm -rf build/linux && DOCKER_OPTS="-e MEDIAFX_TEST=1" TARGET=mediafx-vulkan builders/linux/docker-run.sh /mediafx/builders/linux/mediafx-build.sh
+      run: sudo rm -rf build/Linux && DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=mediafx-vulkan builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: iwyu
-      run: sudo rm -rf build/linux && builders/linux/docker-run.sh /mediafx/builders/linux/iwyu.sh
+      run: sudo rm -rf build/Linux && builders/Linux/docker-run.sh /mediafx/builders/Linux/iwyu.sh
+    - name: qmlformat/lint
+      run: builders/Linux/docker-run.sh bash -c "cd /mediafx && qmlformat $(git ls-files '**/*.qml') && qmllint --qmltypes build/Linux/src/mediafx/qmldir $(git ls-files '**/*.qml')"
 
   macos:
     runs-on: macos-13
@@ -45,6 +49,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Xcode
       run: |
         sudo xcode-select -s "/Applications/Xcode_${XCODE_VER}.app"
@@ -52,18 +58,18 @@ jobs:
       uses: actions/cache/restore@v3
       id: restore-cache
       with:
-        path: build/macos/installed
+        path: build/Darwin/installed
         key: ${{ runner.os }}-${{ hashFiles('builders/macos/versions') }}-${{ env.XCODE_VER }}
     - name: Build installation
       if: steps.restore-cache.outputs.cache-hit != 'true'
       run: |
-        builders/macos/install-qt6.sh
+        builders/Darwin/install-qt6.sh
     - name: Save cached installation
       uses: actions/cache/save@v3
       if: steps.restore-cache.outputs.cache-hit != 'true'
       with:
-        path: build/macos/installed
+        path: build/Darwin/installed
         key: ${{ steps.restore-cache.outputs.cache-primary-key }}
     - name: Install mediaFX
       run: |
-        MEDIAFX_TEST=1 builders/macos/mediafx-build.sh
+        MEDIAFX_TEST="-LE GPU" builders/Darwin/mediafx-build.sh

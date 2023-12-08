@@ -42,10 +42,10 @@ RUN ldconfig
 
 COPY entrypoint.sh /entrypoint.sh
 
-RUN useradd -ms /bin/bash -d /mediafx/build/linux -g root -G sudo mediafx
+RUN useradd -ms /bin/bash -d /mediafx/build/Linux -g root -G sudo mediafx
 RUN echo "mediafx ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/mediafx && chmod 0440 /etc/sudoers.d/mediafx
 VOLUME /mediafx
-WORKDIR /mediafx/build/linux
+WORKDIR /mediafx/build/Linux
 
 ENTRYPOINT ["/usr/bin/xvfb-run", "--error-file", "/dev/stderr", "/entrypoint.sh"]
 

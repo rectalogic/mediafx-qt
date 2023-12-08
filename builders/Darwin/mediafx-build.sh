@@ -14,12 +14,19 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-set -e
+BUILD_TYPE=${BUILD_TYPE:-Release}
+CURRENT=$(dirname "${BASH_SOURCE[0]}")
+source "$CURRENT/versions"
 
-sudo mkdir -p /mediafx/build/linux && sudo chown mediafx /mediafx/build/ /mediafx/build/linux
-cd /mediafx/build/linux
-if [ ! -f "qt${QT_VER}.imp" ]; then
-    curl -O https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_13/mapgen/iwyu-mapgen-qt.py
-    python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/gcc_64/include > qt${QT_VER}.imp
+MEDIAFX_ROOT="$(cd "$(dirname "${CURRENT}")/../"; pwd)"
+
+MEDIAFX_BUILD="${BUILD_ROOT}/build/mediafx/${BUILD_TYPE}"
+mkdir -p "$MEDIAFX_BUILD"
+
+PATH=$INSTALL_ROOT/bin:$PATH
+
+cd "$MEDIAFX_BUILD"
+(cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE --install-prefix "$INSTALL_ROOT" "$MEDIAFX_ROOT" && cmake --build . && cmake --install .) || exit 1
+if [[ -v MEDIAFX_TEST ]]; then
+    make test CTEST_OUTPUT_ON_FAILURE=1 ARGS="${MEDIAFX_TEST}"|| exit 1
 fi
-CC="clang-13" CXX="clang++-13" cmake -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE="/usr/bin/iwyu;-Xiwyu;--mapping_file=/mediafx/build/linux/qt${QT_VER}.imp;-Xiwyu;--cxx17ns;-Xiwyu;--no_comments" --install-prefix /usr/local/Qt/${QT_VER}/gcc_64 ../.. && exec cmake --build . --parallel 4

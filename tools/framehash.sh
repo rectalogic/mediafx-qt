@@ -14,4 +14,4 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-ffmpeg -loglevel error -i ${1:?specify input video} -f framehash -hash md5 -fflags bitexact -
+ffmpeg -loglevel error -i ${1:?specify input video} -c copy -f framehash -hash md5 -fflags bitexact -
