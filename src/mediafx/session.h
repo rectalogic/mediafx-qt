@@ -24,6 +24,7 @@
 #include <QObject>
 #include <QQuickView>
 #include <chrono>
+#include <memory>
 class AnimationDriver;
 class Encoder;
 class MediaFX;
@@ -36,6 +37,8 @@ class Session : public QObject {
 
 public:
     Session(Encoder* encoder, QObject* parent = nullptr);
+    ~Session();
+
     bool initialize(const QUrl& url);
 
     microseconds frameDuration() const noexcept { return m_frameDuration; };
@@ -56,8 +59,8 @@ private:
     Encoder* encoder;
     microseconds m_frameDuration;
     Interval frameTime;
-    RenderControl renderControl;
-    QQuickView quickView;
-    MediaFX* mediaFX;
     AnimationDriver* animationDriver;
+    RenderControl* renderControl;
+    std::unique_ptr<QQuickView> quickView;
+    MediaFX* mediaFX;
 };

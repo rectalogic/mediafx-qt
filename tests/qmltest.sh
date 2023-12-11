@@ -37,6 +37,7 @@ done
 
 FFMPEG='ffmpeg -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD} -f nut -vcodec ffv1 -flags bitexact -g 1 -level 3 -pix_fmt rgb32 -framerate ${MEDIAFX_FRAMERATE} -fflags bitexact -y ${MEDIAFX_OUTPUT}'
 
+echo Testing ${QML}
 "${MEDIAFX}" --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "${FFMPEG}" "${QML}" || exit 1
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 

@@ -44,30 +44,36 @@ Session::Session(Encoder* encoder, QObject* parent)
     , encoder(encoder)
     , m_frameDuration(encoder->frameRate().toFrameDuration())
     , frameTime(microseconds::zero(), m_frameDuration)
-    , quickView(QUrl(), &renderControl)
     , animationDriver(new AnimationDriver(m_frameDuration, this))
 {
     connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
     animationDriver->install();
+    renderControl = new RenderControl(this);
+    quickView.reset(new QQuickView(QUrl(), renderControl));
 
     mediaFX = new MediaFX(this, this);
     MediaFXForeign::s_singletonInstance = mediaFX;
 
-    quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView.resize(encoder->frameSize().toSize());
-    connect(&quickView, &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
-    connect(quickView.engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
+    quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
+    quickView->resize(encoder->frameSize().toSize());
+    connect(quickView.get(), &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
+    connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
+}
+
+Session::~Session()
+{
+    animationDriver->uninstall();
 }
 
 bool Session::initialize(const QUrl& url)
 {
-    if (!renderControl.install(quickView)) {
+    if (!renderControl->install(quickView.get())) {
         qCritical() << "Failed to install QQuickRenderControl";
         return false;
     }
-    quickView.setSource(url);
-    if (quickView.status() == QQuickView::Error)
+    quickView->setSource(url);
+    if (quickView->status() == QQuickView::Error)
         return false;
     else
         return true;
@@ -115,7 +121,7 @@ int write(int fd, qsizetype size, const char* data)
 void Session::render()
 {
     if (mediaFX->renderVideoFrame(frameTime)) {
-        auto frameData = renderControl.renderVideoFrame();
+        auto frameData = renderControl->renderVideoFrame();
 
         if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
             return;

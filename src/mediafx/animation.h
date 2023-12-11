@@ -25,7 +25,7 @@ class AnimationDriver : public QAnimationDriver {
 public:
     AnimationDriver(const microseconds& frameDuration, QObject* parent = nullptr)
         : QAnimationDriver(parent)
-        , m_frameDuration(frameDuration)
+        , m_frameDuration(duration_cast<milliseconds>(frameDuration))
     {
     }
 
@@ -41,6 +41,6 @@ public:
     }
 
 private:
-    microseconds m_frameDuration;
-    microseconds m_elapsed = microseconds::zero();
+    milliseconds m_frameDuration;
+    milliseconds m_elapsed = milliseconds::zero();
 };

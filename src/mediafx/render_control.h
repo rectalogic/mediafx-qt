@@ -35,7 +35,9 @@ class QQuickWindow;
 class RenderControl : public QQuickRenderControl {
     Q_OBJECT
 public:
-    bool install(QQuickWindow& window);
+    RenderControl(QObject* parent = nullptr)
+        : QQuickRenderControl(parent) {};
+    bool install(QQuickWindow* window);
     QByteArray renderVideoFrame();
 
 private:

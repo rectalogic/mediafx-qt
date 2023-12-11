@@ -18,13 +18,13 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-qt_add_executable(interval tst_interval.cpp)
-add_test(NAME interval COMMAND interval)
-target_link_libraries(interval PRIVATE mediafx Qt::Test)
+qt_add_executable(tst_interval tst_interval.cpp)
+add_test(NAME tst_interval COMMAND tst_interval)
+target_link_libraries(tst_interval PRIVATE mediafx Qt::Test)
 
-qt_add_executable(encoder tst_encoder.cpp)
-add_test(NAME encoder COMMAND encoder)
-target_link_libraries(encoder PRIVATE mediafx Qt::Test)
+qt_add_executable(tst_encoder tst_encoder.cpp)
+add_test(NAME tst_encoder COMMAND tst_encoder)
+target_link_libraries(tst_encoder PRIVATE mediafx Qt::Test)
 
 macro(add_qml_test NAME OUTPUTSPEC QMLFILE OUTPUTFILE)
     set(ASSETSPECS ${ARGN})
@@ -38,8 +38,10 @@ macro(add_qml_test NAME OUTPUTSPEC QMLFILE OUTPUTFILE)
     )
 endmacro()
 
-add_qml_test(qml_video_clipstart 15:320x180 video-clipstart.qml video-clipstart.nut nut:red:320x180:15:8)
-add_qml_test(qml_multisink 30:640x360 multisink.qml multisink.nut nut:red:640x360:30:4 png:red:160x120)
+add_qml_test(tst_qml_static 15:320x180 static.qml static.nut)
+add_qml_test(tst_qml_animated 15:320x180 animated.qml animated.nut)
+add_qml_test(tst_qml_video_clipstart 15:320x180 video-clipstart.qml video-clipstart.nut nut:red:320x180:15:8)
+add_qml_test(tst_qml_multisink 30:640x360 multisink.qml multisink.nut nut:red:640x360:30:4 png:red:160x120)
 
 # Label tests that require a GPU
-set_tests_properties(qml_video_clipstart qml_multisink PROPERTIES LABELS GPU)
+set_tests_properties(tst_qml_static tst_qml_animated tst_qml_video_clipstart tst_qml_multisink PROPERTIES LABELS GPU)

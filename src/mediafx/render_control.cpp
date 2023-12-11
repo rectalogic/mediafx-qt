@@ -27,13 +27,13 @@
 #include <QQuickGraphicsConfiguration>
 #endif
 
-bool RenderControl::install(QQuickWindow& window)
+bool RenderControl::install(QQuickWindow* window)
 {
     if (!initialize()) {
         qCritical() << "Failed to initialize render control";
         return false;
     }
-    QSize size = window.size();
+    QSize size = window->size();
 
     QRhi* rhi = this->rhi();
     if (!rhi) {
@@ -42,13 +42,13 @@ bool RenderControl::install(QQuickWindow& window)
     }
 
 #ifdef MEDIAFX_ENABLE_VULKAN
-    if (window.rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
+    if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
         vulkanInstance.setExtensions(QQuickGraphicsConfiguration::preferredInstanceExtensions());
         if (!vulkanInstance.create()) {
             qCritical() << "Failed to initialize Vulkan";
             return false;
         }
-        window.setVulkanInstance(&vulkanInstance);
+        window->setVulkanInstance(&vulkanInstance);
     }
 #endif
 
@@ -82,7 +82,7 @@ bool RenderControl::install(QQuickWindow& window)
         renderTarget.setMirrorVertically(true);
 
     // redirect Qt Quick rendering into our texture
-    window.setRenderTarget(renderTarget);
+    window->setRenderTarget(renderTarget);
 
     return true;
 }
