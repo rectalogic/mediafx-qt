@@ -41,6 +41,12 @@ jobs:
       run: sudo rm -rf build/Linux && builders/Linux/docker-run.sh /mediafx/builders/Linux/iwyu.sh
     - name: qmlformat/lint
       run: builders/Linux/docker-run.sh bash -c "cd /mediafx && qmlformat $(git ls-files '**/*.qml') && qmllint --qmltypes build/Linux/src/mediafx/qmldir $(git ls-files '**/*.qml')"
+    - name: Upload Failed Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: failed-output-linux
+        path: build/Linux/output
 
   macos:
     runs-on: macos-13
@@ -75,3 +81,9 @@ jobs:
     - name: Install mediaFX
       run: |
         MEDIAFX_TEST="-LE GPU" builders/Darwin/mediafx-build.sh
+    - name: Upload Failed Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: failed-output-darwin
+        path: build/Darwin/output
