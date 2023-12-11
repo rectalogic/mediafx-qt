@@ -8,6 +8,9 @@ jobs:
 
   linux:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -15,6 +18,12 @@ jobs:
         submodules: true
     - name: Setup buildx
       uses: docker/setup-buildx-action@v3
+    - name: Log into registry ghcr.io
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build mediafx image
       uses: docker/build-push-action@v5
       with:
@@ -22,8 +31,8 @@ jobs:
         tags: mediafx
         load: true
         target: mediafx
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+        cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
     - name: Build mediafx-vulkan image
       uses: docker/build-push-action@v5
       with:
@@ -31,8 +40,8 @@ jobs:
         tags: mediafx-vulkan
         load: true
         target: mediafx-vulkan  
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+        cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
     - name: Install mediaFX
       run: sudo rm -rf build/Linux && DOCKER_OPTS="-e MEDIAFX_TEST=" builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: Install mediaFX vulkan
@@ -67,7 +76,7 @@ jobs:
       id: restore-cache
       with:
         path: build/Darwin/installed
-        key: ${{ runner.os }}-${{ hashFiles('builders/macos/versions') }}-${{ env.XCODE_VER }}
+        key: ${{ runner.os }}-${{ hashFiles('builders/versions') }}-${{ env.XCODE_VER }}
     - name: Build installation
       if: steps.restore-cache.outputs.cache-hit != 'true'
       run: |

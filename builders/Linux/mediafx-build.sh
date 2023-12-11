@@ -14,8 +14,13 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../../build/Linux" || exit 1
+CURRENT=$(dirname "${BASH_SOURCE[0]}")
+source "$CURRENT/../versions"
+cd "${BUILD_ROOT:?}/Linux" || exit 1
 (cmake --install-prefix /usr/local/Qt/${QT_VER:?}/gcc_64 ../.. && cmake --build . && sudo cmake --install .) || exit 1
 if [[ -v MEDIAFX_TEST ]]; then
+    export GALLIUM_DRIVER=softpipe
+    export LIBGL_ALWAYS_SOFTWARE=1
+    export DRI_NO_MSAA=1
     make test CTEST_OUTPUT_ON_FAILURE=1 ARGS="${MEDIAFX_TEST}" || exit 1
 fi

@@ -30,7 +30,7 @@ RUN apt-get -y update \
     curl xz-utils xvfb pkg-config ffmpeg \
     fontconfig fonts-liberation
 
-ARG QT_VER=6.6.0
+ARG QT_VER
 
 RUN pip3 install aqtinstall \
     && python3 -m aqt install-qt linux desktop ${QT_VER} -m qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives icu qtbase qtdeclarative qtmultimedia qtquick3d qtshadertools qtquicktimeline qttools --outputdir /usr/local/Qt
@@ -47,7 +47,7 @@ RUN echo "mediafx ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/mediafx && chmod 044
 VOLUME /mediafx
 WORKDIR /mediafx/build/Linux
 
-ENTRYPOINT ["/usr/bin/xvfb-run", "--error-file", "/dev/stderr", "/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/xvfb-run", "--server-args", "-screen 0 640x480x24", "--error-file", "/dev/stderr", "/entrypoint.sh"]
 
 
 FROM base as mediafx

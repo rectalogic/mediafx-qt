@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-ROOT=$(dirname "${BASH_SOURCE[0]}")
+CURRENT=$(dirname "${BASH_SOURCE[0]}")
+source "$CURRENT/../versions"
 TARGET=${TARGET:-mediafx}
-docker buildx build --target $TARGET --platform linux/amd64 --memory-swap -1 --load --tag $TARGET "$ROOT"
+docker buildx build --build-arg QT_VER=${QT_VER:?} --target $TARGET --platform linux/amd64 --memory-swap -1 --load --tag $TARGET "$CURRENT"
