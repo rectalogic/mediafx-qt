@@ -19,7 +19,7 @@ set -u
 CURRENT=$(dirname "${BASH_SOURCE[0]}")
 source "$CURRENT/../versions"
 (
-    mkdir -p "$BUILD_ROOT"/Darwin && cd "$BUILD_ROOT"/Darwin
+    mkdir -p "${BUILD_ROOT:?}" && cd "$BUILD_ROOT"
     python3 -m venv --clear "build/qtvenv" || exit 1
     "build/qtvenv/bin/pip" install --upgrade --upgrade-strategy eager aqtinstall || exit 1
     "build/qtvenv/bin/python" -m aqt install-qt mac desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtquickeffectmaker -O "$BUILD_ROOT/installed" || exit 1

@@ -16,12 +16,12 @@
 
 CURRENT=$(dirname "${BASH_SOURCE[0]}")
 source "$CURRENT/../versions"
-INSTALL_ROOT="${BUILD_ROOT:?}/Darwin/installed/${QT_VER:?}/macos"
+INSTALL_ROOT="${BUILD_ROOT:?}/installed/${QT_VER:?}/macos"
 BUILD_TYPE=${BUILD_TYPE:-Release}
 
 MEDIAFX_ROOT="$(cd "$(dirname "${CURRENT}")/../"; pwd)"
 
-MEDIAFX_BUILD="${BUILD_ROOT}/Darwin/build/mediafx/${BUILD_TYPE}"
+MEDIAFX_BUILD="${BUILD_ROOT}/build/mediafx/${BUILD_TYPE}"
 mkdir -p "$MEDIAFX_BUILD"
 
 PATH=${INSTALL_ROOT:?}/bin:$PATH

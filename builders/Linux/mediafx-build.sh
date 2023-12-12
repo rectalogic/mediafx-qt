@@ -16,7 +16,7 @@
 
 CURRENT=$(dirname "${BASH_SOURCE[0]}")
 source "$CURRENT/../versions"
-cd "${BUILD_ROOT:?}/Linux" || exit 1
+cd "${BUILD_ROOT:?}" || exit 1
 (cmake --install-prefix /usr/local/Qt/${QT_VER:?}/gcc_64 ../.. && cmake --build . && sudo cmake --install .) || exit 1
 if [[ -v MEDIAFX_TEST ]]; then
     export GALLIUM_DRIVER=softpipe

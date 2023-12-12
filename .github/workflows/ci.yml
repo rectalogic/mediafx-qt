@@ -24,6 +24,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Source versions
+      run: |
+        source builders/versions
+        echo "QT_VER=${QT_VER}" >> $GITHUB_ENV
     - name: Build mediafx image
       uses: docker/build-push-action@v5
       with:
@@ -31,6 +35,7 @@ jobs:
         tags: mediafx
         load: true
         target: mediafx
+        build-args: QT_VER=${{ env.QT_VER }}
         cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
         cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
     - name: Build mediafx-vulkan image
@@ -39,7 +44,8 @@ jobs:
         context: builders/Linux
         tags: mediafx-vulkan
         load: true
-        target: mediafx-vulkan  
+        target: mediafx-vulkan
+        build-args: QT_VER=${{ env.QT_VER }}
         cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
         cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
     - name: Install mediaFX
