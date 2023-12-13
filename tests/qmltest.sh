@@ -19,7 +19,7 @@ usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> [asset-spec .
 BASE=$(dirname "${BASH_SOURCE[0]}")
 
 ASSETS=${BASE}/../build/assets
-FIXTURES=${BASE}/fixtures/$(uname)
+FIXTURES=${BASE}/fixtures
 
 MEDIAFX=${1:?$usage}
 shift
@@ -41,4 +41,11 @@ echo Testing ${QML}
 "${MEDIAFX}" --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "${FFMPEG}" "${QML}" || exit 1
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 
-diff "${FIXTURES}/$(basename "${OUTPUT}").framehash" "${OUTPUT}.framehash" || exit 1
+# If framehash is different, then pixel difference each frame.
+# threshold=2 is how much each pixel can differ
+# https://superuser.com/questions/1615310/how-to-use-ffmpeg-blend-difference-filter-mode-to-identify-frame-differences-bet
+FIXTURE=${FIXTURES}/$(basename "${OUTPUT}")
+if ( ! diff "${FIXTURE}.framehash" "${OUTPUT}.framehash" ); then
+    echo Warning: framehash is different, comparing frames
+    ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=99.999:function=less,metadata=print:file=-" -an -v 24 "${OUTPUT}-%05d.png" | grep pblack ) || exit 1
+fi

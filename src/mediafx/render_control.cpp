@@ -22,10 +22,8 @@
 #include <QQuickRenderTarget>
 #include <QQuickWindow>
 #include <QSize>
+#include <QtCore>
 #include <rhi/qrhi.h>
-#ifdef MEDIAFX_ENABLE_VULKAN
-#include <QQuickGraphicsConfiguration>
-#endif
 
 bool RenderControl::install(QQuickWindow* window)
 {
@@ -40,17 +38,6 @@ bool RenderControl::install(QQuickWindow* window)
         qCritical() << "No Rhi on QQuickRenderControl";
         return false;
     }
-
-#ifdef MEDIAFX_ENABLE_VULKAN
-    if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
-        vulkanInstance.setExtensions(QQuickGraphicsConfiguration::preferredInstanceExtensions());
-        if (!vulkanInstance.create()) {
-            qCritical() << "Failed to initialize Vulkan";
-            return false;
-        }
-        window->setVulkanInstance(&vulkanInstance);
-    }
-#endif
 
     texture.reset(rhi->newTexture(QRhiTexture::RGBA8, size, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
     if (!texture->create()) {

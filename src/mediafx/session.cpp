@@ -19,6 +19,7 @@
 #include "animation.h"
 #include "encoder.h"
 #include "mediafx.h"
+#include "render_control.h"
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QDebug>
@@ -35,6 +36,9 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef MEDIAFX_ENABLE_VULKAN
+#include <QQuickGraphicsConfiguration>
+#endif
 using namespace std::chrono;
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
@@ -45,12 +49,20 @@ Session::Session(Encoder* encoder, QObject* parent)
     , m_frameDuration(encoder->frameRate().toFrameDuration())
     , frameTime(microseconds::zero(), m_frameDuration)
     , animationDriver(new AnimationDriver(m_frameDuration, this))
+    , renderControl(nullptr)
+    , quickView(nullptr)
 {
     connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
     animationDriver->install();
-    renderControl = new RenderControl(this);
-    quickView.reset(new QQuickView(QUrl(), renderControl));
+    renderControl.reset(new RenderControl());
+    quickView.reset(new QQuickView(QUrl(), renderControl.get()));
+#ifdef MEDIAFX_ENABLE_VULKAN
+    if (quickView->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
+        vulkanInstance.setExtensions(QQuickGraphicsConfiguration::preferredInstanceExtensions());
+        vulkanInstance.create();
+    }
+#endif
 
     mediaFX = new MediaFX(this, this);
     MediaFXForeign::s_singletonInstance = mediaFX;
@@ -68,6 +80,15 @@ Session::~Session()
 
 bool Session::initialize(const QUrl& url)
 {
+#ifdef MEDIAFX_ENABLE_VULKAN
+    if (quickView->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
+        if (!vulkanInstance.isValid()) {
+            qCritical() << "Invalid Vulkan instance";
+            return false;
+        }
+        quickView->setVulkanInstance(&vulkanInstance);
+    }
+#endif
     if (!renderControl->install(quickView.get())) {
         qCritical() << "Failed to install QQuickRenderControl";
         return false;

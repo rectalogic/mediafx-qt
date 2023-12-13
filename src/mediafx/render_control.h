@@ -20,17 +20,9 @@
 #include <QByteArray>
 #include <QObject>
 #include <QQuickRenderControl>
-#include <QtCore>
 #include <memory>
-#include <qtgui-config.h>
 #include <rhi/qrhi.h>
 class QQuickWindow;
-#if (QT_CONFIG(vulkan) && __has_include(<vulkan/vulkan.h>))
-#define MEDIAFX_ENABLE_VULKAN
-#endif
-#ifdef MEDIAFX_ENABLE_VULKAN
-#include <QVulkanInstance>
-#endif
 
 class RenderControl : public QQuickRenderControl {
     Q_OBJECT
@@ -45,7 +37,4 @@ private:
     std::unique_ptr<QRhiRenderBuffer> stencilBuffer;
     std::unique_ptr<QRhiTextureRenderTarget> textureRenderTarget;
     std::unique_ptr<QRhiRenderPassDescriptor> renderPassDescriptor;
-#ifdef MEDIAFX_ENABLE_VULKAN
-    QVulkanInstance vulkanInstance;
-#endif
 };

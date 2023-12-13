@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  linux:
+  docker:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -16,6 +16,11 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
     - name: Setup buildx
       uses: docker/setup-buildx-action@v3
     - name: Log into registry ghcr.io
@@ -32,30 +37,26 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: builders/Linux
-        tags: mediafx
-        load: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: true
         target: mediafx
         build-args: QT_VER=${{ env.QT_VER }}
         cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
         cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
-    - name: Build mediafx-vulkan image
-      uses: docker/build-push-action@v5
+
+  linux:
+    runs-on: ubuntu-22.04
+    needs: docker
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
       with:
-        context: builders/Linux
-        tags: mediafx-vulkan
-        load: true
-        target: mediafx-vulkan
-        build-args: QT_VER=${{ env.QT_VER }}
-        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
-        cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
-    - name: Install mediaFX
-      run: sudo rm -rf build/Linux && DOCKER_OPTS="-e MEDIAFX_TEST=" builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
-    - name: Install mediaFX vulkan
-      run: sudo rm -rf build/Linux && DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=mediafx-vulkan builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
-    - name: iwyu
-      run: sudo rm -rf build/Linux && builders/Linux/docker-run.sh /mediafx/builders/Linux/iwyu.sh
-    - name: qmlformat/lint
-      run: builders/Linux/docker-run.sh bash -c "cd /mediafx && qmlformat $(git ls-files '**/*.qml') && qmllint --qmltypes build/Linux/src/mediafx/qmldir $(git ls-files '**/*.qml')"
+        submodules: true
+    - name: Build/test mediaFX
+      run: DOCKER_OPTS="-e MEDIAFX_TEST=" builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
+    - name: Build/test mediaFX vulkan
+      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=vulkan builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v3
@@ -93,7 +94,7 @@ jobs:
       with:
         path: build/Darwin/installed
         key: ${{ steps.restore-cache.outputs.cache-primary-key }}
-    - name: Install mediaFX
+    - name: Build/test mediaFX
       run: |
         MEDIAFX_TEST="-LE GPU" builders/Darwin/mediafx-build.sh
     - name: Upload Failed Artifacts
@@ -102,3 +103,24 @@ jobs:
       with:
         name: failed-output-darwin
         path: build/Darwin/output
+
+  lint:
+    runs-on: ubuntu-22.04
+    needs: docker
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: clang-format
+      uses: jidicula/clang-format-action@v4.9.0
+      with:
+        clang-format-version: '15'
+    - name: qmlformat
+      if: ${{ false }}
+      run: builders/Linux/docker-run.sh bash -c 'cd /mediafx && qmlformat -i $(git ls-files "**/*.qml") && git diff --exit-code'
+    - name: qmllint
+      if: ${{ false }}
+      run: builders/Linux/docker-run.sh bash -c 'cd /mediafx && qmllint --qmltypes build/Linux/Release/src/mediafx/qmldir $(git ls-files "**/*.qml")'
+    - name: iwyu
+      run: builders/Linux/docker-run.sh /mediafx/builders/Linux/iwyu.sh

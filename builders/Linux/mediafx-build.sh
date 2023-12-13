@@ -16,8 +16,11 @@
 
 CURRENT=$(dirname "${BASH_SOURCE[0]}")
 source "$CURRENT/../versions"
-cd "${BUILD_ROOT:?}" || exit 1
-(cmake --install-prefix /usr/local/Qt/${QT_VER:?}/gcc_64 ../.. && cmake --build . && sudo cmake --install .) || exit 1
+BUILD_TYPE=${BUILD_TYPE:-Release}
+MEDIAFX_BUILD="${BUILD_ROOT:?}/${BUILD_TYPE}"
+mkdir -p "$MEDIAFX_BUILD"
+cd "$MEDIAFX_BUILD"
+(cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE --install-prefix /usr/local/Qt/${QT_VER:?}/gcc_64 ../../.. && cmake --build . && sudo cmake --install .) || exit 1
 if [[ -v MEDIAFX_TEST ]]; then
     export GALLIUM_DRIVER=softpipe
     export LIBGL_ALWAYS_SOFTWARE=1

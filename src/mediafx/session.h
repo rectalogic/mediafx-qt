@@ -18,18 +18,25 @@
 #pragma once
 
 #include "interval.h"
-#include "render_control.h"
 #include <QEvent>
 #include <QList>
 #include <QObject>
 #include <QQuickView>
+#include <QtCore>
 #include <chrono>
 #include <memory>
+#include <qtgui-config.h>
+#if (QT_CONFIG(vulkan) && __has_include(<vulkan/vulkan.h>))
+#define MEDIAFX_ENABLE_VULKAN
+#endif
+#ifdef MEDIAFX_ENABLE_VULKAN
+#include <QVulkanInstance>
+#endif
 class AnimationDriver;
 class Encoder;
 class MediaFX;
 class QQmlError;
-class QUrl;
+class RenderControl;
 using namespace std::chrono;
 
 class Session : public QObject {
@@ -60,7 +67,10 @@ private:
     microseconds m_frameDuration;
     Interval frameTime;
     AnimationDriver* animationDriver;
-    RenderControl* renderControl;
+#ifdef MEDIAFX_ENABLE_VULKAN
+    QVulkanInstance vulkanInstance;
+#endif
+    std::unique_ptr<RenderControl> renderControl;
     std::unique_ptr<QQuickView> quickView;
     MediaFX* mediaFX;
 };

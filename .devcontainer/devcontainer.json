@@ -1,9 +1,6 @@
 {
     "name": "mediaFX",
-    "build": {
-        "dockerfile": "../builders/linux/Dockerfile",
-        "target": "mediafx"
-    },
+    "image": "ghcr.io/rectalogic/mediafx:dev",
     "init": true,
     "customizations": {
         "vscode": {

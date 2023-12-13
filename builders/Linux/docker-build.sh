@@ -16,5 +16,4 @@
 
 CURRENT=$(dirname "${BASH_SOURCE[0]}")
 source "$CURRENT/../versions"
-TARGET=${TARGET:-mediafx}
-docker buildx build --build-arg QT_VER=${QT_VER:?} --target $TARGET --platform linux/amd64 --memory-swap -1 --load --tag $TARGET "$CURRENT"
+docker buildx build --build-arg QT_VER=${QT_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:$(git branch --show-current) "$CURRENT"
