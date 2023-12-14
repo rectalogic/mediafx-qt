@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-MOUNT="$(dirname $(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"))"
+MOUNT="$(dirname $(dirname "$(cd "${BASH_SOURCE%/*}"; pwd)"))"
 
 # opengl or vulkan
 TARGET=${TARGET:-opengl}
-docker run ${DOCKER_OPTS} -e QSG_RHI_BACKEND=${TARGET} --rm --init \
+docker run ${DOCKER_OPTS} -e QSG_RHI_BACKEND=${TARGET} --platform linux/amd64 --rm --init \
     --mount="type=bind,src=${MOUNT},dst=/mediafx,consistency=cached" ghcr.io/rectalogic/mediafx:$(git branch --show-current) "$@"

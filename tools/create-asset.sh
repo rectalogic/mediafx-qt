@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-BASE=$(dirname "${BASH_SOURCE[0]}")
+BASE=${BASH_SOURCE%/*}
 
 usage="$0 <outputdir> <png|nut>:[[color]:[WxH]:[framerate]:[duration]]"
 IFS=: read -r TYPE COLOR SIZE FRAMERATE DURATION <<< $2

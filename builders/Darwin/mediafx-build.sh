@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-CURRENT=$(dirname "${BASH_SOURCE[0]}")
+CURRENT=${BASH_SOURCE%/*}
 source "$CURRENT/../versions"
 INSTALL_ROOT="${BUILD_ROOT:?}/installed/${QT_VER:?}/macos"
 BUILD_TYPE=${BUILD_TYPE:-Release}

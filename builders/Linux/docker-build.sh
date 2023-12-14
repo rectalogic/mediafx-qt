@@ -14,6 +14,6 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-CURRENT=$(dirname "${BASH_SOURCE[0]}")
+CURRENT=${BASH_SOURCE%/*}
 source "$CURRENT/../versions"
 docker buildx build --build-arg QT_VER=${QT_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:$(git branch --show-current) "$CURRENT"

@@ -16,7 +16,7 @@
 
 set -u
 
-CURRENT=$(dirname "${BASH_SOURCE[0]}")
+CURRENT=${BASH_SOURCE%/*}
 source "$CURRENT/../versions"
 (
     mkdir -p "${BUILD_ROOT:?}" && cd "$BUILD_ROOT"

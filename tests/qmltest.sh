@@ -16,7 +16,7 @@
 
 usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> [asset-spec ...]"
 
-BASE=$(dirname "${BASH_SOURCE[0]}")
+BASE=${BASH_SOURCE%/*}
 
 ASSETS=${BASE}/../build/assets
 FIXTURES=${BASE}/fixtures
