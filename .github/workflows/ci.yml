@@ -54,7 +54,7 @@ jobs:
       with:
         submodules: true
     - name: Build/test mediaFX
-      run: DOCKER_OPTS="-e MEDIAFX_TEST=" builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
+      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=opengl builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: Build/test mediaFX vulkan
       run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=vulkan builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
     - name: Upload Failed Artifacts
