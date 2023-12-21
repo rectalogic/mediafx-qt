@@ -15,29 +15,32 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "audio_clip.h"
-class QUrl;
-struct Interval;
+#pragma once
 
-void AudioClip::onActiveChanged(bool active)
-{
-    Clip::onActiveChanged(active);
-    // XXX
-}
+#include "track.h"
+#include <QtTypes>
+class ErrorInfo;
+class Interval;
+class MediaClip;
+struct FFMS_AudioSource;
+struct FFMS_Index;
 
-void AudioClip::loadMedia(const QUrl&)
-{
-    // XXX
-}
+class AudioTrack : public Track {
+public:
+    AudioTrack(MediaClip* mediaClip)
+        : Track(mediaClip) {};
+    ~AudioTrack()
+    {
+        stop();
+    }
+    bool initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo) override;
+    qint64 duration() const override;
+    void stop() override;
+    void render(const Interval& frameTime) override;
 
-bool AudioClip::renderClip(const Interval& globalTime)
-{
-    // XXX
-    return true;
-}
+protected:
+    void updateActive();
 
-void AudioClip::stop()
-{
-    Clip::stop();
-    // XXX
-}
+private:
+    FFMS_AudioSource* m_audioSource = nullptr;
+};

@@ -15,58 +15,46 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "visual_clip.h"
+#include "video_sink.h"
+#include "media_clip.h"
+#include "video_track.h"
 #include <QList>
 #include <QMessageLogContext>
 #include <QMetaObject>
-#include <QVideoSink>
-struct Interval;
 
-void VisualClip::setVideoSinks(const QList<QVideoSink*>& videoSinks)
-{
-    if (m_videoSinks != videoSinks) {
-        m_videoSinks = videoSinks;
-        setActive(!videoSinks.isEmpty());
-    }
-}
-
-bool VisualClip::renderClip(const Interval& globalTime)
-{
-    if (!prepareNextVideoFrame(globalTime))
-        return false;
-    for (auto videoSink : videoSinks()) {
-        videoSink->setVideoFrame(m_currentVideoFrame);
-    }
-    return true;
-}
-
-VisualSinkAttached* VisualSink::qmlAttachedProperties(QObject* object)
+VideoSinkAttached* VideoSink::qmlAttachedProperties(QObject* object)
 {
     QVideoSink* videoSink = nullptr;
     auto* mo = object->metaObject();
     mo->invokeMethod(object, "videoSink", Q_RETURN_ARG(QVideoSink*, videoSink));
     if (videoSink)
-        return new VisualSinkAttached(videoSink, object);
+        return new VideoSinkAttached(videoSink, object);
     else {
-        qCritical("VisualSink must be attached to an object with a videoSink property");
+        qCritical("VideoSink must be attached to an object with a videoSink property");
         return nullptr;
     }
 }
 
-void VisualSinkAttached::setClip(VisualClip* clip)
+void VideoSinkAttached::setClip(MediaClip* clip)
 {
     if (clip != m_clip) {
         if (m_clip) {
-            auto sinks = m_clip->videoSinks();
-            if (sinks.removeOne(m_videoSink)) {
-                m_clip->setVideoSinks(sinks);
+            VideoTrack* videoTrack = m_clip->videoTrack();
+            if (videoTrack) {
+                auto sinks = videoTrack->videoSinks();
+                if (sinks.removeOne(m_videoSink)) {
+                    videoTrack->setVideoSinks(sinks);
+                }
             }
         }
         if (clip) {
-            auto sinks = clip->videoSinks();
-            if (!sinks.contains(m_videoSink)) {
-                sinks.append(m_videoSink);
-                clip->setVideoSinks(sinks);
+            VideoTrack* videoTrack = clip->videoTrack();
+            if (videoTrack) {
+                auto sinks = videoTrack->videoSinks();
+                if (!sinks.contains(m_videoSink)) {
+                    sinks.append(m_videoSink);
+                    videoTrack->setVideoSinks(sinks);
+                }
             }
         }
         emit clipChanged();

@@ -17,29 +17,32 @@
 
 #pragma once
 
-#include "visual_clip.h"
-#include <QObject>
-#include <QVideoFrame>
-#include <QtQmlIntegration>
-class QUrl;
-struct Interval;
+#include <QtTypes>
+struct FFMS_Index;
+class MediaClip;
+class Interval;
+class ErrorInfo;
 
-class ImageClip : public VisualClip {
-    Q_OBJECT
-    QML_ELEMENT
-
+class Track {
 public:
-    using VisualClip::VisualClip;
+    explicit Track(MediaClip* mediaClip)
+        : m_mediaClip(mediaClip)
+    {
+    }
+    virtual ~Track() { }
 
-    void componentComplete() override;
+    virtual bool initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo) = 0;
+    bool isActive() const { return m_active; };
+    virtual qint64 duration() const = 0;
+    virtual void render(const Interval& frameTime) = 0;
+    virtual void stop() = 0;
+
+    MediaClip* mediaClip() const { return m_mediaClip; };
 
 protected:
-    void loadMedia(const QUrl&) override;
-
-    bool prepareNextVideoFrame(const Interval& globalTime) override;
-
-    void stop() override;
+    void setActive(bool active);
 
 private:
-    QVideoFrame videoFrame;
+    bool m_active = false;
+    MediaClip* m_mediaClip;
 };

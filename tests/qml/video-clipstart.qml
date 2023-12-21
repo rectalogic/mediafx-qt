@@ -18,7 +18,7 @@ import QtMultimedia
 import mediafx
 
 Item {
-    VideoClip {
+    MediaClip {
         id: videoClip
 
         clipStart: 5000
@@ -29,7 +29,7 @@ Item {
         }
     }
     VideoOutput {
-        VisualSink.clip: videoClip
+        VideoSink.clip: videoClip
         anchors.fill: parent
     }
 }

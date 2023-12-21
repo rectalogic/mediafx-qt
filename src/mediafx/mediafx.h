@@ -23,9 +23,8 @@
 #include <QtAssert>
 #include <QtQml>
 #include <QtQmlIntegration>
-class Clip;
+class MediaClip;
 class Session;
-struct Interval;
 
 class MediaFX : public QObject {
     Q_OBJECT
@@ -38,17 +37,17 @@ public:
 
     Session* session() { return m_session; };
 
-    void registerClip(Clip* clip);
-    void unregisterClip(Clip* clip);
+    void registerClip(MediaClip* clip);
+    void unregisterClip(MediaClip* clip);
 
-    bool renderVideoFrame(const Interval& frameTimeRange);
+    void render();
 
 signals:
     void finishEncoding();
 
 private:
     Session* m_session;
-    QList<Clip*> activeClips;
+    QList<MediaClip*> activeClips;
 };
 
 // https://doc.qt.io/qt-6/qqmlengine.html#QML_SINGLETON

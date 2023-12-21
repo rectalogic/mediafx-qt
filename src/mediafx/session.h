@@ -23,7 +23,6 @@
 #include <QObject>
 #include <QQuickView>
 #include <QtCore>
-#include <chrono>
 #include <memory>
 #include <qtgui-config.h>
 #if (QT_CONFIG(vulkan) && __has_include(<vulkan/vulkan.h>))
@@ -37,7 +36,6 @@ class Encoder;
 class MediaFX;
 class QQmlError;
 class RenderControl;
-using namespace std::chrono;
 
 class Session : public QObject {
     Q_OBJECT
@@ -48,7 +46,7 @@ public:
 
     bool initialize(const QUrl& url);
 
-    microseconds frameDuration() const noexcept { return m_frameDuration; };
+    qint64 frameDuration() const noexcept { return m_frameDuration; };
 
     void render();
 
@@ -64,7 +62,7 @@ private slots:
 private:
     static QEvent::Type renderEventType;
     Encoder* encoder;
-    microseconds m_frameDuration;
+    qint64 m_frameDuration;
     Interval frameTime;
     AnimationDriver* animationDriver;
 #ifdef MEDIAFX_ENABLE_VULKAN

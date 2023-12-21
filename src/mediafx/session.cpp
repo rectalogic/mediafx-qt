@@ -29,29 +29,28 @@
 #include <QQmlEngine>
 #include <QQmlError>
 #include <QQuickView>
+#include <QSGRendererInterface>
 #include <QUrl>
-#include <Qt>
-#include <QtTypes>
-#include <chrono>
 #include <errno.h>
+#include <ffms.h>
 #include <string.h>
 #include <unistd.h>
 #ifdef MEDIAFX_ENABLE_VULKAN
 #include <QQuickGraphicsConfiguration>
 #endif
-using namespace std::chrono;
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
 Session::Session(Encoder* encoder, QObject* parent)
     : QObject(parent)
     , encoder(encoder)
-    , m_frameDuration(encoder->frameRate().toFrameDuration())
-    , frameTime(microseconds::zero(), m_frameDuration)
+    , m_frameDuration(encoder->frameRate().toFrameDurationMS())
+    , frameTime(0, m_frameDuration)
     , animationDriver(new AnimationDriver(m_frameDuration, this))
     , renderControl(nullptr)
     , quickView(nullptr)
 {
+    FFMS_Init(0, 0);
     connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
     animationDriver->install();
@@ -76,6 +75,7 @@ Session::Session(Encoder* encoder, QObject* parent)
 Session::~Session()
 {
     animationDriver->uninstall();
+    FFMS_Deinit();
 }
 
 bool Session::initialize(const QUrl& url)
@@ -141,15 +141,15 @@ int write(int fd, qsizetype size, const char* data)
 
 void Session::render()
 {
-    if (mediaFX->renderVideoFrame(frameTime)) {
-        auto frameData = renderControl->renderVideoFrame();
+    mediaFX->render();
 
-        if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
-            return;
+    auto frameData = renderControl->renderVideoFrame();
 
-        animationDriver->advance();
-        frameTime = frameTime.translated(frameDuration());
-    }
+    if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
+        return;
+
+    animationDriver->advance();
+    frameTime = frameTime.translated(frameDuration());
 
     QCoreApplication::postEvent(this, new QEvent(renderEventType));
 }

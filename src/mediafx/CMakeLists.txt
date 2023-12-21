@@ -15,19 +15,23 @@
 
 qt_policy(SET QTP0001 NEW)
 
+find_package(PkgConfig)
+pkg_search_module(ffms2 REQUIRED IMPORTED_TARGET ffms2)
+
 qt_add_library(mediafx STATIC
     session.cpp
     mediafx.cpp
     encoder.cpp
     render_control.cpp
-    clip.cpp
-    audio_clip.cpp
-    visual_clip.cpp
-    video_clip.cpp
-    image_clip.cpp
-    rate_control.cpp
+    media_clip.cpp
+    track.cpp
+    video_track.cpp
+    audio_track.cpp
+    video_sink.cpp
 )
 target_include_directories(mediafx PUBLIC ./)
+target_include_directories(mediafx PRIVATE ${FFMS2_INCLUDE_DIRS})
+target_compile_options(mediafx PUBLIC ${FFMS2_CFLAGS})
 
 qt_add_executable(mediafxtool
     main.cpp
@@ -38,7 +42,7 @@ qt_add_qml_module(mediafx
     URI mediafx
 )
 
-target_link_libraries(mediafx PUBLIC Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
+target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick Qt6::Quick3D)
 
 if(${Qt6WebEngineQuick_FOUND})
     target_link_libraries(mediafx PUBLIC Qt6::WebEngineQuick)

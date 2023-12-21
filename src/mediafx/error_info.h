@@ -14,39 +14,40 @@
  * You should have received a copy of the GNU General Public License along with mediaFX.
  * If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
 
-#include "interval.h"
 #include <QDebug>
-#include <QObject>
-#include <QString>
-#include <QStringLiteral>
-#include <QtTest>
+#include <QDebugStateSaver>
+#include <ffms.h>
 
-class tst_Interval : public QObject {
-    Q_OBJECT
-
-private slots:
-
-    void contains()
+class ErrorInfo {
+public:
+    ErrorInfo()
     {
-        QVERIFY(Interval(100, 200).contains(150));
-        QVERIFY(!Interval(100, 200).contains(300));
-        QVERIFY(Interval(100, 200).contains(100));
-        QVERIFY(!Interval(100, 200).contains(200));
+        reset();
     }
 
-    void translated()
+    inline void reset()
     {
-        QCOMPARE(Interval(33, 66), Interval(0, 33).translated(33));
+        errorInfo.Buffer = errorMessage;
+        errorInfo.BufferSize = sizeof(errorMessage);
+        errorInfo.ErrorType = FFMS_ERROR_SUCCESS;
+        errorInfo.SubType = FFMS_ERROR_SUCCESS;
     }
 
-    void qdebug()
+    inline FFMS_ErrorInfo* operator&()
     {
-        QString result;
-        QDebug { &result } << Interval(100, 200);
-        QCOMPARE(result, QStringLiteral("(100, 200) "));
+        return &errorInfo;
     }
+
+    friend QDebug inline operator<<(QDebug dbg, const ErrorInfo& error)
+    {
+        QDebugStateSaver saver(dbg);
+        dbg.nospace() << error.errorMessage << " (error: " << error.errorInfo.ErrorType << ", sub: " << error.errorInfo.SubType << ")";
+        return dbg.maybeSpace();
+    }
+
+private:
+    char errorMessage[1024];
+    FFMS_ErrorInfo errorInfo;
 };
-
-QTEST_APPLESS_MAIN(tst_Interval);
-#include "tst_interval.moc"

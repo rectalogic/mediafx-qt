@@ -1,6 +1,13 @@
 {
     "name": "mediaFX",
-    "image": "ghcr.io/rectalogic/mediafx:dev",
+    "build": {
+        "dockerfile": "../builders/Linux/Dockerfile",
+        "context": "../builders/Linux",
+        "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
+        "args": {
+            "QT_VER": "6.6.0"
+        }
+    },
     "init": true,
     "customizations": {
         "vscode": {
@@ -17,7 +24,7 @@
             ],
             "settings": {
                 "cmake.installPrefix": "/usr/local/Qt/6.6.0/gcc_64",
-                "cmake.buildDirectory": "${workspaceFolder}/build/vscode",
+                "cmake.buildDirectory": "${workspaceFolder}/build/Linux/vscode",
                 "cmake.configureSettings": {
                     "CMAKE_BUILD_TYPE": "Debug"
                 },

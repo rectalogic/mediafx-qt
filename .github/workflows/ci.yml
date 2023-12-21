@@ -69,8 +69,8 @@ jobs:
     env:
       XCODE_VER: "15.0"
     steps:
-    - name: Upgrade bash
-      run: brew install bash
+    - name: Brew
+      run: brew install bash ffms2
     - name: Checkout
       uses: actions/checkout@v4
       with:

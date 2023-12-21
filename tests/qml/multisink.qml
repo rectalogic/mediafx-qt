@@ -6,7 +6,7 @@ import mediafx
 Item {
     id: root
 
-    VideoClip {
+    MediaClip {
         id: videoClip
 
         clipStart: 3000
@@ -16,7 +16,7 @@ Item {
             videoClip.clipEnded.connect(MediaFX.finishEncoding);
         }
     }
-    ImageClip {
+    MediaClip {
         id: imageClip
 
         clipEnd: 3000
@@ -32,7 +32,7 @@ Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.rowSpan: 2
-            VisualSink.clip: imageClip
+            VideoSink.clip: imageClip
         }
         ColumnLayout {
             spacing: 0
@@ -40,12 +40,12 @@ Item {
             VideoOutput {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                VisualSink.clip: videoClip
+                VideoSink.clip: videoClip
             }
             VideoOutput {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                VisualSink.clip: videoClip
+                VideoSink.clip: videoClip
             }
         }
     }

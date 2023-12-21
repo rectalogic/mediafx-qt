@@ -17,28 +17,38 @@
 
 #pragma once
 
-#include "clip.h"
 #include <QObject>
 #include <QtQmlIntegration>
-class QUrl;
-struct Interval;
+class QVideoSink;
+class MediaClip;
 
-class AudioClip : public Clip {
+class VideoSinkAttached : public QObject {
     Q_OBJECT
+    Q_PROPERTY(MediaClip* clip READ clip WRITE setClip NOTIFY clipChanged)
+    QML_ANONYMOUS
+
+public:
+    explicit VideoSinkAttached(QVideoSink* videoSink, QObject* parent = nullptr)
+        : QObject(parent)
+        , m_videoSink(videoSink) {};
+    MediaClip* clip() const { return m_clip; };
+    void setClip(MediaClip* clip);
+
+signals:
+    void clipChanged();
+
+private:
+    MediaClip* m_clip = nullptr;
+    QVideoSink* m_videoSink;
+};
+
+class VideoSink : public QObject {
+    Q_OBJECT
+    QML_ATTACHED(VideoSinkAttached)
     QML_ELEMENT
 
 public:
-    using Clip::Clip;
-    explicit AudioClip(QObject* parent = nullptr)
-        : Clip(parent) {};
-
-protected:
-    void onActiveChanged(bool active) override;
-
-    void loadMedia(const QUrl&) override;
-    bool renderClip(const Interval& globalTime) override;
-
-    virtual void stop() override;
-
-private:
+    explicit VideoSink(QObject* parent = nullptr)
+        : QObject(parent) {};
+    static VideoSinkAttached* qmlAttachedProperties(QObject* object);
 };

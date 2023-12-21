@@ -20,13 +20,11 @@
 #include <QDebug>
 #include <QDebugStateSaver>
 #include <QtTypes>
-#include <chrono>
 #include <utility>
-using namespace std::chrono;
 
 struct Interval {
     constexpr Interval() noexcept = default;
-    explicit constexpr Interval(const microseconds& start, const microseconds& end) noexcept
+    explicit constexpr Interval(qint64 start, qint64 end) noexcept
         : s(start)
         , e(end)
     {
@@ -35,15 +33,15 @@ struct Interval {
         }
     }
 
-    constexpr microseconds start() const noexcept { return s; }
-    constexpr microseconds end() const noexcept { return e; }
+    constexpr qint64 start() const noexcept { return s; }
+    constexpr qint64 end() const noexcept { return e; }
 
-    constexpr bool contains(const microseconds& time) const noexcept
+    constexpr bool contains(qint64 time) const noexcept
     {
         return (s <= time && time < e);
     }
 
-    constexpr Interval translated(const microseconds& offset) const
+    constexpr Interval translated(qint64 offset) const
     {
         return Interval(s + offset, e + offset);
     }
@@ -58,8 +56,8 @@ struct Interval {
     }
 
 private:
-    microseconds s = microseconds::zero();
-    microseconds e = microseconds::zero();
+    qint64 s = 0;
+    qint64 e = 0;
 };
 
 QDebug inline operator<<(QDebug dbg, const Interval& interval)

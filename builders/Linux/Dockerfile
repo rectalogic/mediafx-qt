@@ -43,7 +43,7 @@ RUN apt-get -y update \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     libvulkan-dev mesa-vulkan-drivers \
     python3 python3-pip \
-    curl xz-utils xvfb pkg-config ffmpeg \
+    curl xz-utils xvfb pkg-config libffms2-dev ffmpeg \
     fontconfig fonts-liberation
 
 COPY --from=build /usr/local/Qt /usr/local/Qt/
@@ -53,12 +53,12 @@ ENV QT_VER=${QT_VER}
 
 RUN ldconfig
 
-COPY entrypoint.sh /entrypoint.sh
-
 RUN useradd -ms /bin/bash -d /mediafx/build/Linux -g root -G sudo mediafx
 RUN echo "mediafx ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/mediafx && chmod 0440 /etc/sudoers.d/mediafx
 VOLUME /mediafx
 WORKDIR /mediafx/build/Linux
 
+COPY entrypoint.sh /entrypoint.sh
+
 USER mediafx
-ENTRYPOINT ["/usr/bin/xvfb-run", "--server-args", "-screen 0 640x480x24", "--error-file", "/dev/stderr", "/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/xvfb-run", "--server-args", "-screen 0 640x480x24 -nolisten unix", "--error-file", "/dev/stderr", "/entrypoint.sh"]

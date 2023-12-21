@@ -15,38 +15,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mediafx.h"
+#include "track.h"
 #include "media_clip.h"
-#include "session.h"
-#include <QObject>
 
-MediaFX::MediaFX(Session* session, QObject* parent)
-    : QObject(parent)
-    , m_session(session)
+void Track::setActive(bool active)
 {
-    connect(this, &MediaFX::finishEncoding, m_session, [this]() { emit this->session()->exitApp(0); });
-}
-
-MediaFX* MediaFX::singletonInstance()
-{
-    return MediaFXForeign::s_singletonInstance;
-}
-
-void MediaFX::registerClip(MediaClip* clip)
-{
-    if (clip && !activeClips.contains(clip)) {
-        activeClips.append(clip);
-    }
-}
-
-void MediaFX::unregisterClip(MediaClip* clip)
-{
-    activeClips.removeOne(clip);
-}
-
-void MediaFX::render()
-{
-    for (auto clip : activeClips) {
-        clip->render();
+    if (active != m_active) {
+        m_active = active;
+        m_mediaClip->updateActive();
     }
 }
