@@ -54,9 +54,9 @@ jobs:
       with:
         submodules: true
     - name: Build/test mediaFX
-      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=opengl builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
+      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=opengl builders/Linux/docker-run.sh
     - name: Build/test mediaFX vulkan
-      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=vulkan builders/Linux/docker-run.sh /mediafx/builders/Linux/mediafx-build.sh
+      run: DOCKER_OPTS="-e MEDIAFX_TEST=" TARGET=vulkan builders/Linux/docker-run.sh
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v3
@@ -67,7 +67,7 @@ jobs:
   macos:
     runs-on: macos-13
     env:
-      XCODE_VER: "15.0"
+      XCODE_VER: "15.1"
     steps:
     - name: Brew
       run: brew install bash ffms2
@@ -96,7 +96,7 @@ jobs:
         key: ${{ steps.restore-cache.outputs.cache-primary-key }}
     - name: Build/test mediaFX
       run: |
-        MEDIAFX_TEST="-LE GPU" builders/Darwin/mediafx-build.sh
+        MEDIAFX_TEST= builders/Darwin/mediafx-build.sh
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v3

@@ -16,6 +16,9 @@
  */
 
 #include "encoder.h"
+#ifdef EVENTLOGGER
+#include "event_logger.h"
+#endif
 #include "session.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
@@ -30,6 +33,8 @@
 #endif
 
 #define qSL QStringLiteral
+
+const auto ffmpegPreamble = qSL("-f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
 
 int main(int argc, char* argv[])
 {
@@ -48,6 +53,10 @@ int main(int argc, char* argv[])
 #endif
 
     QGuiApplication app(argc, argv);
+
+#ifdef EVENTLOGGER
+    app.installEventFilter(new EventLogger(&app));
+#endif
 
     app.setOrganizationDomain(qSL("mediafx.stream"));
     app.setOrganizationName(qSL("mediaFX"));
@@ -76,15 +85,20 @@ int main(int argc, char* argv[])
     QString command;
     if (parser.isSet(qSL("command"))) {
         command = parser.value(qSL("command"));
-        if (command == "ffplay") {
+        if (command == qSL("ffplay")) {
             // XXX need to handle audio eventually
-            command = qSL("ffplay -autoexit -infbuf -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
-        } else if (command == "ffmpeg") {
+            command = qSL("ffplay -autoexit -infbuf ") + ffmpegPreamble;
+        } else if (command.startsWith(qSL("ffmpeg:"))) {
             if (!parser.isSet(qSL("output"))) {
                 parser.showHelp(1);
             }
-            // XXX quicktime no longer supports qtrle
-            command = qSL("ffmpeg -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD} -f mov -vcodec rawvideo -pix_fmt uyvy422 -vtag yuvs -framerate ${MEDIAFX_FRAMERATE} -y ${MEDIAFX_OUTPUT}");
+            if (command == qSL("ffmpeg:lossless")) {
+                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f nut -vcodec ffv1 -flags bitexact -g 1 -level 3 -pix_fmt rgb32 -fflags bitexact -y ${MEDIAFX_OUTPUT}");
+            } else if (command == qSL("ffmpeg:mov")) {
+                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f mov -vcodec rawvideo -pix_fmt uyvy422 -vtag yuvs -y ${MEDIAFX_OUTPUT}");
+            } else {
+                parser.showHelp(1);
+            }
         }
     }
     QString output;

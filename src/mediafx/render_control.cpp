@@ -17,6 +17,7 @@
 
 #include "render_control.h"
 #include <QByteArray>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QMessageLogContext>
 #include <QQuickRenderTarget>
@@ -76,6 +77,7 @@ bool RenderControl::install(QQuickWindow* window)
 
 QByteArray RenderControl::renderVideoFrame()
 {
+    QCoreApplication::processEvents();
     polishItems();
     beginFrame();
     sync();

@@ -24,7 +24,7 @@ MediaFX::MediaFX(Session* session, QObject* parent)
     : QObject(parent)
     , m_session(session)
 {
-    connect(this, &MediaFX::finishEncoding, m_session, [this]() { emit this->session()->exitApp(0); });
+    connect(this, &MediaFX::finishEncoding, [this](bool immediate) { this->setEncodingState(immediate ? EncodingState::Stopped : EncodingState::Stopping); emit this->session()->exitApp(0); });
 }
 
 MediaFX* MediaFX::singletonInstance()

@@ -17,30 +17,20 @@
 
 #pragma once
 
-#include <QAnimationDriver>
-#include <chrono>
-using namespace std::chrono;
+#include <QDebug>
+#include <QEvent>
+#include <QObject>
 
-class AnimationDriver : public QAnimationDriver {
+class EventLogger : public QObject {
+    Q_OBJECT
 public:
-    AnimationDriver(microseconds frameDuration, QObject* parent = nullptr)
-        : QAnimationDriver(parent)
-        , m_frameDuration(frameDuration)
-    {
-    }
+    EventLogger(QObject* parent = nullptr)
+        : QObject(parent) {};
 
-    void advance() override
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override
     {
-        m_elapsed += m_frameDuration;
-        advanceAnimation();
+        qDebug() << obj << event->type();
+        return false;
     }
-
-    qint64 elapsed() const override
-    {
-        return duration_cast<milliseconds>(m_elapsed).count();
-    }
-
-private:
-    microseconds m_frameDuration;
-    microseconds m_elapsed = microseconds::zero();
 };

@@ -29,6 +29,7 @@
 #include <QString>
 #include <QUrl>
 #include <algorithm>
+#include <chrono>
 #include <ffms.h>
 
 MediaClip::MediaClip(QObject* parent)
@@ -90,12 +91,14 @@ void MediaClip::render()
         return;
     }
 
+    emit clipCurrentTimeChanged();
+
     if (m_audioTrack)
         m_audioTrack->render(m_currentFrameTime);
     if (m_videoTrack)
         m_videoTrack->render(m_currentFrameTime);
 
-    m_currentFrameTime = m_currentFrameTime.translated(MediaFX::singletonInstance()->session()->frameDuration());
+    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaFX::singletonInstance()->session()->frameDuration());
 }
 
 void MediaClip::setActive(bool active)
@@ -161,9 +164,8 @@ void MediaClip::componentComplete()
     if (clipStart() < 0)
         setClipStart(0);
     loadMedia();
-    auto frameDuration = MediaFX::singletonInstance()->session()->frameDuration();
     if (clipEnd() < 0) {
         setClipEnd(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
     }
-    m_currentFrameTime = Interval(clipStart(), clipStart() + frameDuration);
+    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaFX::singletonInstance()->session()->frameDuration());
 }

@@ -52,7 +52,7 @@ public:
     const QList<QVideoSink*>& videoSinks() const { return m_videoSinks; };
 
 protected:
-    friend class VideoSinkAttached;
+    friend class MediaAttached;
     void setVideoSinks(const QList<QVideoSink*>&);
     void updateActive();
 

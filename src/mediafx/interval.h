@@ -20,11 +20,19 @@
 #include <QDebug>
 #include <QDebugStateSaver>
 #include <QtTypes>
+#include <chrono>
 #include <utility>
+using namespace std::chrono;
 
-struct Interval {
+class Interval {
+    Q_GADGET
+    Q_PROPERTY(int start READ start FINAL)
+    Q_PROPERTY(int end READ end FINAL)
+
+public:
     constexpr Interval() noexcept = default;
-    explicit constexpr Interval(qint64 start, qint64 end) noexcept
+
+    explicit constexpr Interval(const microseconds& start, const microseconds& end) noexcept
         : s(start)
         , e(end)
     {
@@ -33,17 +41,22 @@ struct Interval {
         }
     }
 
-    constexpr qint64 start() const noexcept { return s; }
-    constexpr qint64 end() const noexcept { return e; }
-
-    constexpr bool contains(qint64 time) const noexcept
+    explicit constexpr Interval(qint64 start, qint64 end) noexcept
+        : Interval(milliseconds(start), milliseconds(end))
     {
-        return (s <= time && time < e);
     }
 
-    constexpr Interval translated(qint64 offset) const
+    constexpr qint64 start() const noexcept { return duration_cast<milliseconds>(s).count(); }
+    constexpr qint64 end() const noexcept { return duration_cast<milliseconds>(e).count(); }
+
+    Q_INVOKABLE constexpr bool contains(qint64 time) const noexcept
     {
-        return Interval(s + offset, e + offset);
+        return (start() <= time && time < end());
+    }
+
+    constexpr Interval nextInterval(const microseconds& duration) const
+    {
+        return Interval(e, e + duration);
     }
 
     friend constexpr bool operator==(Interval lhs, Interval rhs) noexcept
@@ -56,13 +69,14 @@ struct Interval {
     }
 
 private:
-    qint64 s = 0;
-    qint64 e = 0;
+    friend QDebug inline operator<<(QDebug dbg, const Interval& interval);
+    microseconds s = microseconds::zero();
+    microseconds e = microseconds::zero();
 };
 
 QDebug inline operator<<(QDebug dbg, const Interval& interval)
 {
     QDebugStateSaver saver(dbg);
-    dbg.nospace() << "(" << interval.start() << ", " << interval.end() << ")";
+    dbg.nospace() << "(" << interval.s << "/" << duration_cast<milliseconds>(interval.s) << ", " << interval.e << "/" << duration_cast<milliseconds>(interval.e) << ")";
     return dbg;
 }

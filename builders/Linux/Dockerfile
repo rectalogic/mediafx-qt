@@ -62,3 +62,4 @@ COPY entrypoint.sh /entrypoint.sh
 
 USER mediafx
 ENTRYPOINT ["/usr/bin/xvfb-run", "--server-args", "-screen 0 640x480x24 -nolisten unix", "--error-file", "/dev/stderr", "/entrypoint.sh"]
+CMD ["/mediafx/builders/Linux/mediafx-build.sh"]

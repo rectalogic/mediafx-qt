@@ -42,12 +42,22 @@ public:
 
     void render();
 
+    enum EncodingState {
+        Encoding,
+        Stopping,
+        Stopped,
+    };
+
+    EncodingState encodingState() const { return m_encodingState; };
+    void setEncodingState(EncodingState state) { m_encodingState = state; };
+
 signals:
-    void finishEncoding();
+    void finishEncoding(bool immediate = true);
 
 private:
     Session* m_session;
     QList<MediaClip*> activeClips;
+    EncodingState m_encodingState = Encoding;
 };
 
 // https://doc.qt.io/qt-6/qqmlengine.html#QML_SINGLETON

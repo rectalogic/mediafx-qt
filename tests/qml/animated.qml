@@ -31,7 +31,7 @@ Item {
     transitions: Transition {
         onRunningChanged: {
             if (!running)
-                MediaFX.finishEncoding();
+                MediaFX.finishEncoding(false);
         }
 
         AnchorAnimation {

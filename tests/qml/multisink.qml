@@ -10,7 +10,7 @@ Item {
         id: videoClip
 
         clipStart: 3000
-        source: Qt.resolvedUrl("../../build/assets/red-640x360-30fps-4s.nut")
+        source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s.nut")
 
         Component.onCompleted: {
             videoClip.clipEnded.connect(MediaFX.finishEncoding);
@@ -20,7 +20,7 @@ Item {
         id: imageClip
 
         clipEnd: 3000
-        source: Qt.resolvedUrl("../../build/assets/red-160x120.png")
+        source: Qt.resolvedUrl("../fixtures/assets/red-160x120.png")
     }
     RowLayout {
         id: layout
@@ -32,7 +32,7 @@ Item {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.rowSpan: 2
-            VideoSink.clip: imageClip
+            Media.clip: imageClip
         }
         ColumnLayout {
             spacing: 0
@@ -40,12 +40,12 @@ Item {
             VideoOutput {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                VideoSink.clip: videoClip
+                Media.clip: videoClip
             }
             VideoOutput {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                VideoSink.clip: videoClip
+                Media.clip: videoClip
             }
         }
     }

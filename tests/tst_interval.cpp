@@ -21,6 +21,9 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QtTest>
+#include <chrono>
+using namespace std::chrono;
+using namespace std::chrono_literals;
 
 class tst_Interval : public QObject {
     Q_OBJECT
@@ -35,16 +38,16 @@ private slots:
         QVERIFY(!Interval(100, 200).contains(200));
     }
 
-    void translated()
+    void nextInterval()
     {
-        QCOMPARE(Interval(33, 66), Interval(0, 33).translated(33));
+        QCOMPARE(Interval(3333, 6666), Interval(0, 3333).nextInterval(3333000us));
     }
 
     void qdebug()
     {
         QString result;
         QDebug { &result } << Interval(100, 200);
-        QCOMPARE(result, QStringLiteral("(100, 200) "));
+        QCOMPARE(result, QStringLiteral("(100000us/100ms, 200000us/200ms) "));
     }
 };
 

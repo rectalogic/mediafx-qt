@@ -19,6 +19,8 @@
 #include <QObject>
 #include <QStringLiteral>
 #include <QtTest>
+#include <chrono>
+using namespace std::chrono;
 
 class tst_Encoder : public QObject {
     Q_OBJECT
@@ -39,7 +41,7 @@ private slots:
         QCOMPARE(Encoder::FrameRate(30000, 1001).toString(), QStringLiteral("30000/1001"));
         QCOMPARE(Encoder::FrameRate(30, 1).toString(), QStringLiteral("30"));
         QVERIFY(Encoder::FrameRate().isEmpty());
-        QCOMPARE(Encoder::FrameRate(30, 1).toFrameDurationMS(), 33);
+        QCOMPARE(Encoder::FrameRate(30, 1).toFrameDuration(), 33333us);
     }
 };
 

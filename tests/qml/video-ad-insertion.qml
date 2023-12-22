@@ -21,15 +21,38 @@ Item {
     MediaClip {
         id: videoClip
 
-        clipStart: 5000
         source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.nut")
 
         Component.onCompleted: {
+            // End encoding when main videoClip finishes
             videoClip.clipEnded.connect(MediaFX.finishEncoding);
         }
     }
+    MediaClip {
+        id: adClip
+
+        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
+
+        // Switch back to default state when ad ends - main videoClip playing
+        onClipEnded: videoOutput.state = ""
+    }
     VideoOutput {
+        id: videoOutput
+
         Media.clip: videoClip
         anchors.fill: parent
+
+        states: [
+            State {
+                name: "ad"
+                // 4 sec into the main video, switch to playing the ad
+                when: (videoClip.clipCurrentTime.contains(4000))
+
+                PropertyChanges {
+                    Media.clip: adClip
+                    target: videoOutput
+                }
+            }
+        ]
     }
 }

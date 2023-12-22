@@ -22,9 +22,9 @@
 #include <QSize>
 #include <QString>
 #include <QStringLiteral>
-#include <QtTypes>
-#include <math.h>
+#include <chrono>
 #include <stdio.h>
+using namespace std::chrono;
 
 class Encoder : public QObject {
     Q_OBJECT
@@ -76,7 +76,7 @@ public:
         constexpr int den() const noexcept { return m_den; };
         constexpr bool isEmpty() const noexcept { return m_num == 0 || m_den == 0; };
         constexpr double toDouble() const noexcept { return m_num / (double)m_den; };
-        constexpr qint64 toFrameDurationMS() const noexcept { return round((m_den / (double)m_num) * 1000); }
+        constexpr microseconds toFrameDuration() const noexcept { return round<microseconds>(duration<double> { 1 / toDouble() }); }
         static FrameRate parse(const QString& fr)
         {
             float num = 0, den = 0;

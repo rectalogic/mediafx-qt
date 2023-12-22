@@ -33,13 +33,15 @@ class MediaClip : public QObject, public QQmlParserStatus {
     Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
     Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
     Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
-    Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged FINAL)
+    Q_PROPERTY(bool active READ isActive NOTIFY activeChanged FINAL)
+    Q_PROPERTY(Interval clipCurrentTime READ clipCurrentTime NOTIFY clipCurrentTimeChanged FINAL)
     QML_ELEMENT
 
 signals:
     void clipStartChanged();
     void clipEndChanged();
     void activeChanged(bool);
+    void clipCurrentTimeChanged();
     void clipEnded();
 
 public:
@@ -56,6 +58,8 @@ public:
 
     qint64 clipEnd() const { return m_clipEnd; };
     void setClipEnd(qint64 ms);
+
+    const Interval& clipCurrentTime() const { return m_currentFrameTime; };
 
     void setActive(bool active);
     bool isActive() const { return m_active; };
@@ -75,7 +79,7 @@ protected:
     VideoTrack* videoTrack() { return m_videoTrack.get(); };
     AudioTrack* audioTrack() { return m_audioTrack.get(); };
 
-    friend class VideoSinkAttached;
+    friend class MediaAttached;
 
 private:
     bool m_componentComplete = false;

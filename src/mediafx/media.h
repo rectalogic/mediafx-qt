@@ -17,18 +17,18 @@
 
 #pragma once
 
+#include "media_clip.h" // IWYU pragma: keep
 #include <QObject>
 #include <QtQmlIntegration>
 class QVideoSink;
-class MediaClip;
 
-class VideoSinkAttached : public QObject {
+class MediaAttached : public QObject {
     Q_OBJECT
     Q_PROPERTY(MediaClip* clip READ clip WRITE setClip NOTIFY clipChanged)
     QML_ANONYMOUS
 
 public:
-    explicit VideoSinkAttached(QVideoSink* videoSink, QObject* parent = nullptr)
+    explicit MediaAttached(QVideoSink* videoSink, QObject* parent = nullptr)
         : QObject(parent)
         , m_videoSink(videoSink) {};
     MediaClip* clip() const { return m_clip; };
@@ -42,13 +42,13 @@ private:
     QVideoSink* m_videoSink;
 };
 
-class VideoSink : public QObject {
+class Media : public QObject {
     Q_OBJECT
-    QML_ATTACHED(VideoSinkAttached)
+    QML_ATTACHED(MediaAttached)
     QML_ELEMENT
 
 public:
-    explicit VideoSink(QObject* parent = nullptr)
+    explicit Media(QObject* parent = nullptr)
         : QObject(parent) {};
-    static VideoSinkAttached* qmlAttachedProperties(QObject* object);
+    static MediaAttached* qmlAttachedProperties(QObject* object);
 };

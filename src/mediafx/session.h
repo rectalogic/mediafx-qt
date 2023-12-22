@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include "interval.h"
 #include <QEvent>
 #include <QList>
 #include <QObject>
 #include <QQuickView>
 #include <QtCore>
+#include <chrono>
 #include <memory>
 #include <qtgui-config.h>
 #if (QT_CONFIG(vulkan) && __has_include(<vulkan/vulkan.h>))
@@ -36,6 +36,7 @@ class Encoder;
 class MediaFX;
 class QQmlError;
 class RenderControl;
+using namespace std::chrono;
 
 class Session : public QObject {
     Q_OBJECT
@@ -46,7 +47,7 @@ public:
 
     bool initialize(const QUrl& url);
 
-    qint64 frameDuration() const noexcept { return m_frameDuration; };
+    microseconds frameDuration() const noexcept { return m_frameDuration; };
 
     void render();
 
@@ -62,8 +63,7 @@ private slots:
 private:
     static QEvent::Type renderEventType;
     Encoder* encoder;
-    qint64 m_frameDuration;
-    Interval frameTime;
+    microseconds m_frameDuration;
     AnimationDriver* animationDriver;
 #ifdef MEDIAFX_ENABLE_VULKAN
     QVulkanInstance vulkanInstance;

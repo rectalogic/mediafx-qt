@@ -44,8 +44,7 @@ QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::regist
 Session::Session(Encoder* encoder, QObject* parent)
     : QObject(parent)
     , encoder(encoder)
-    , m_frameDuration(encoder->frameRate().toFrameDurationMS())
-    , frameTime(0, m_frameDuration)
+    , m_frameDuration(encoder->frameRate().toFrameDuration())
     , animationDriver(new AnimationDriver(m_frameDuration, this))
     , renderControl(nullptr)
     , quickView(nullptr)
@@ -143,13 +142,22 @@ void Session::render()
 {
     mediaFX->render();
 
+    switch (mediaFX->encodingState()) {
+    case MediaFX::EncodingState::Encoding:
+        break;
+    case MediaFX::EncodingState::Stopped:
+        return;
+    case MediaFX::EncodingState::Stopping:
+        mediaFX->setEncodingState(MediaFX::EncodingState::Stopped);
+        break;
+    }
+
     auto frameData = renderControl->renderVideoFrame();
 
     if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
         return;
 
     animationDriver->advance();
-    frameTime = frameTime.translated(frameDuration());
 
     QCoreApplication::postEvent(this, new QEvent(renderEventType));
 }

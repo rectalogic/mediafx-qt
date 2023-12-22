@@ -15,27 +15,27 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "video_sink.h"
+#include "media.h"
 #include "media_clip.h"
 #include "video_track.h"
 #include <QList>
 #include <QMessageLogContext>
 #include <QMetaObject>
 
-VideoSinkAttached* VideoSink::qmlAttachedProperties(QObject* object)
+MediaAttached* Media::qmlAttachedProperties(QObject* object)
 {
     QVideoSink* videoSink = nullptr;
     auto* mo = object->metaObject();
     mo->invokeMethod(object, "videoSink", Q_RETURN_ARG(QVideoSink*, videoSink));
     if (videoSink)
-        return new VideoSinkAttached(videoSink, object);
+        return new MediaAttached(videoSink, object);
     else {
-        qCritical("VideoSink must be attached to an object with a videoSink property");
+        qCritical("Media must be attached to an object with a videoSink property");
         return nullptr;
     }
 }
 
-void VideoSinkAttached::setClip(MediaClip* clip)
+void MediaAttached::setClip(MediaClip* clip)
 {
     if (clip != m_clip) {
         if (m_clip) {
@@ -57,6 +57,7 @@ void VideoSinkAttached::setClip(MediaClip* clip)
                 }
             }
         }
+        m_clip = clip;
         emit clipChanged();
     }
 }
