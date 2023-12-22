@@ -1,4 +1,4 @@
-export QT_VER=6.6.0
+export QT_VER=6.6.1
 BUILD_ROOT="${BASH_SOURCE%/*}/../build/$(uname)"
 mkdir -p "${BUILD_ROOT}"
 export BUILD_ROOT=$(cd "${BUILD_ROOT}"; pwd)

@@ -45,6 +45,7 @@ echo Testing ${QML}
 # threshold=2 is how much each pixel can differ
 # https://superuser.com/questions/1615310/how-to-use-ffmpeg-blend-difference-filter-mode-to-identify-frame-differences-bet
 FIXTURE=${FIXTURES}/$(basename "${OUTPUT}")
+[ -f "${FIXTURE}.framehash" ] || exit 1
 if ( ! diff "${FIXTURE}.framehash" "${OUTPUT}.framehash" ); then
     echo Warning: framehash is different, comparing frames
     ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=99.999:function=less,metadata=print:file=-" -an -v 24 "${OUTPUT}-%05d.png" | grep pblack ) || exit 1
