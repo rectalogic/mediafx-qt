@@ -58,7 +58,8 @@ protected:
 
 private:
     inline qint64 calculateFrameStartTime(const FFMS_FrameInfo* frameInfo) const;
-    void mapVideoFrameData(const FFMS_Frame* frameProperties);
+    QVideoFrameFormat formatForFrame(const FFMS_Frame* frameProperties) const;
+    void mapVideoFrameData(QVideoFrame& videoFrame, const FFMS_Frame* frameProperties);
 
     FFMS_VideoSource* m_videoSource = nullptr;
     FFMS_Track* m_track = nullptr;
