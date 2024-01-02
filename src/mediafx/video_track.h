@@ -20,6 +20,7 @@
 #include "track.h"
 #include <QList>
 #include <QVideoFrame>
+#include <QVideoFrameFormat>
 #include <QtTypes>
 #include <utility>
 class ErrorInfo;
