@@ -38,7 +38,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 RUN apt-get -y update \
-    && apt-get -y install sudo build-essential cmake ninja-build git clang clang-13 clang-format iwyu \
+    && apt-get -y install sudo gosu build-essential cmake ninja-build git clang clang-13 clang-format iwyu \
     libglx-mesa0 libglvnd-dev libxkbcommon-dev libxkbcommon-x11-0 libpulse-dev libxcb1 libx11-xcb1 libxcb-glx0 libxcb-cursor0 \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     libvulkan-dev mesa-vulkan-drivers \
@@ -58,8 +58,7 @@ RUN echo "mediafx ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/mediafx && chmod 044
 VOLUME /mediafx
 WORKDIR /mediafx/build/Linux
 
-COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh xvfb.sh /entrypoint/
 
-USER mediafx
-ENTRYPOINT ["/usr/bin/xvfb-run", "--server-args", "-screen 0 640x480x24 -nolisten unix", "--error-file", "/dev/stderr", "/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint/entrypoint.sh"]
 CMD ["/mediafx/builders/Linux/mediafx-build.sh"]
