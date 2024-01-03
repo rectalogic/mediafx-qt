@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> [asset-spec ...]"
+usage="$0 <mediafxpath> <qsbpath> <framerate>:<WxH> <qml-file> <output-file> [asset-spec ...]"
 
 BASE=${BASH_SOURCE%/*}
 
@@ -22,6 +22,8 @@ FIXTURES=${BASE}/fixtures
 ASSETS=${FIXTURES}/assets
 
 MEDIAFX=${1:?$usage}
+shift
+QSB=${1:?$usage}
 shift
 IFS=: read -r FRAMERATE SIZE <<< $1
 shift
@@ -35,7 +37,15 @@ for assetspec in "$@"; do
     "${BASE}/../tools/create-asset.sh" "${ASSETS}" ${assetspec} || exit 1
 done
 
+for shader in $(find "${BASE}/qml" -name '*.frag' -o -name '*.vert'); do
+    if [ "${shader}.qsb" -ot "${shader}" ]; then
+        "${QSB}" --glsl "100 es,120,150" --hlsl 50 --msl 12 -o "${shader}.qsb" "${shader}"
+    fi
+done
+
+
 echo Testing ${QML}
+export QT_LOGGING_RULES="qt.qml.binding.removal.info=true"
 "${MEDIAFX}" --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "ffmpeg:lossless" "${QML}" || exit 1
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 

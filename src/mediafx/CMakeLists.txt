@@ -50,6 +50,8 @@ set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 
 qt_add_qml_module(mediafx
     URI mediafx
+    QML_FILES
+    qml/MultiEffectState.qml
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)

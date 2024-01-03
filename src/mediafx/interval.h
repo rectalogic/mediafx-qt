@@ -54,6 +54,11 @@ public:
         return (start() <= time && time < end());
     }
 
+    Q_INVOKABLE constexpr bool containedBy(qint64 startTime, qint64 endTime) const noexcept
+    {
+        return (startTime <= start() && endTime >= end());
+    }
+
     constexpr Interval nextInterval(const microseconds& duration) const
     {
         return Interval(e, e + duration);

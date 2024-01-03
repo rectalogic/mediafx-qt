@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Andrew Wason
+// Copyright (C) 2024 Andrew Wason
 //
 // This file is part of mediaFX.
 //
@@ -14,6 +14,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 
 import QtQuick
+import QtQuick.Effects
 import QtMultimedia
 import mediafx
 
@@ -21,20 +22,11 @@ Item {
     MediaClip {
         id: videoClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.nut")
-
-        Component.onCompleted: {
-            // End encoding when main videoClip finishes
-            videoClip.clipEnded.connect(MediaFX.finishEncoding);
-        }
-    }
-    MediaClip {
-        id: adClip
-
         source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
 
-        // Switch back to default state when ad ends - main videoClip playing
-        onClipEnded: videoOutput.state = ""
+        Component.onCompleted: {
+            videoClip.clipEnded.connect(MediaFX.finishEncoding);
+        }
     }
     VideoOutput {
         id: videoOutput
@@ -42,17 +34,15 @@ Item {
         Media.clip: videoClip
         anchors.fill: parent
 
-        states: [
-            State {
-                name: "ad"
-                // 4 sec into the main video, switch to playing the ad. This also stops videoClip.clipCurrentTime
-                when: (videoClip.clipCurrentTime.contains(4000))
+        states: MultiEffectState {
+            name: "filter"
+            videoOutput: videoOutput
+            // From 1-2 sec into the video, switch to greyscale
+            when: (videoClip.clipCurrentTime.containedBy(1000, 2000))
 
-                PropertyChanges {
-                    Media.clip: adClip
-                    target: videoOutput
-                }
+            MultiEffect {
+                saturation: -1.0
             }
-        ]
+        }
     }
 }
