@@ -122,5 +122,3 @@ jobs:
     - name: qmllint
       if: ${{ false }}
       run: builders/Linux/docker-run.sh bash -c 'cd /mediafx && qmllint --qmltypes build/Linux/Release/src/mediafx/qmldir $(git ls-files "**/*.qml")'
-    - name: iwyu
-      run: builders/Linux/docker-run.sh /mediafx/builders/Linux/iwyu.sh
