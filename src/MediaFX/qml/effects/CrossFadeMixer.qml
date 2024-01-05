@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Andrew Wason
+// Copyright (C) 2024 Andrew Wason
 //
 // This file is part of mediaFX.
 //
@@ -13,39 +13,8 @@
 // You should have received a copy of the GNU General Public License along with mediaFX.
 // If not, see <https://www.gnu.org/licenses/>.
 
-import QtQuick
 import MediaFX
 
-Item {
-    id: container
-
-    states: State {
-        name: "reanchored"
-
-        AnchorChanges {
-            anchors.bottom: container.bottom
-            anchors.right: container.right
-            target: rect
-        }
-    }
-    transitions: Transition {
-        onRunningChanged: {
-            if (!running)
-                MediaManager.finishEncoding();
-        }
-
-        AnchorAnimation {
-            duration: 2000
-        }
-    }
-
-    onWidthChanged: container.state = "reanchored"
-
-    Rectangle {
-        id: rect
-
-        width: 50
-        height: 50
-        color: "red"
-    }
+MediaMixer {
+    fragmentShader: "qrc:/qml/effects/crossfade.frag.qsb"
 }

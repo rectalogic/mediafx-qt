@@ -28,6 +28,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QQmlError>
+#include <QQuickItem>
 #include <QQuickView>
 #include <QSGRendererInterface>
 #include <QUrl>
@@ -50,11 +51,13 @@ Session::Session(Encoder* encoder, QObject* parent)
     , quickView(nullptr)
 {
     FFMS_Init(0, 0);
-    connect(this, &Session::exitApp, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
     animationDriver->install();
     renderControl.reset(new RenderControl());
     quickView.reset(new QQuickView(QUrl(), renderControl.get()));
+    // Enables Qt.exit(0) in QML
+    connect(quickView->engine(), &QQmlEngine::exit, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
+
 #ifdef MEDIAFX_ENABLE_VULKAN
     if (quickView->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
         vulkanInstance.setExtensions(QQuickGraphicsConfiguration::preferredInstanceExtensions());
@@ -62,7 +65,7 @@ Session::Session(Encoder* encoder, QObject* parent)
     }
 #endif
 
-    manager = new MediaManager(this, this);
+    manager = new MediaManager(m_frameDuration, quickView.get(), this);
     MediaManagerForeign::s_singletonInstance = manager;
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
@@ -102,8 +105,9 @@ bool Session::initialize(const QUrl& url)
 void Session::quickViewStatusChanged(QQuickView::Status status)
 {
     if (status == QQuickView::Error) {
-        emit exitApp(1);
+        emit quickView->engine()->exit(1);
     } else if (status == QQuickView::Ready) {
+        quickView->rootObject()->setEnabled(false);
         QCoreApplication::postEvent(this, new QEvent(renderEventType));
     }
 }
@@ -142,20 +146,17 @@ void Session::render()
 {
     manager->render();
 
-    switch (manager->encodingState()) {
-    case MediaManager::EncodingState::Encoding:
-        break;
-    case MediaManager::EncodingState::Stopped:
-        return;
-    case MediaManager::EncodingState::Stopping:
-        manager->setEncodingState(MediaManager::EncodingState::Stopped);
-        break;
-    }
-
     auto frameData = renderControl->renderVideoFrame();
 
     if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
         return;
+
+    emit manager->frameRendered();
+
+    if (manager->isFinishedEncoding()) {
+        emit quickView->engine()->exit(0);
+        return;
+    }
 
     animationDriver->advance();
 

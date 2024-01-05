@@ -17,47 +17,53 @@
 
 #pragma once
 
+#include "interval.h"
 #include <QJSEngine>
 #include <QList>
 #include <QObject>
+#include <QQuickView> // IWYU pragma: keep
 #include <QtAssert>
 #include <QtQml>
 #include <QtQmlIntegration>
+#include <QtTypes>
+#include <chrono>
 class MediaClip;
-class Session;
+using namespace std::chrono;
 
 class MediaManager : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QQuickView* window READ window FINAL)
 
 public:
     using QObject::QObject;
-    MediaManager(Session* session, QObject* parent = nullptr);
+    MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent = nullptr);
 
     static MediaManager* singletonInstance();
 
-    Session* session() { return m_session; };
+    Q_INVOKABLE Interval createInterval(qint64 start, qint64 end) const
+    {
+        return Interval(start, end);
+    };
+
+    QQuickView* window() const { return m_quickView; };
+    const microseconds& frameDuration() { return m_frameDuration; };
 
     void registerClip(MediaClip* clip);
     void unregisterClip(MediaClip* clip);
 
     void render();
 
-    enum EncodingState {
-        Encoding,
-        Stopping,
-        Stopped,
-    };
-
-    EncodingState encodingState() const { return m_encodingState; };
-    void setEncodingState(EncodingState state) { m_encodingState = state; };
+    bool isFinishedEncoding() const { return finishedEncoding; }
 
 signals:
-    void finishEncoding(bool immediate = true);
+    void finishEncoding();
+    void frameRendered();
 
 private:
-    Session* m_session;
+    microseconds m_frameDuration;
+    QQuickView* m_quickView;
     QList<MediaClip*> activeClips;
-    EncodingState m_encodingState = Encoding;
+    bool finishedEncoding = false;
 };
 
 // https://doc.qt.io/qt-6/qqmlengine.html#QML_SINGLETON

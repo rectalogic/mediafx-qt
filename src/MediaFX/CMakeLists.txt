@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-qt_policy(SET QTP0001 NEW)
-
 find_package(PkgConfig)
 pkg_search_module(ffms2 REQUIRED IMPORTED_TARGET ffms2)
 
 option(EVENT_LOGGER "Enable event logger" OFF)
 
 qt_add_library(mediafx STATIC
+    application.cpp
     session.cpp
     media_manager.cpp
     encoder.cpp
@@ -51,7 +50,22 @@ set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 qt_add_qml_module(mediafx
     URI MediaFX
     QML_FILES
+    qml/sequence.js
+    qml/MediaSequence.qml
     qml/MultiEffectState.qml
+    qml/ShaderEffectState.qml
+    qml/effects/MediaMixer.qml
+    qml/effects/CrossFadeMixer.qml
+    qml/effects/LumaMixer.qml
+    qml/effects/LumaGradientMixer.qml
+    qml/effects/WipeMixer.qml
+)
+qt_add_shaders(mediafx "shaders"
+    PREFIX
+    "/"
+    FILES
+    qml/effects/crossfade.frag
+    qml/effects/luma.frag
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)

@@ -16,26 +16,30 @@
 import QtQuick
 import QtQuick.Effects
 import QtMultimedia
-import MediaFX
 
 State {
+    id: root
+
     default required property MultiEffect effect
     required property VideoOutput videoOutput
 
-    Component.onCompleted: effect.visible = false
+    Component.onCompleted: root.effect.visible = false
 
     ParentChange {
-        target: effect
-        parent: videoOutput.parent
+        parent: root.videoOutput.parent
+        target: root.effect
     }
     PropertyChanges {
-        anchors.fill: videoOutput
-        source: videoOutput
-        target: effect
+        x: root.videoOutput.x
+        y: root.videoOutput.y
+        width: root.videoOutput.width
+        height: root.videoOutput.height
+        source: root.videoOutput
         visible: true
+        target: root.effect
     }
     PropertyChanges {
-        target: videoOutput
         visible: false
+        target: root.videoOutput
     }
 }

@@ -20,12 +20,13 @@
 #include "error_info.h"
 #include "interval.h"
 #include "media_manager.h"
-#include "session.h"
 #include "video_track.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QObject>
+#include <QQmlEngine>
 #include <QQmlInfo>
+#include <QQuickView>
 #include <QString>
 #include <QUrl>
 #include <algorithm>
@@ -65,6 +66,7 @@ void MediaClip::setClipStart(qint64 ms)
     }
     m_clipStart = ms;
     emit clipStartChanged();
+    emit clipDurationChanged();
 }
 
 void MediaClip::setClipEnd(qint64 ms)
@@ -75,12 +77,22 @@ void MediaClip::setClipEnd(qint64 ms)
     }
     m_clipEnd = ms;
     emit clipEndChanged();
+    emit clipDurationChanged();
 }
 
 void MediaClip::render()
 {
     if (!isActive())
         return;
+
+    emit clipCurrentTimeChanged();
+
+    if (m_audioTrack)
+        m_audioTrack->render(m_currentFrameTime);
+    if (m_videoTrack)
+        m_videoTrack->render(m_currentFrameTime);
+
+    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->frameDuration());
 
     if (m_currentFrameTime.start() >= m_clipEnd) {
         if (m_audioTrack)
@@ -90,15 +102,6 @@ void MediaClip::render()
         emit clipEnded();
         return;
     }
-
-    emit clipCurrentTimeChanged();
-
-    if (m_audioTrack)
-        m_audioTrack->render(m_currentFrameTime);
-    if (m_videoTrack)
-        m_videoTrack->render(m_currentFrameTime);
-
-    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->session()->frameDuration());
 }
 
 void MediaClip::setActive(bool active)
@@ -123,7 +126,7 @@ void MediaClip::loadMedia()
 {
     if (!source().isValid()) {
         qmlWarning(this) << "MediaClip requires source Url";
-        emit MediaManager::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
         return;
     }
     ErrorInfo errorInfo;
@@ -132,14 +135,14 @@ void MediaClip::loadMedia()
     FFMS_Indexer* indexer = FFMS_CreateIndexer(sourceFileUtf8.data(), &errorInfo);
     if (!indexer) {
         qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo;
-        emit MediaManager::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
         return;
     }
 
     FFMS_Index* index = FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errorInfo);
     if (!index) {
         qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo;
-        emit MediaManager::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
         return;
     }
 
@@ -167,5 +170,5 @@ void MediaClip::componentComplete()
     if (clipEnd() < 0) {
         setClipEnd(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
     }
-    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaManager::singletonInstance()->session()->frameDuration());
+    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaManager::singletonInstance()->frameDuration());
 }

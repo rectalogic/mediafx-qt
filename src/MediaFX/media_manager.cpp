@@ -17,14 +17,17 @@
 
 #include "media_manager.h"
 #include "media_clip.h"
-#include "session.h"
 #include <QObject>
+#include <chrono>
+class QQuickView;
+using namespace std::chrono;
 
-MediaManager::MediaManager(Session* session, QObject* parent)
+MediaManager::MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent)
     : QObject(parent)
-    , m_session(session)
+    , m_frameDuration(frameDuration)
+    , m_quickView(quickView)
 {
-    connect(this, &MediaManager::finishEncoding, [this](bool immediate) { this->setEncodingState(immediate ? EncodingState::Stopped : EncodingState::Stopping); emit this->session()->exitApp(0); });
+    connect(this, &MediaManager::finishEncoding, [this]() { this->finishedEncoding = true; });
 }
 
 MediaManager* MediaManager::singletonInstance()

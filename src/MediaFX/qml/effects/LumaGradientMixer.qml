@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Andrew Wason
+// Copyright (C) 2024 Andrew Wason
 //
 // This file is part of mediaFX.
 //
@@ -14,38 +14,26 @@
 // If not, see <https://www.gnu.org/licenses/>.
 
 import QtQuick
+import QtQuick.Shapes
 import MediaFX
 
-Item {
-    id: container
+LumaMixer {
+    id: root
 
-    states: State {
-        name: "reanchored"
+    property alias fillGradient: path.fillGradient
 
-        AnchorChanges {
-            anchors.bottom: container.bottom
-            anchors.right: container.right
-            target: rect
+    Shape {
+        parent: root.parent
+        visible: false
+
+        ShapePath {
+            id: path
+
+            scale: Qt.size(root.width, root.height)
+
+            PathPolyline {
+                path: [Qt.point(0, 0), Qt.point(0, 1), Qt.point(1, 1), Qt.point(1, 0), Qt.point(0, 0)]
+            }
         }
-    }
-    transitions: Transition {
-        onRunningChanged: {
-            if (!running)
-                MediaManager.finishEncoding();
-        }
-
-        AnchorAnimation {
-            duration: 2000
-        }
-    }
-
-    onWidthChanged: container.state = "reanchored"
-
-    Rectangle {
-        id: rect
-
-        width: 50
-        height: 50
-        color: "red"
     }
 }

@@ -53,9 +53,6 @@ public:
 
     bool event(QEvent* event) override;
 
-signals:
-    void exitApp(int);
-
 private slots:
     void quickViewStatusChanged(QQuickView::Status status);
     void engineWarnings(const QList<QQmlError>& warnings);

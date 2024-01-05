@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Andrew Wason
+// Copyright (C) 2024 Andrew Wason
 //
 // This file is part of mediaFX.
 //
@@ -14,38 +14,17 @@
 // If not, see <https://www.gnu.org/licenses/>.
 
 import QtQuick
-import MediaFX
+import QtMultimedia
 
-Item {
-    id: container
+State {
+    id: root
 
-    states: State {
-        name: "reanchored"
+    default required property Component effect
+    required property VideoOutput videoOutput
 
-        AnchorChanges {
-            anchors.bottom: container.bottom
-            anchors.right: container.right
-            target: rect
-        }
-    }
-    transitions: Transition {
-        onRunningChanged: {
-            if (!running)
-                MediaManager.finishEncoding();
-        }
-
-        AnchorAnimation {
-            duration: 2000
-        }
-    }
-
-    onWidthChanged: container.state = "reanchored"
-
-    Rectangle {
-        id: rect
-
-        width: 50
-        height: 50
-        color: "red"
+    PropertyChanges {
+        layer.effect: root.effect
+        layer.enabled: true
+        target: root.videoOutput
     }
 }

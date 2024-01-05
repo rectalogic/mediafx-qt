@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Andrew Wason
+// Copyright (C) 2024 Andrew Wason
 //
 // This file is part of mediaFX.
 //
@@ -16,36 +16,27 @@
 import QtQuick
 import MediaFX
 
-Item {
-    id: container
+MediaMixer {
+    id: root
+
+    default required property Item luma
+    property real transitionWidth: 1.0
+    readonly property real premultipliedTransitionWidth: root.time * (transitionWidth + 1.0)
+
+    fragmentShader: "qrc:/qml/effects/luma.frag.qsb"
+    state: "default"
 
     states: State {
-        name: "reanchored"
+        name: "default"
 
-        AnchorChanges {
-            anchors.bottom: container.bottom
-            anchors.right: container.right
-            target: rect
+        PropertyChanges {
+            x: root.x
+            y: root.y
+            width: root.width
+            height: root.height
+            layer.enabled: true
+            visible: false
+            target: root.luma
         }
-    }
-    transitions: Transition {
-        onRunningChanged: {
-            if (!running)
-                MediaManager.finishEncoding();
-        }
-
-        AnchorAnimation {
-            duration: 2000
-        }
-    }
-
-    onWidthChanged: container.state = "reanchored"
-
-    Rectangle {
-        id: rect
-
-        width: 50
-        height: 50
-        color: "red"
     }
 }

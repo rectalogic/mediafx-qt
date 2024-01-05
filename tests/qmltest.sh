@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along with mediaFX.
 # If not, see <https://www.gnu.org/licenses/>.
 
-usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> [asset-spec ...]"
+usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> <threshold> [asset-spec ...]"
 
 BASE=${BASH_SOURCE%/*}
 
@@ -28,6 +28,8 @@ shift
 QML=${1:?$usage}
 shift
 OUTPUT=${1:?$usage}
+shift
+THRESHOLD=${1:?$usage}
 shift
 mkdir -p $(dirname "${OUTPUT}")
 
@@ -48,5 +50,5 @@ FIXTURE=${FIXTURES}/$(basename "${OUTPUT}")
 if ( ! diff "${FIXTURE}.framehash" "${OUTPUT}.framehash" ); then
     echo Warning: framehash is different, comparing frames
     mkdir -p "${OUTPUT}-png"
-    ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=99.999:function=less,metadata=print:file=-" -an -v 24 "${OUTPUT}-png/frame-%05d.png" | grep pblack ) || exit 1
+    ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=${THRESHOLD}:function=less,metadata=print:file=-" -an -v 24 "${OUTPUT}-png/frame-%05d.png" | grep pblack ) || exit 1
 fi
