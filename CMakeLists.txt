@@ -36,5 +36,5 @@ if(NOT "${isSystemDir}" STREQUAL "-1")
     set(CMAKE_INSTALL_RPATH "")
 endif()
 
-add_subdirectory(src/mediafx)
+add_subdirectory(src/MediaFX)
 add_subdirectory(tests)

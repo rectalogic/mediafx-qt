@@ -15,36 +15,36 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mediafx.h"
+#include "media_manager.h"
 #include "media_clip.h"
 #include "session.h"
 #include <QObject>
 
-MediaFX::MediaFX(Session* session, QObject* parent)
+MediaManager::MediaManager(Session* session, QObject* parent)
     : QObject(parent)
     , m_session(session)
 {
-    connect(this, &MediaFX::finishEncoding, [this](bool immediate) { this->setEncodingState(immediate ? EncodingState::Stopped : EncodingState::Stopping); emit this->session()->exitApp(0); });
+    connect(this, &MediaManager::finishEncoding, [this](bool immediate) { this->setEncodingState(immediate ? EncodingState::Stopped : EncodingState::Stopping); emit this->session()->exitApp(0); });
 }
 
-MediaFX* MediaFX::singletonInstance()
+MediaManager* MediaManager::singletonInstance()
 {
-    return MediaFXForeign::s_singletonInstance;
+    return MediaManagerForeign::s_singletonInstance;
 }
 
-void MediaFX::registerClip(MediaClip* clip)
+void MediaManager::registerClip(MediaClip* clip)
 {
     if (clip && !activeClips.contains(clip)) {
         activeClips.append(clip);
     }
 }
 
-void MediaFX::unregisterClip(MediaClip* clip)
+void MediaManager::unregisterClip(MediaClip* clip)
 {
     activeClips.removeOne(clip);
 }
 
-void MediaFX::render()
+void MediaManager::render()
 {
     for (auto clip : activeClips) {
         clip->render();

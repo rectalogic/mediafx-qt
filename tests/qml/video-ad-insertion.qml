@@ -15,7 +15,7 @@
 
 import QtQuick
 import QtMultimedia
-import mediafx
+import MediaFX
 
 Item {
     MediaClip {
@@ -25,7 +25,7 @@ Item {
 
         Component.onCompleted: {
             // End encoding when main videoClip finishes
-            videoClip.clipEnded.connect(MediaFX.finishEncoding);
+            videoClip.clipEnded.connect(MediaManager.finishEncoding);
         }
     }
     MediaClip {

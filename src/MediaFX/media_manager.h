@@ -26,14 +26,14 @@
 class MediaClip;
 class Session;
 
-class MediaFX : public QObject {
+class MediaManager : public QObject {
     Q_OBJECT
 
 public:
     using QObject::QObject;
-    MediaFX(Session* session, QObject* parent = nullptr);
+    MediaManager(Session* session, QObject* parent = nullptr);
 
-    static MediaFX* singletonInstance();
+    static MediaManager* singletonInstance();
 
     Session* session() { return m_session; };
 
@@ -61,15 +61,15 @@ private:
 };
 
 // https://doc.qt.io/qt-6/qqmlengine.html#QML_SINGLETON
-struct MediaFXForeign {
+struct MediaManagerForeign {
     Q_GADGET
-    QML_FOREIGN(MediaFX)
+    QML_FOREIGN(MediaManager)
     QML_SINGLETON
-    QML_NAMED_ELEMENT(MediaFX)
+    QML_NAMED_ELEMENT(MediaManager)
 public:
-    inline static MediaFX* s_singletonInstance = nullptr;
+    inline static MediaManager* s_singletonInstance = nullptr;
 
-    static MediaFX* create(QQmlEngine*, QJSEngine* engine)
+    static MediaManager* create(QQmlEngine*, QJSEngine* engine)
     {
         // The instance has to exist before it is used. We cannot replace it.
         Q_ASSERT(s_singletonInstance);

@@ -14,10 +14,10 @@
 // If not, see <https://www.gnu.org/licenses/>.
 
 import QtQuick
-import mediafx
+import MediaFX
 
 Rectangle {
     color: "red"
 
-    Component.onCompleted: MediaFX.finishEncoding(false)
+    Component.onCompleted: MediaManager.finishEncoding(false)
 }

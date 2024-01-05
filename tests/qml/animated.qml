@@ -14,7 +14,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 
 import QtQuick
-import mediafx
+import MediaFX
 
 Item {
     id: container
@@ -31,7 +31,7 @@ Item {
     transitions: Transition {
         onRunningChanged: {
             if (!running)
-                MediaFX.finishEncoding(false);
+                MediaManager.finishEncoding(false);
         }
 
         AnchorAnimation {

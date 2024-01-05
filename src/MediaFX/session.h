@@ -33,7 +33,7 @@
 #endif
 class AnimationDriver;
 class Encoder;
-class MediaFX;
+class MediaManager;
 class QQmlError;
 class RenderControl;
 using namespace std::chrono;
@@ -70,5 +70,5 @@ private:
 #endif
     std::unique_ptr<RenderControl> renderControl;
     std::unique_ptr<QQuickView> quickView;
-    MediaFX* mediaFX;
+    MediaManager* manager;
 };

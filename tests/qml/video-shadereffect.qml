@@ -15,7 +15,7 @@
 
 import QtQuick
 import QtMultimedia
-import mediafx
+import MediaFX
 
 Item {
     MediaClip {
@@ -24,7 +24,7 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(MediaFX.finishEncoding);
+            videoClip.clipEnded.connect(MediaManager.finishEncoding);
         }
     }
     VideoOutput {

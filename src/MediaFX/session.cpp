@@ -18,7 +18,7 @@
 #include "session.h"
 #include "animation.h"
 #include "encoder.h"
-#include "mediafx.h"
+#include "media_manager.h"
 #include "render_control.h"
 #include <QByteArray>
 #include <QCoreApplication>
@@ -62,8 +62,8 @@ Session::Session(Encoder* encoder, QObject* parent)
     }
 #endif
 
-    mediaFX = new MediaFX(this, this);
-    MediaFXForeign::s_singletonInstance = mediaFX;
+    manager = new MediaManager(this, this);
+    MediaManagerForeign::s_singletonInstance = manager;
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView->resize(encoder->frameSize().toSize());
@@ -140,15 +140,15 @@ int write(int fd, qsizetype size, const char* data)
 
 void Session::render()
 {
-    mediaFX->render();
+    manager->render();
 
-    switch (mediaFX->encodingState()) {
-    case MediaFX::EncodingState::Encoding:
+    switch (manager->encodingState()) {
+    case MediaManager::EncodingState::Encoding:
         break;
-    case MediaFX::EncodingState::Stopped:
+    case MediaManager::EncodingState::Stopped:
         return;
-    case MediaFX::EncodingState::Stopping:
-        mediaFX->setEncodingState(MediaFX::EncodingState::Stopped);
+    case MediaManager::EncodingState::Stopping:
+        manager->setEncodingState(MediaManager::EncodingState::Stopped);
         break;
     }
 

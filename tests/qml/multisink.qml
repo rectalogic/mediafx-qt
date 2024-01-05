@@ -1,7 +1,7 @@
 import QtQuick
 import QtMultimedia
 import QtQuick.Layouts
-import mediafx
+import MediaFX
 
 Item {
     id: root
@@ -13,7 +13,7 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s.nut")
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(MediaFX.finishEncoding);
+            videoClip.clipEnded.connect(MediaManager.finishEncoding);
         }
     }
     MediaClip {

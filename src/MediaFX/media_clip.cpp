@@ -19,7 +19,7 @@
 #include "audio_track.h"
 #include "error_info.h"
 #include "interval.h"
-#include "mediafx.h"
+#include "media_manager.h"
 #include "session.h"
 #include "video_track.h"
 #include <QByteArray>
@@ -98,14 +98,14 @@ void MediaClip::render()
     if (m_videoTrack)
         m_videoTrack->render(m_currentFrameTime);
 
-    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaFX::singletonInstance()->session()->frameDuration());
+    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->session()->frameDuration());
 }
 
 void MediaClip::setActive(bool active)
 {
     if (m_active != active) {
         m_active = active;
-        auto mediaFX = MediaFX::singletonInstance();
+        auto mediaFX = MediaManager::singletonInstance();
         if (active) {
             mediaFX->registerClip(this);
         } else {
@@ -123,7 +123,7 @@ void MediaClip::loadMedia()
 {
     if (!source().isValid()) {
         qmlWarning(this) << "MediaClip requires source Url";
-        emit MediaFX::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->session()->exitApp(1);
         return;
     }
     ErrorInfo errorInfo;
@@ -132,14 +132,14 @@ void MediaClip::loadMedia()
     FFMS_Indexer* indexer = FFMS_CreateIndexer(sourceFileUtf8.data(), &errorInfo);
     if (!indexer) {
         qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo;
-        emit MediaFX::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->session()->exitApp(1);
         return;
     }
 
     FFMS_Index* index = FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errorInfo);
     if (!index) {
         qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo;
-        emit MediaFX::singletonInstance()->session()->exitApp(1);
+        emit MediaManager::singletonInstance()->session()->exitApp(1);
         return;
     }
 
@@ -167,5 +167,5 @@ void MediaClip::componentComplete()
     if (clipEnd() < 0) {
         setClipEnd(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
     }
-    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaFX::singletonInstance()->session()->frameDuration());
+    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaManager::singletonInstance()->session()->frameDuration());
 }

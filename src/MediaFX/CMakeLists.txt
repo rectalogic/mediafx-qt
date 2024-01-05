@@ -22,7 +22,7 @@ option(EVENT_LOGGER "Enable event logger" OFF)
 
 qt_add_library(mediafx STATIC
     session.cpp
-    mediafx.cpp
+    media_manager.cpp
     encoder.cpp
     render_control.cpp
     media_clip.cpp
@@ -49,7 +49,7 @@ endif()
 set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 
 qt_add_qml_module(mediafx
-    URI mediafx
+    URI MediaFX
     QML_FILES
     qml/MultiEffectState.qml
 )
