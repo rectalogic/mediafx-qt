@@ -29,7 +29,7 @@
 #include <QStringLiteral>
 #include <QUrl>
 
-const auto ffmpegPreamble = qSL("-f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i pipe:${MEDIAFX_VIDEOFD}");
+const auto ffmpegPreamble = qSL("-hide_banner -loglevel warning -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i async:pipe:${MEDIAFX_VIDEOFD}");
 
 int main(int argc, char* argv[])
 {
@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
     parser.addOption({ { qSL("s"), qSL("size") }, qSL("Output video frame size, WxH"), qSL("size"), qSL("640x360") });
     parser.addOption({ { qSL("o"), qSL("output") }, qSL("Output filename"), qSL("output") });
     parser.addOption({ { qSL("c"), qSL("command") }, qSL("Encoder commandline"), qSL("command") });
+    parser.addOption({ { qSL("w"), qSL("exitOnWarning") }, qSL("Exit on QML warnings") });
     parser.addPositionalArgument(qSL("source"), qSL("QML source URL."));
 
     parser.process(app);
@@ -83,6 +84,9 @@ int main(int argc, char* argv[])
                 command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f nut -vcodec ffv1 -flags bitexact -g 1 -level 3 -pix_fmt rgb32 -fflags bitexact -y ${MEDIAFX_OUTPUT}");
             } else if (command == qSL("ffmpeg:mov")) {
                 command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f mov -vcodec rawvideo -pix_fmt uyvy422 -vtag yuvs -y ${MEDIAFX_OUTPUT}");
+            } else if (command == qSL("ffmpeg:")) {
+                // Let ffmpeg choose codec/format based on filename suffix
+                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -y ${MEDIAFX_OUTPUT}");
             } else {
                 parser.showHelp(1);
             }
@@ -105,7 +109,7 @@ int main(int argc, char* argv[])
         qCritical("Failed to initialize encoder");
         return 1;
     }
-    Session session(&encoder);
+    Session session(&encoder, parser.isSet(qSL("exitOnWarning")));
     if (!session.initialize(url)) {
         qCritical("Failed to initialize session");
         return 1;

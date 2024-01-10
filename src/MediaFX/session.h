@@ -42,7 +42,7 @@ class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(Encoder* encoder, QObject* parent = nullptr);
+    Session(Encoder* encoder, bool exitOnWarning, QObject* parent = nullptr);
     ~Session();
 
     bool initialize(const QUrl& url);
@@ -59,6 +59,7 @@ private slots:
 
 private:
     static QEvent::Type renderEventType;
+    bool exitOnWarning;
     Encoder* encoder;
     microseconds m_frameDuration;
     AnimationDriver* animationDriver;

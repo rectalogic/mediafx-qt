@@ -42,8 +42,9 @@
 
 QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
-Session::Session(Encoder* encoder, QObject* parent)
+Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     : QObject(parent)
+    , exitOnWarning(exitOnWarning)
     , encoder(encoder)
     , m_frameDuration(encoder->frameRate().toFrameDuration())
     , animationDriver(new AnimationDriver(m_frameDuration, this))
@@ -114,9 +115,9 @@ void Session::quickViewStatusChanged(QQuickView::Status status)
 
 void Session::engineWarnings(const QList<QQmlError>& warnings)
 {
-    for (const QQmlError& warning : warnings) {
-        qWarning() << warning.toString();
-    }
+    // Warnings are logged
+    if (exitOnWarning)
+        emit quickView->engine()->exit(1);
 }
 
 bool Session::event(QEvent* event)

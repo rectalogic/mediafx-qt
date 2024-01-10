@@ -39,7 +39,7 @@ done
 
 echo Testing ${QML}
 export QT_LOGGING_RULES="qt.qml.binding.removal.info=true"
-"${MEDIAFX}" --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "ffmpeg:lossless" "${QML}" || exit 1
+"${MEDIAFX}" --exitOnWarning --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "ffmpeg:lossless" "${QML}" || exit 1
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 
 # If framehash is different, then pixel difference each frame.
