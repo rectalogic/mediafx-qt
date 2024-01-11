@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     app.installEventFilter(new EventLogger(&app));
 #endif
 
-    app.setOrganizationDomain(qSL("mediafx.stream"));
+    app.setOrganizationDomain(qSL("mediafx.org"));
     app.setOrganizationName(qSL("mediaFX"));
     app.setApplicationName(qSL("mediaFX"));
 
