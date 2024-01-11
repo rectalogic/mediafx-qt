@@ -15,7 +15,7 @@
 #include <QStringLiteral>
 #include <QUrl>
 
-const auto ffmpegPreamble = qSL("-hide_banner -loglevel warning -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i async:pipe:${MEDIAFX_VIDEOFD}");
+const auto ffmpegPreamble = qSL(" -hide_banner -loglevel warning -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i async:pipe:${MEDIAFX_VIDEOFD} ");
 
 int main(int argc, char* argv[])
 {
@@ -61,20 +61,21 @@ int main(int argc, char* argv[])
         command = parser.value(qSL("command"));
         if (command == qSL("ffplay")) {
             // XXX need to handle audio eventually
-            command = qSL("ffplay -autoexit -infbuf ") + ffmpegPreamble;
-        } else if (command.startsWith(qSL("ffmpeg:"))) {
+            command = qSL("ffplay -autoexit -infbuf") + ffmpegPreamble;
+        } else if (command == qSL("ffmpeg") || command.startsWith(qSL("ffmpeg:"))) {
             if (!parser.isSet(qSL("output"))) {
                 parser.showHelp(1);
             }
             if (command == qSL("ffmpeg:lossless")) {
-                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f nut -vcodec ffv1 -flags bitexact -g 1 -level 3 -pix_fmt rgb32 -fflags bitexact -y ${MEDIAFX_OUTPUT}");
+                command = qSL("ffmpeg") + ffmpegPreamble + qSL("-f mp4 -codec:v libx264 -preset veryslow -qp 0 -y ${MEDIAFX_OUTPUT}");
             } else if (command == qSL("ffmpeg:mov")) {
-                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -f mov -vcodec rawvideo -pix_fmt uyvy422 -vtag yuvs -y ${MEDIAFX_OUTPUT}");
-            } else if (command == qSL("ffmpeg:")) {
+                command = qSL("ffmpeg") + ffmpegPreamble + qSL("-f mov -codec:v rawvideo -pix_fmt uyvy422 -vtag yuvs -y ${MEDIAFX_OUTPUT}");
+            } else if (command == qSL("ffmpeg")) {
                 // Let ffmpeg choose codec/format based on filename suffix
-                command = qSL("ffmpeg ") + ffmpegPreamble + qSL(" -y ${MEDIAFX_OUTPUT}");
+                command = qSL("ffmpeg") + ffmpegPreamble + qSL("-y ${MEDIAFX_OUTPUT}");
             } else {
-                parser.showHelp(1);
+                // Treat arguments as encoding parameters
+                command = qSL("ffmpeg") + ffmpegPreamble + command.last(command.size() - qSL("ffmpeg:").size()) + qSL(" -y ${MEDIAFX_OUTPUT}");
             }
         }
     }

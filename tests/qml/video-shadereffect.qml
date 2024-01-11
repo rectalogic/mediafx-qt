@@ -9,7 +9,7 @@ Item {
     MediaClip {
         id: videoClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
+        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.mp4")
 
         Component.onCompleted: {
             videoClip.clipEnded.connect(MediaManager.finishEncoding);

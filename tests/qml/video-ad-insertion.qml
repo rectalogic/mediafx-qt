@@ -9,7 +9,7 @@ Item {
     MediaClip {
         id: videoClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.nut")
+        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.mp4")
 
         Component.onCompleted: {
             // End encoding when main videoClip finishes
@@ -19,7 +19,7 @@ Item {
     MediaClip {
         id: adClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
+        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.mp4")
 
         // Switch back to default state when ad ends - main videoClip playing
         onClipEnded: videoOutput.state = ""

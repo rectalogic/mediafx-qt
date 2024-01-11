@@ -2,7 +2,7 @@
 # Copyright (C) 2023 Andrew Wason
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> <threshold> [asset-spec ...]"
+usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> <threshold>"
 
 BASE=${BASH_SOURCE%/*}
 
@@ -17,17 +17,14 @@ QML=${1:?$usage}
 shift
 OUTPUT=${1:?$usage}
 shift
+mkdir -p $(dirname "${OUTPUT}")
 THRESHOLD=${1:?$usage}
 shift
-mkdir -p $(dirname "${OUTPUT}")
-
-for assetspec in "$@"; do
-    "${BASE}/../tools/create-asset.sh" "${ASSETS}" ${assetspec} || exit 1
-done
 
 echo Testing ${QML}
 export QT_LOGGING_RULES="qt.qml.binding.removal.info=true"
 "${MEDIAFX}" --exitOnWarning --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "ffmpeg:lossless" "${QML}" || exit 1
+
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 
 # If framehash is different, then pixel difference each frame.
@@ -38,5 +35,5 @@ FIXTURE=${FIXTURES}/$(basename "${OUTPUT}")
 if ( ! diff "${FIXTURE}.framehash" "${OUTPUT}.framehash" ); then
     echo Warning: framehash is different, comparing frames
     mkdir -p "${OUTPUT}-png"
-    ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=${THRESHOLD}:function=less,metadata=print:file=-" -an -v 24 "${OUTPUT}-png/frame-%05d.png" | grep pblack ) || exit 1
+    ( ! ffmpeg -hide_banner -i "${FIXTURE}" -i "${OUTPUT}" -filter_complex "blend=all_mode=difference,blackframe=amount=0:threshold=3,metadata=select:key=lavfi.blackframe.pblack:value=${THRESHOLD}:function=less,metadata=print:file=-" -an -loglevel warning "${OUTPUT}-png/frame-%05d.png" | grep pblack ) || exit 1
 fi
