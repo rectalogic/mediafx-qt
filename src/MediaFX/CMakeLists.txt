@@ -54,18 +54,18 @@ qt_add_qml_module(mediafx
     qml/MediaSequence.qml
     qml/MultiEffectState.qml
     qml/ShaderEffectState.qml
-    qml/effects/MediaMixer.qml
-    qml/effects/CrossFadeMixer.qml
-    qml/effects/LumaMixer.qml
-    qml/effects/LumaGradientMixer.qml
-    qml/effects/WipeMixer.qml
+    qml/mixers/MediaMixer.qml
+    qml/mixers/CrossFadeMixer.qml
+    qml/mixers/LumaMixer.qml
+    qml/mixers/LumaGradientMixer.qml
+    qml/mixers/WipeMixer.qml
 )
 qt_add_shaders(mediafx "shaders"
     PREFIX
     "/"
     FILES
-    qml/effects/crossfade.frag
-    qml/effects/luma.frag
+    qml/mixers/crossfade.frag
+    qml/mixers/luma.frag
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)

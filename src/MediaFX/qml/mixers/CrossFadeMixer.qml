@@ -16,5 +16,5 @@
 import MediaFX
 
 MediaMixer {
-    fragmentShader: "qrc:/qml/effects/crossfade.frag.qsb"
+    fragmentShader: "qrc:/qml/mixers/crossfade.frag.qsb"
 }

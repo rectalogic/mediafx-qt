@@ -23,7 +23,7 @@ MediaMixer {
     property real transitionWidth: 1.0
     readonly property real premultipliedTransitionWidth: root.time * (transitionWidth + 1.0)
 
-    fragmentShader: "qrc:/qml/effects/luma.frag.qsb"
+    fragmentShader: "qrc:/qml/mixers/luma.frag.qsb"
     state: "default"
 
     states: State {
