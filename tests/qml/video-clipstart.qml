@@ -21,7 +21,7 @@ Item {
     MediaClip {
         id: videoClip
 
-        clipStart: 5000
+        startTime: 5000
         source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.nut")
 
         Component.onCompleted: {

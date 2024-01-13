@@ -35,8 +35,8 @@
 
 MediaClip::MediaClip(QObject* parent)
     : QObject(parent)
-    , m_clipStart(-1)
-    , m_clipEnd(-1)
+    , m_startTime(-1)
+    , m_endTime(-1)
     , m_currentFrameTime(-1, -1)
     , m_videoTrack(new VideoTrack(this))
     , m_audioTrack(new AudioTrack(this))
@@ -58,26 +58,26 @@ void MediaClip::setSource(const QUrl& url)
     m_source = url;
 }
 
-void MediaClip::setClipStart(qint64 ms)
+void MediaClip::setStartTime(qint64 ms)
 {
-    if (m_clipStart != -1) {
-        qmlWarning(this) << "MediaClip clipStart is a write-once property and cannot be changed";
+    if (m_startTime != -1) {
+        qmlWarning(this) << "MediaClip startTime is a write-once property and cannot be changed";
         return;
     }
-    m_clipStart = ms;
-    emit clipStartChanged();
-    emit clipDurationChanged();
+    m_startTime = ms;
+    emit startTimeChanged();
+    emit durationChanged();
 }
 
-void MediaClip::setClipEnd(qint64 ms)
+void MediaClip::setEndTime(qint64 ms)
 {
-    if (m_clipEnd != -1) {
-        qmlWarning(this) << "MediaClip clipEnd is a write-once property and cannot be changed";
+    if (m_endTime != -1) {
+        qmlWarning(this) << "MediaClip endTime is a write-once property and cannot be changed";
         return;
     }
-    m_clipEnd = ms;
-    emit clipEndChanged();
-    emit clipDurationChanged();
+    m_endTime = ms;
+    emit endTimeChanged();
+    emit durationChanged();
 }
 
 void MediaClip::render()
@@ -85,7 +85,7 @@ void MediaClip::render()
     if (!isActive())
         return;
 
-    emit clipCurrentTimeChanged();
+    emit currentFrameTimeChanged();
 
     if (m_audioTrack)
         m_audioTrack->render(m_currentFrameTime);
@@ -94,7 +94,7 @@ void MediaClip::render()
 
     m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->frameDuration());
 
-    if (m_currentFrameTime.start() >= m_clipEnd) {
+    if (m_currentFrameTime.start() >= m_endTime) {
         if (m_audioTrack)
             m_audioTrack->stop();
         if (m_videoTrack)
@@ -164,11 +164,11 @@ void MediaClip::loadMedia()
 void MediaClip::componentComplete()
 {
     m_componentComplete = true;
-    if (clipStart() < 0)
-        setClipStart(0);
+    if (startTime() < 0)
+        setStartTime(0);
     loadMedia();
-    if (clipEnd() < 0) {
-        setClipEnd(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
+    if (endTime() < 0) {
+        setEndTime(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
     }
-    m_currentFrameTime = Interval(milliseconds(clipStart()), milliseconds(clipStart()) + MediaManager::singletonInstance()->frameDuration());
+    m_currentFrameTime = Interval(milliseconds(startTime()), milliseconds(startTime()) + MediaManager::singletonInstance()->frameDuration());
 }

@@ -17,11 +17,11 @@ function onClipEnded() {
     MediaManager.frameRendered.connect(nextClip);
 };
 
-function onClipCurrentTimeChanged() {
+function onCurrentFrameTimechanged() {
     var clip = root.mediaClips[internal.currentClipIndex];
-    if (clip.clipCurrentTime.start >= internal.mixStartTime) {
+    if (clip.currentFrameTime.start >= internal.mixStartTime) {
         internal.state = "mixer";
-        root.mediaMixers[internal.currentMixerIndex].time = (clip.clipCurrentTime.start - internal.mixStartTime) / (clip.clipEnd - internal.mixStartTime);
+        root.mediaMixers[internal.currentMixerIndex].time = (clip.currentFrameTime.start - internal.mixStartTime) / (clip.endTime - internal.mixStartTime);
     }
 };
 
@@ -29,7 +29,7 @@ function nextClip() {
     MediaManager.frameRendered.disconnect(nextClip);
     if (internal.currentClipIndex + 1 < root.mediaClips.length) {
         var clip = root.mediaClips[internal.currentClipIndex];
-        clip.clipCurrentTimeChanged.disconnect(onClipCurrentTimeChanged);
+        clip.currentFrameTimeChanged.disconnect(onCurrentFrameTimechanged);
         clip.clipEnded.disconnect(onClipEnded);
         internal.currentClipIndex += 1;
         initializeClip();
@@ -46,9 +46,9 @@ function initializeClip() {
     }
     else {
         var mixer = root.mediaMixers[internal.currentMixerIndex];
-        var clampedMixDuration = Math.min(Math.min(mixer.duration, clip.clipDuration), root.mediaClips[internal.currentClipIndex + 1].clipDuration);
-        internal.mixStartTime = clip.clipEnd - clampedMixDuration;
-        clip.clipCurrentTimeChanged.connect(onClipCurrentTimeChanged);
+        var clampedMixDuration = Math.min(Math.min(mixer.duration, clip.duration), root.mediaClips[internal.currentClipIndex + 1].duration);
+        internal.mixStartTime = clip.endTime - clampedMixDuration;
+        clip.currentFrameTimeChanged.connect(onCurrentFrameTimechanged);
         clip.clipEnded.connect(onClipEnded);
     }
     internal.state = "video";

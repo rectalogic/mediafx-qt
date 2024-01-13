@@ -45,8 +45,8 @@ Item {
         states: [
             State {
                 name: "ad"
-                // 4 sec into the main video, switch to playing the ad. This also stops videoClip.clipCurrentTime
-                when: (videoClip.clipCurrentTime.contains(4000))
+                // 4 sec into the main video, switch to playing the ad. This also stops videoClip.currentFrameTime
+                when: (videoClip.currentFrameTime.contains(4000))
 
                 PropertyChanges {
                     Media.clip: adClip

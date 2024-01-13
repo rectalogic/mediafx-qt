@@ -31,19 +31,19 @@ class MediaClip : public QObject, public QQmlParserStatus {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
-    Q_PROPERTY(int clipStart READ clipStart WRITE setClipStart NOTIFY clipStartChanged FINAL)
-    Q_PROPERTY(int clipEnd READ clipEnd WRITE setClipEnd NOTIFY clipEndChanged FINAL)
-    Q_PROPERTY(int clipDuration READ clipDuration NOTIFY clipDurationChanged FINAL)
+    Q_PROPERTY(int startTime READ startTime WRITE setStartTime NOTIFY startTimeChanged FINAL)
+    Q_PROPERTY(int endTime READ endTime WRITE setEndTime NOTIFY endTimeChanged FINAL)
+    Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
     Q_PROPERTY(bool active READ isActive NOTIFY activeChanged FINAL)
-    Q_PROPERTY(Interval clipCurrentTime READ clipCurrentTime NOTIFY clipCurrentTimeChanged FINAL)
+    Q_PROPERTY(Interval currentFrameTime READ currentFrameTime NOTIFY currentFrameTimeChanged FINAL)
     QML_ELEMENT
 
 signals:
-    void clipStartChanged();
-    void clipEndChanged();
-    void clipDurationChanged();
+    void startTimeChanged();
+    void endTimeChanged();
+    void durationChanged();
     void activeChanged(bool);
-    void clipCurrentTimeChanged();
+    void currentFrameTimeChanged();
     void clipEnded();
 
 public:
@@ -55,15 +55,15 @@ public:
     QUrl source() const { return m_source; };
     void setSource(const QUrl&);
 
-    qint64 clipStart() const { return m_clipStart; };
-    void setClipStart(qint64 ms);
+    qint64 startTime() const { return m_startTime; };
+    void setStartTime(qint64 ms);
 
-    qint64 clipEnd() const { return m_clipEnd; };
-    void setClipEnd(qint64 ms);
+    qint64 endTime() const { return m_endTime; };
+    void setEndTime(qint64 ms);
 
-    qint64 clipDuration() const { return m_clipEnd - m_clipStart; };
+    qint64 duration() const { return m_endTime - m_startTime; };
 
-    const Interval& clipCurrentTime() const { return m_currentFrameTime; };
+    const Interval& currentFrameTime() const { return m_currentFrameTime; };
 
     void setActive(bool active);
     bool isActive() const { return m_active; };
@@ -89,8 +89,8 @@ private:
     bool m_componentComplete = false;
     bool m_active = false;
     QUrl m_source;
-    qint64 m_clipStart;
-    qint64 m_clipEnd;
+    qint64 m_startTime;
+    qint64 m_endTime;
 
     Interval m_currentFrameTime;
 

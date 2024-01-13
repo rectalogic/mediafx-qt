@@ -38,7 +38,7 @@ Item {
             name: "filter"
             videoOutput: videoOutput
             // From 1-2 sec into the video, switch to greyscale
-            when: (videoClip.clipCurrentTime.containedBy(1000, 2000))
+            when: (videoClip.currentFrameTime.containedBy(1000, 2000))
 
             MultiEffect {
                 saturation: -1.0

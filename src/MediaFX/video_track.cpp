@@ -159,7 +159,7 @@ bool VideoTrack::initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo
 {
     int videoTrackNum = FFMS_GetFirstTrackOfType(index, FFMS_TYPE_VIDEO, &errorInfo);
     if (videoTrackNum >= 0) {
-        FFMS_VideoSource* videoSource = FFMS_CreateVideoSource(sourceFile, videoTrackNum, index, 1, mediaClip()->clipStart() == 0 ? FFMS_SEEK_LINEAR_NO_RW : FFMS_SEEK_NORMAL, &errorInfo);
+        FFMS_VideoSource* videoSource = FFMS_CreateVideoSource(sourceFile, videoTrackNum, index, 1, mediaClip()->startTime() == 0 ? FFMS_SEEK_LINEAR_NO_RW : FFMS_SEEK_NORMAL, &errorInfo);
         if (videoSource) {
             const FFMS_Frame* frameProperties = FFMS_GetFrame(videoSource, 0, &errorInfo);
             if (frameProperties) {
@@ -173,7 +173,7 @@ bool VideoTrack::initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo
                     m_videoFrame.first = QVideoFrame(format);
                     m_videoFrame.second = QVideoFrame(format);
                     // Prime first frames data
-                    if (mediaClip()->clipStart() == 0) {
+                    if (mediaClip()->startTime() == 0) {
                         mapVideoFrameData(m_videoFrame.first, frameProperties);
                     }
                     updateActive();

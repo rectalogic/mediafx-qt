@@ -9,7 +9,7 @@ Item {
     MediaClip {
         id: videoClip
 
-        clipStart: 3000
+        startTime: 3000
         source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s.nut")
 
         Component.onCompleted: {
@@ -19,7 +19,7 @@ Item {
     MediaClip {
         id: imageClip
 
-        clipEnd: 3000
+        endTime: 3000
         source: Qt.resolvedUrl("../fixtures/assets/red-160x120.png")
     }
     RowLayout {

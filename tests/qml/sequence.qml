@@ -45,14 +45,14 @@ Item {
             source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.nut")
         }
         MediaClip {
-            clipEnd: 3000
+            endTime: 3000
             source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.nut")
         }
         MediaClip {
             source: Qt.resolvedUrl("../fixtures/assets/green-320x180-15fps-3s.nut")
         }
         MediaClip {
-            clipEnd: 3000
+            endTime: 3000
             source: Qt.resolvedUrl("../fixtures/assets/red-160x120.png")
         }
         MediaClip {
