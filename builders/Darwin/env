@@ -1,0 +1,5 @@
+# Copyright (C) 2024 Andrew Wason
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+export QTDIR=${BUILD_ROOT}/installed/${QT_VER}/macos
+export PATH=${QTDIR}/bin:$PATH

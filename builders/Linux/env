@@ -1,0 +1,6 @@
+# Copyright (C) 2024 Andrew Wason
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+export GALLIUM_DRIVER=softpipe
+export LIBGL_ALWAYS_SOFTWARE=1
+export DRI_NO_MSAA=1

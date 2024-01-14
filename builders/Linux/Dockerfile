@@ -37,7 +37,7 @@ RUN apt-get -y update \
     fontconfig fonts-liberation
 
 COPY --from=build /usr/local/Qt /usr/local/Qt/
-
+ENV QTDIR /usr/local/Qt/${QT_VER}/gcc_64
 ENV PATH /usr/local/Qt/${QT_VER}/gcc_64/bin:$PATH
 ENV QT_VER=${QT_VER}
 
@@ -51,4 +51,4 @@ WORKDIR /mediafx/build/Linux
 COPY entrypoint.sh xvfb.sh /entrypoint/
 
 ENTRYPOINT ["/entrypoint/entrypoint.sh"]
-CMD ["/mediafx/builders/Linux/mediafx-build.sh"]
+CMD ["/mediafx/builders/mediafx-build.sh"]

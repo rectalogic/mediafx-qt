@@ -96,7 +96,7 @@ jobs:
         key: ${{ steps.restore-cache.outputs.cache-primary-key }}
     - name: Build/test mediaFX
       run: |
-        MEDIAFX_TEST= builders/Darwin/mediafx-build.sh
+        MEDIAFX_TEST= builders/mediafx-build.sh
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v3

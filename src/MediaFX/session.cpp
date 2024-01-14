@@ -13,7 +13,6 @@
 #include <QMessageLogContext>
 #include <QObject>
 #include <QQmlEngine>
-#include <QQmlError>
 #include <QQuickItem>
 #include <QQuickView>
 #include <QSGRendererInterface>
