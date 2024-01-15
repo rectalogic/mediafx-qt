@@ -4,3 +4,4 @@
 export GALLIUM_DRIVER=softpipe
 export LIBGL_ALWAYS_SOFTWARE=1
 export DRI_NO_MSAA=1
+export SUDO=sudo
