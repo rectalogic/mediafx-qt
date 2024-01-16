@@ -8,6 +8,7 @@
 #include <QSize>
 #include <QString>
 #include <QStringLiteral>
+#include <QtTypes>
 #include <chrono>
 #include <stdio.h>
 using namespace std::chrono;
@@ -107,6 +108,7 @@ public:
     constexpr FrameRate frameRate() const noexcept { return m_frameRate; };
     constexpr int audiofd() const noexcept { return m_audiofd; };
     constexpr int videofd() const noexcept { return m_videofd; };
+    int write(int fd, qsizetype size, const char* data);
 
 private:
     FrameSize m_frameSize;

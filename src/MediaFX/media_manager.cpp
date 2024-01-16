@@ -5,7 +5,6 @@
 #include "media_clip.h"
 #include <QObject>
 #include <chrono>
-class QQuickView;
 using namespace std::chrono;
 
 MediaManager::MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent)

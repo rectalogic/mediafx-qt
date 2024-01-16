@@ -97,3 +97,17 @@ bool Encoder::initialize(const QString& output, const QString& command)
 
     return true;
 }
+
+int Encoder::write(int fd, qsizetype size, const char* data)
+{
+    size_t bytesIO = 0;
+    while (bytesIO < size) {
+        ssize_t n = ::write(fd, data + bytesIO, size - bytesIO);
+        if (n == -1) {
+            qCritical() << "write failed: " << strerror(errno);
+            return -1;
+        }
+        bytesIO = bytesIO + n;
+    }
+    return size;
+}

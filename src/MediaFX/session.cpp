@@ -17,10 +17,7 @@
 #include <QQuickView>
 #include <QSGRendererInterface>
 #include <QUrl>
-#include <errno.h>
 #include <ffms.h>
-#include <string.h>
-#include <unistd.h>
 #ifdef MEDIAFX_ENABLE_VULKAN
 #include <QQuickGraphicsConfiguration>
 #endif
@@ -114,27 +111,13 @@ bool Session::event(QEvent* event)
     return QObject::event(event);
 }
 
-int write(int fd, qsizetype size, const char* data)
-{
-    size_t bytesIO = 0;
-    while (bytesIO < size) {
-        ssize_t n = write(fd, data + bytesIO, size - bytesIO);
-        if (n == -1) {
-            qCritical() << "write failed: " << strerror(errno);
-            return -1;
-        }
-        bytesIO = bytesIO + n;
-    }
-    return size;
-}
-
 void Session::render()
 {
     manager->render();
 
     auto frameData = renderControl->renderVideoFrame();
 
-    if (write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
+    if (encoder->write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
         return;
 
     emit manager->frameRendered();

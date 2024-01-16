@@ -3,6 +3,7 @@
 
 find_package(PkgConfig)
 pkg_search_module(ffms2 REQUIRED IMPORTED_TARGET ffms2)
+pkg_search_module(libavutil REQUIRED IMPORTED_TARGET libavutil)
 
 option(EVENT_LOGGER "Enable event logger" OFF)
 
@@ -21,7 +22,7 @@ qt_add_library(mediafx STATIC
 )
 
 target_include_directories(mediafx PUBLIC ./)
-target_include_directories(mediafx PRIVATE ${FFMS2_INCLUDE_DIRS})
+target_include_directories(mediafx PRIVATE ${FFMS2_INCLUDE_DIRS} ${LIBAVUTIL_INCLUDE_DIRS})
 target_compile_options(mediafx PUBLIC ${FFMS2_CFLAGS})
 
 qt_add_executable(mediafxtool
