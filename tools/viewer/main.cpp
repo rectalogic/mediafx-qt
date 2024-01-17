@@ -13,21 +13,22 @@
 #include <QtLogging>
 #include <chrono>
 using namespace std::chrono;
+using namespace Qt::Literals::StringLiterals;
 
 int main(int argc, char* argv[])
 {
     initializeMediaFX();
     QGuiApplication app(argc, argv);
 
-    app.setOrganizationDomain(qSL("mediafx.stream"));
-    app.setOrganizationName(qSL("mediaFX"));
-    app.setApplicationName(qSL("mediaFX viewer"));
+    app.setOrganizationDomain(u"mediafx.org"_s);
+    app.setOrganizationName(u"mediaFX"_s);
+    app.setApplicationName(u"mediaFX viewer"_s);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(qSL("mediaFX viewer"));
+    parser.setApplicationDescription(u"mediaFX viewer"_s);
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
-    parser.addPositionalArgument(qSL("source"), qSL("QML source URL."));
+    parser.addPositionalArgument(u"source"_s, u"QML source URL."_s);
 
     parser.process(app);
 

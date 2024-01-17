@@ -3,6 +3,4 @@
 
 #pragma once
 
-#define qSL QStringLiteral
-
 void initializeMediaFX();
