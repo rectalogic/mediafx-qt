@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     app.setApplicationName(u"mediaFX"_s);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(u"mediaFX"_s);
+    parser.setApplicationDescription(u"mediaFX\nCopyright (C) 2023-2024 Andrew Wason\nSPDX-License-Identifier: GPL-3.0-or-later"_s);
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
     parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be float or rational e.g. 30000/1001"_s, u"fps"_s, u"30"_s });
