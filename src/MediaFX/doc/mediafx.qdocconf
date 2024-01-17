@@ -1,0 +1,67 @@
+# Copyright (C) 2024 Andrew Wason
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+project = MediaFX
+description = MediaFX Documentation
+moduleheader =
+
+outputformats = HTML
+language = QML
+syntaxhighlighting = true
+
+depends = qtquick qtmultimedia
+
+sources.fileextensions = "*.cpp *.qdoc *.qml"
+headers.fileextensions = "*.h"
+
+sourcedirs += ../ ../qml/
+headerdirs += ../
+exampledirs += ../../../tests/qml/
+
+HTML.extraimages = \
+    images/arrow_bc.png \
+    images/btn_prev.png \
+    images/ico_note.png \
+    images/bgrContent.png \
+    images/bullet_dn.png \
+    images/ico_note_attention.png \
+    images/btn_next.png \
+    images/home.png
+HTML.templatedir = .
+HTML.stylesheets = style/offline.css style/highlight.css
+
+HTML.headerstyles = \
+    "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/offline.css\" />\n" \
+    "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/highlight.css\" />\n"
+HTML.endheader = \
+    "</head>\n"
+HTML.postheader = \
+    "<body>\n" \
+    "<div class=\"header\" id=\"qtdocheader\">\n"\
+    "    <div class=\"main\">\n" \
+    "    <div class=\"main-rounded\">\n" \
+    "        <div class=\"navigationbar\">\n"\
+    "        <ul>\n"
+HTML.postpostheader = \
+    "    <li id=\"buildversion\"><a href=\"/\">Home</a></li>\n" \
+    "    </ul>\n"\
+    "    </div>\n" \
+    "</div>\n" \
+    "<div class=\"content\">\n" \
+    "<div class=\"line\">\n" \
+    "<div class=\"content mainContent\">\n"
+HTML.footer = \
+    "        </div>\n" \
+    "       </div>\n" \
+    "   </div>\n" \
+    "   </div>\n" \
+    "</div>\n" \
+    "<div class=\"footer\">\n" \
+    "   <div>\n" \
+    "      <acronym title=\"Copyright\">&copy;</acronym> 2023 Andrew Wason\n" \
+    "      <div class=\"github\">\n" \
+    "         <img src=\"https://github.githubassets.com/assets/github-mark-9be88460eaa6.svg\"/>\n" \
+    "         <a href=\"https://github.com/rectalogic/mediafx\">MediaFX GitHub</a>" \
+    "      </div>\n" \
+    "   </div>\n" \
+    "</div>\n"

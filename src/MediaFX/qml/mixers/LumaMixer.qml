@@ -4,10 +4,18 @@
 import QtQuick
 import MediaFX
 
+/*!
+    \qmltype LumaMixer
+    \inqmlmodule MediaFX
+    \ingroup mixers
+    \brief Crossfade/wipe source to dest using a greyscale luma "map" image.
+*/
 MediaMixer {
     id: root
 
+    /*! The item to use as the greyscale luma image. */
     default required property Item luma
+    /*! Softness of the wip, 0.0 is a hard wipe, higher values are softer. */
     property real transitionWidth: 1.0
     readonly property real premultipliedTransitionWidth: root.time * (transitionWidth + 1.0)
 

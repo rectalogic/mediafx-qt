@@ -45,8 +45,10 @@ public:
     bool isFinishedEncoding() const { return finishedEncoding; }
 
 signals:
-    void finishEncoding();
     void currentRenderTimeChanged();
+
+public slots:
+    void finishEncoding();
 
 private:
     microseconds m_frameDuration;

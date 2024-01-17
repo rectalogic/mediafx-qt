@@ -36,7 +36,8 @@ jobs:
     - name: Build mediafx image
       uses: docker/build-push-action@v5
       with:
-        context: builders/Linux
+        context: builders/
+        file: builders/Linux/Dockerfile
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         push: true
@@ -83,7 +84,7 @@ jobs:
       id: restore-cache
       with:
         path: build/Darwin/installed
-        key: ${{ runner.os }}-${{ hashFiles('builders/versions') }}-${{ env.XCODE_VER }}
+        key: ${{ runner.os }}-${{ hashFiles('builders/versions') }}-${{ hashFiles('builders/Darwin/install-qt6.sh') }}-${{ hashFiles('builders/aqtinstall-requirements.txt') }}-${{ env.XCODE_VER }}
     - name: Build installation
       if: steps.restore-cache.outputs.cache-hit != 'true'
       run: |

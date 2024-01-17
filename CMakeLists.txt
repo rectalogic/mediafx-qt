@@ -1,7 +1,7 @@
 # Copyright (C) 2023 Andrew Wason
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.22)
 
 project(mediaFX VERSION 1.0.0 LANGUAGES CXX)
 

@@ -5,6 +5,12 @@ import QtQuick
 import QtQuick.Shapes
 import MediaFX
 
+/*!
+    \qmltype WipeMixer
+    \inqmlmodule MediaFX
+    \ingroup mixers
+    \brief Wipe source to dest using a generated gradient luma map.
+*/
 LumaGradientMixer {
     id: root
 
@@ -15,7 +21,19 @@ LumaGradientMixer {
         Right
     }
 
+    /*!
+        \qmlproperty enumeration WipeMixer::direction
+
+        Wipe direction.
+
+        \value WipeMixer.Direction.Up up
+        \value WipeMixer.Direction.Down down
+        \value WipeMixer.Direction.Left left
+        \value WipeMixer.Direction.Right right
+    */
     property int direction: WipeMixer.Direction.Right
+
+    /*! Split wipe into "venetian blinds" if > 0. */
     property real blindsEffect: 0.0
 
     function isDirectionHorizontal(): bool {

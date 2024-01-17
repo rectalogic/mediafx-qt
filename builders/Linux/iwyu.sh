@@ -4,7 +4,7 @@
 
 set -e
 
-sudo mkdir -p /mediafx/build/Linux
+mkdir -p /mediafx/build/Linux
 cd /mediafx/build/Linux
 if [ ! -f "qt${QT_VER}.imp" ]; then
     curl -O https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_13/mapgen/iwyu-mapgen-qt.py

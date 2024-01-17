@@ -1,0 +1,39 @@
+@media screen {
+    span.comment {
+        color: #008B00;
+        font-style: italic
+    }
+
+    span.string,
+    span.char {
+        color: #000084;
+    }
+
+    span.number {
+        color: #a46200;
+    }
+
+    span.operator {
+        color: #202020;
+    }
+
+    span.keyword {
+        color: #840000;
+    }
+
+    span.name {
+        color: black
+    }
+
+    span.type {
+        font-weight: bold
+    }
+
+    span.type a:visited {
+        color: #0F5300;
+    }
+
+    span.preprocessor {
+        color: #404040
+    }
+}

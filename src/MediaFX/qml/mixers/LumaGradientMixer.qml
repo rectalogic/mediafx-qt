@@ -5,9 +5,19 @@ import QtQuick
 import QtQuick.Shapes
 import MediaFX
 
+/*!
+    \qmltype LumaGradientMixer
+    \inqmlmodule MediaFX
+    \ingroup mixers
+    \brief LumaMixer that uses a ShapeGradient as the luma map.
+*/
 LumaMixer {
     id: root
 
+    /*!
+        \qmlproperty ShapeGradient ShapePath::fillGradient
+        \sa ShapePath::fillGradient
+    */
     property alias fillGradient: path.fillGradient
 
     Shape {

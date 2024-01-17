@@ -19,6 +19,19 @@
 #include <chrono>
 #include <ffms.h>
 
+/*!
+    \qmlsignal MediaClip::clipEnded()
+
+    This signal is emitted when the clip has finished playback.
+*/
+
+/*!
+    \qmltype MediaClip
+    //! \instantiates MediaClip
+    \inqmlmodule MediaFX
+
+    \brief Plays audio and video frames from a \l source.
+*/
 MediaClip::MediaClip(QObject* parent)
     : QObject(parent)
     , m_startTime(-1)
@@ -31,6 +44,11 @@ MediaClip::MediaClip(QObject* parent)
 
 MediaClip::~MediaClip() = default;
 
+/*!
+    \qmlproperty url MediaClip::source
+
+    The source media file url.
+*/
 void MediaClip::setSource(const QUrl& url)
 {
     if (url.isEmpty()) {
@@ -44,6 +62,12 @@ void MediaClip::setSource(const QUrl& url)
     m_source = url;
 }
 
+/*!
+    \qmlproperty int MediaClip::startTime
+
+    The start time offset (in milliseconds) of the clip.
+    Defaults to 0.
+*/
 void MediaClip::setStartTime(qint64 ms)
 {
     if (m_startTime != -1) {
@@ -55,6 +79,12 @@ void MediaClip::setStartTime(qint64 ms)
     emit durationChanged();
 }
 
+/*!
+    \qmlproperty int MediaClip::endTime
+
+    The end time (in milliseconds) of the clip.
+    Defaults to the clips duration.
+*/
 void MediaClip::setEndTime(qint64 ms)
 {
     if (m_endTime != -1) {
@@ -65,6 +95,13 @@ void MediaClip::setEndTime(qint64 ms)
     emit endTimeChanged();
     emit durationChanged();
 }
+
+/*!
+    \qmlproperty int MediaClip::duration
+
+    The duration (in milliseconds) of the clip.
+    This is (\l endTime - \l startTime).
+*/
 
 void MediaClip::render()
 {
@@ -90,6 +127,11 @@ void MediaClip::render()
     }
 }
 
+/*!
+    \qmlproperty bool MediaClip::active
+
+    \c true if the clip is currently rendering video frames into a \l VideoOutput.
+*/
 void MediaClip::setActive(bool active)
 {
     if (m_active != active) {
@@ -158,3 +200,9 @@ void MediaClip::componentComplete()
     }
     m_currentFrameTime = Interval(milliseconds(startTime()), milliseconds(startTime()) + MediaManager::singletonInstance()->frameDuration());
 }
+
+/*!
+    \qmlproperty interval MediaClip::currentFrameTime
+
+    The time \l interval of the currently rendered video frame.
+*/

@@ -4,4 +4,4 @@
 
 CURRENT=${BASH_SOURCE%/*}
 source "$CURRENT/../versions"
-docker buildx build --build-arg QT_VER=${QT_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:$(git branch --show-current) "$CURRENT"
+docker buildx build --build-arg QT_VER=${QT_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:$(git branch --show-current) --file "${CURRENT}/Dockerfile" "${CURRENT}/.."

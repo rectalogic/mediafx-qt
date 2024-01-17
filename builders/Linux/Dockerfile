@@ -13,8 +13,11 @@ ENV LC_ALL=C.UTF-8
 RUN apt-get -y update \
     && apt-get -y install python3 python3-pip
 
-RUN pip3 install aqtinstall \
-    && python3 -m aqt install-qt linux desktop ${QT_VER} -m qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives icu qtbase qtdeclarative qtmultimedia qtquick3d qtshadertools qtquicktimeline qttools --outputdir /usr/local/Qt
+COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
+RUN pip3 install --requirement /tmp/aqtinstall-requirements.txt \
+    && python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
+    && python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
+    && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete
 
 
 FROM --platform=linux/amd64 ubuntu:jammy as mediafx
@@ -33,7 +36,7 @@ RUN apt-get -y update \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     libvulkan-dev mesa-vulkan-drivers \
     python3 python3-pip \
-    curl xz-utils xvfb pkg-config libffms2-dev ffmpeg \
+    curl xz-utils xvfb pkg-config libavutil-dev libffms2-dev ffmpeg \
     fontconfig fonts-liberation
 
 COPY --from=build /usr/local/Qt /usr/local/Qt/
@@ -48,7 +51,7 @@ RUN echo "mediafx ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/mediafx && chmod 044
 VOLUME /mediafx
 WORKDIR /mediafx/build/Linux
 
-COPY entrypoint.sh xvfb.sh /entrypoint/
+COPY Linux/entrypoint.sh Linux/xvfb.sh /entrypoint/
 
 ENTRYPOINT ["/entrypoint/entrypoint.sh"]
 CMD ["/mediafx/builders/mediafx-build.sh"]

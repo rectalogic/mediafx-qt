@@ -18,7 +18,7 @@ qt_add_library(mediafx STATIC
     video_track.cpp
     audio_track.cpp
     media.cpp
-    interval.h
+    interval.cpp
 )
 
 target_include_directories(mediafx PUBLIC ./)
@@ -71,3 +71,5 @@ endif()
 target_link_libraries(mediafxtool PRIVATE mediafx mediafxplugin)
 
 install(TARGETS mediafxtool RUNTIME DESTINATION)
+
+add_subdirectory(doc)

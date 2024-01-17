@@ -10,13 +10,8 @@ import MediaFX.Viewer
 ColumnLayout {
     id: layout
 
-    Component.onCompleted: MediaManager.window.color = palette.window
+    Component.onCompleted: MediaManager.window.color = MediaManager.window.palette.window
 
-    SystemPalette {
-        id: palette
-
-        colorGroup: SystemPalette.Active
-    }
     MediaMixerViewer {
         mixer: linearMixer
         Layout.fillWidth: true

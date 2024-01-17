@@ -2,7 +2,7 @@
     "name": "mediaFX",
     "build": {
         "dockerfile": "../builders/Linux/Dockerfile",
-        "context": "../builders/Linux",
+        "context": "../builders",
         "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
         "args": {
             "QT_VER": "6.6.1"

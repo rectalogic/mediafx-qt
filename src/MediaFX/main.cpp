@@ -3,17 +3,17 @@
 
 #include "application.h"
 #include "encoder.h"
-#ifdef EVENTLOGGER
-#include "event_logger.h"
-#endif
 #include "session.h"
+#include <QByteArray>
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QMessageLogContext>
 #include <QString>
 #include <QStringList>
-#include <QStringLiteral>
 #include <QUrl>
+#ifdef EVENTLOGGER
+#include "event_logger.h"
+#endif
 using namespace Qt::Literals::StringLiterals;
 
 const auto ffmpegPreamble = u" -hide_banner -loglevel warning -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i async:pipe:${MEDIAFX_VIDEOFD} "_s;

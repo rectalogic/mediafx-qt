@@ -6,12 +6,34 @@ import QtMultimedia
 import MediaFX
 import "sequence.js" as Sequence
 
+/*!
+    \qmltype MediaSequence
+    \inqmlmodule MediaFX
+    \brief Plays a sequence of MediaClips in order, with MediaMixer transitions between them.
+
+    \quotefile sequence.qml
+
+    \sa MediaMixer
+*/
 Item {
     id: root
 
+    /*! The sequence of MediaClips to play in order. */
     default required property list<MediaClip> mediaClips
+    /*!
+        A list of MediaMixers to apply to each transition.
+        If there are more clips than mixers, then mixers will be reused.
+    */
     required property list<MediaMixer> mediaMixers
+    /*!
+        \qmlproperty enumeration VideoOutput::fillMode
+        \sa {VideoOutput::fillMode}
+    */
     property alias fillMode: video.fillMode
+    /*!
+        \qmlproperty int VideoOutput::orientation
+        \sa {VideoOutput::orientation}
+    */
     property alias orientation: video.orientation
 
     signal mediaSequenceEnded

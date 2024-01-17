@@ -8,8 +8,8 @@
 #include <QList>
 #include <QQuickView>
 #include <QStringList>
-#include <QStringLiteral>
 #include <QUrl>
+#include <QtCore>
 #include <QtLogging>
 #include <chrono>
 using namespace std::chrono;
