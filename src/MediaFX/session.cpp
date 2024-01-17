@@ -114,13 +114,11 @@ bool Session::event(QEvent* event)
 void Session::render()
 {
     manager->render();
-
     auto frameData = renderControl->renderVideoFrame();
+    manager->nextRenderTime();
 
     if (encoder->write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
         return;
-
-    emit manager->frameRendered();
 
     if (manager->isFinishedEncoding()) {
         emit quickView->engine()->exit(0);

@@ -19,6 +19,7 @@ using namespace std::chrono;
 class MediaManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(QQuickView* window READ window FINAL)
+    Q_PROPERTY(Interval currentRenderTime READ currentRenderTime NOTIFY currentRenderTimeChanged FINAL)
 
 public:
     using QObject::QObject;
@@ -33,6 +34,8 @@ public:
 
     QQuickView* window() const { return m_quickView; };
     const microseconds& frameDuration() { return m_frameDuration; };
+    const Interval& currentRenderTime() const { return m_currentRenderTime; };
+    void nextRenderTime();
 
     void registerClip(MediaClip* clip);
     void unregisterClip(MediaClip* clip);
@@ -43,10 +46,11 @@ public:
 
 signals:
     void finishEncoding();
-    void frameRendered();
+    void currentRenderTimeChanged();
 
 private:
     microseconds m_frameDuration;
+    Interval m_currentRenderTime;
     QQuickView* m_quickView;
     QList<MediaClip*> activeClips;
     bool finishedEncoding = false;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 function onClipEnded() {
-    MediaManager.frameRendered.connect(nextClip);
+    MediaManager.currentRenderTimeChanged.connect(nextClip);
 };
 
 function onCurrentFrameTimechanged() {
@@ -14,7 +14,7 @@ function onCurrentFrameTimechanged() {
 };
 
 function nextClip() {
-    MediaManager.frameRendered.disconnect(nextClip);
+    MediaManager.currentRenderTimeChanged.disconnect(nextClip);
     if (internal.currentClipIndex + 1 < root.mediaClips.length) {
         var clip = root.mediaClips[internal.currentClipIndex];
         clip.currentFrameTimeChanged.disconnect(onCurrentFrameTimechanged);

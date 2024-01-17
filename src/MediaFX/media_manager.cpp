@@ -10,6 +10,7 @@ using namespace std::chrono;
 MediaManager::MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent)
     : QObject(parent)
     , m_frameDuration(frameDuration)
+    , m_currentRenderTime(Interval(0us, frameDuration))
     , m_quickView(quickView)
 {
     connect(this, &MediaManager::finishEncoding, [this]() { this->finishedEncoding = true; });
@@ -30,6 +31,12 @@ void MediaManager::registerClip(MediaClip* clip)
 void MediaManager::unregisterClip(MediaClip* clip)
 {
     activeClips.removeOne(clip);
+}
+
+void MediaManager::nextRenderTime()
+{
+    m_currentRenderTime = m_currentRenderTime.nextInterval(m_frameDuration);
+    emit currentRenderTimeChanged();
 }
 
 void MediaManager::render()
