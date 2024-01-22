@@ -5,10 +5,9 @@ import MediaFX
 
 /*!
     \qmltype CrossFadeMixer
-    \inqmlmodule MediaFX
-    \ingroup mixers
+    \inqmlmodule MediaFX.Mixers
     \brief Fades out the source video as it fades in the destination video.
 */
 MediaMixer {
-    fragmentShader: "qrc:/qml/mixers/crossfade.frag.qsb"
+    fragmentShader: "qrc:/shaders/crossfade.frag.qsb"
 }

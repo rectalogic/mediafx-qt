@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Effects
 import QtMultimedia
 import MediaFX
+import MediaFX.Mixers
 
 MediaSequence {
     id: sequence

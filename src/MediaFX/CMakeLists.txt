@@ -39,25 +39,14 @@ set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 qt_add_qml_module(mediafx
     URI MediaFX
     QML_FILES
-    qml/sequence.js
-    qml/MediaSequence.qml
-    qml/MultiEffectState.qml
-    qml/ShaderEffectState.qml
-    qml/mixers/MediaMixer.qml
-    qml/mixers/CrossFadeMixer.qml
-    qml/mixers/LumaMixer.qml
-    qml/mixers/LumaGradientMixer.qml
-    qml/mixers/WipeMixer.qml
-)
-qt_add_shaders(mediafx "shaders"
-    PREFIX
-    "/"
-    FILES
-    qml/mixers/crossfade.frag
-    qml/mixers/luma.frag
+    sequence.js
+    MediaSequence.qml
+    MultiEffectState.qml
+    ShaderEffectState.qml
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
+target_link_libraries(mediafx PRIVATE mediafxplugin mixersplugin)
 
 if(${Qt6Quick3D_FOUND})
     target_link_libraries(mediafx PUBLIC Qt6::Quick3D)
@@ -68,8 +57,9 @@ if(${Qt6WebEngineQuick_FOUND})
     add_compile_definitions(WEBENGINEQUICK)
 endif()
 
-target_link_libraries(mediafxtool PRIVATE mediafx mediafxplugin)
+target_link_libraries(mediafxtool PRIVATE mediafx)
 
 install(TARGETS mediafxtool RUNTIME DESTINATION)
 
+add_subdirectory(Mixers)
 add_subdirectory(doc)

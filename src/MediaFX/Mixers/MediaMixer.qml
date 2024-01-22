@@ -5,8 +5,7 @@ import QtQuick
 
 /*!
     \qmltype MediaMixer
-    \inqmlmodule MediaFX
-    \ingroup mixers
+    \inqmlmodule MediaFX.Mixers
     \brief Renders a video transition between two MediaClips in a MediaSequence.
     \sa MediaSequence
 */

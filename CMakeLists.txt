@@ -9,6 +9,7 @@ find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick ShaderToo
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
+cmake_policy(SET CMP0079 NEW)
 enable_testing(true)
 
 set(CMAKE_CXX_STANDARD 20)

@@ -6,8 +6,7 @@ import MediaFX
 
 /*!
     \qmltype LumaMixer
-    \inqmlmodule MediaFX
-    \ingroup mixers
+    \inqmlmodule MediaFX.Mixers
     \brief Crossfade/wipe source to dest using a greyscale luma "map" image.
 */
 MediaMixer {
@@ -19,7 +18,7 @@ MediaMixer {
     property real transitionWidth: 1.0
     readonly property real premultipliedTransitionWidth: root.time * (transitionWidth + 1.0)
 
-    fragmentShader: "qrc:/qml/mixers/luma.frag.qsb"
+    fragmentShader: "qrc:/shaders/luma.frag.qsb"
     state: "default"
 
     states: State {

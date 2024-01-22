@@ -4,6 +4,7 @@
 import QtQuick
 import QtMultimedia
 import MediaFX
+import MediaFX.Mixers
 import "sequence.js" as Sequence
 
 /*!

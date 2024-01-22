@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
 import MediaFX
+import MediaFX.Mixers
 import MediaFX.Viewer
 
 ColumnLayout {

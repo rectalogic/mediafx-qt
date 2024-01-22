@@ -1,9 +1,0 @@
-// Copyright (C) 2024 Andrew Wason
-// SPDX-License-Identifier: GPL-3.0-or-later
-
-/*!
-    \group mixers 
-    \title Media Mixers
-
-    Mixers implement transitions between subsequent MediaClips in a MediaSequence
-*/
