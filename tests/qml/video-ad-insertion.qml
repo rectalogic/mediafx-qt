@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtMultimedia
 import MediaFX
 
 Item {
@@ -22,12 +21,12 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.mp4")
 
         // Switch back to default state when ad ends - main videoClip playing
-        onClipEnded: videoOutput.state = ""
+        onClipEnded: videoRenderer.state = ""
     }
-    VideoOutput {
-        id: videoOutput
+    VideoRenderer {
+        id: videoRenderer
 
-        Media.clip: videoClip
+        mediaClip: videoClip
         anchors.fill: parent
 
         states: [
@@ -37,8 +36,8 @@ Item {
                 when: (videoClip.currentFrameTime.contains(4000))
 
                 PropertyChanges {
-                    Media.clip: adClip
-                    target: videoOutput
+                    mediaClip: adClip
+                    target: videoRenderer
                 }
             }
         ]

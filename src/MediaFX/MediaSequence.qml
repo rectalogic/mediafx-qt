@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtMultimedia
 import MediaFX
 import MediaFX.Mixers
 import "sequence.js" as Sequence
@@ -21,18 +20,21 @@ Item {
 
     /*! The sequence of MediaClips to play in order. */
     default required property list<MediaClip> mediaClips
+
     /*!
         A list of MediaMixers to apply to each transition.
         If there are more clips than mixers, then mixers will be reused.
     */
     required property list<MediaMixer> mediaMixers
+
     /*!
-        \qmlproperty enumeration VideoOutput::fillMode
+        \qmlproperty enumeration MediaSequence::fillMode
         \sa {VideoOutput::fillMode}
     */
     property alias fillMode: video.fillMode
+
     /*!
-        \qmlproperty int VideoOutput::orientation
+        \qmlproperty int MediaSequence::orientation
         \sa {VideoOutput::orientation}
     */
     property alias orientation: video.orientation
@@ -53,7 +55,7 @@ Item {
                 name: "video"
 
                 PropertyChanges {
-                    Media.clip: root.mediaClips[internal.currentClipIndex]
+                    mediaClip: root.mediaClips[internal.currentClipIndex]
                     target: video
                 }
                 PropertyChanges {
@@ -65,13 +67,13 @@ Item {
                 name: "mixer"
 
                 PropertyChanges {
-                    Media.clip: root.mediaClips[internal.currentClipIndex]
+                    mediaClip: root.mediaClips[internal.currentClipIndex]
                     layer.enabled: true
                     visible: false
                     target: video
                 }
                 PropertyChanges {
-                    Media.clip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
+                    mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
                     layer.enabled: true
                     target: auxVideo
                 }
@@ -91,12 +93,12 @@ Item {
 
         Component.onCompleted: Sequence.initializeClip()
 
-        VideoOutput {
+        VideoRenderer {
             id: video
 
             anchors.fill: internal
         }
-        VideoOutput {
+        VideoRenderer {
             id: auxVideo
 
             fillMode: video.fillMode

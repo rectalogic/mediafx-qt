@@ -36,11 +36,12 @@ public:
     qint64 duration() const override;
     void render(const Interval& frameTime) override;
     void stop() override;
-    const QList<QVideoSink*>& videoSinks() const { return m_videoSinks; };
+
+    void addVideoSink(QVideoSink* videoSink);
+    void removeVideoSink(const QVideoSink* videoSink);
 
 protected:
-    friend class MediaAttached;
-    void setVideoSinks(const QList<QVideoSink*>&);
+    const QList<QVideoSink*>& videoSinks() const { return m_videoSinks; };
     void updateActive();
 
 private:

@@ -4,16 +4,17 @@
 #pragma once
 
 #include "interval.h"
+#include "media_clip.h" // IWYU pragma: keep
 #include <QJSEngine>
 #include <QList>
 #include <QObject>
 #include <QQuickView> // IWYU pragma: keep
+#include <QVideoSink> // IWYU pragma: keep
 #include <QtAssert>
 #include <QtQml>
 #include <QtQmlIntegration>
 #include <QtTypes>
 #include <chrono>
-class MediaClip;
 using namespace std::chrono;
 
 class MediaManager : public QObject {
@@ -31,6 +32,8 @@ public:
     {
         return Interval(start, end);
     };
+
+    Q_INVOKABLE void updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVideoSink* videoSink);
 
     QQuickView* window() const { return m_quickView; };
     const microseconds& frameDuration() { return m_frameDuration; };

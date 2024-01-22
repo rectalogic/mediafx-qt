@@ -3,7 +3,7 @@
 
 import QtQuick
 import QtQuick.Effects
-import QtMultimedia
+import MediaFX
 
 /*!
     \qmltype MultiEffectState
@@ -21,25 +21,25 @@ State {
     default required property MultiEffect effect
 
     /*! The video to apply the effect to */
-    required property VideoOutput videoOutput
+    required property VideoRenderer videoRenderer
 
     Component.onCompleted: root.effect.visible = false
 
     ParentChange {
-        parent: root.videoOutput.parent
+        parent: root.videoRenderer.parent
         target: root.effect
     }
     PropertyChanges {
-        x: root.videoOutput.x
-        y: root.videoOutput.y
-        width: root.videoOutput.width
-        height: root.videoOutput.height
-        source: root.videoOutput
+        x: root.videoRenderer.x
+        y: root.videoRenderer.y
+        width: root.videoRenderer.width
+        height: root.videoRenderer.height
+        source: root.videoRenderer
         visible: true
         target: root.effect
     }
     PropertyChanges {
         visible: false
-        target: root.videoOutput
+        target: root.videoRenderer
     }
 }

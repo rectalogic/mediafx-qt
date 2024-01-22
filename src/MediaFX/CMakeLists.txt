@@ -17,7 +17,6 @@ qt_add_library(mediafx STATIC
     track.cpp
     video_track.cpp
     audio_track.cpp
-    media.cpp
     interval.cpp
 )
 
@@ -39,6 +38,7 @@ set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 qt_add_qml_module(mediafx
     URI MediaFX
     QML_FILES
+    VideoRenderer.qml
     sequence.js
     MediaSequence.qml
     MultiEffectState.qml

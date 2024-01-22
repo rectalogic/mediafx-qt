@@ -1,5 +1,4 @@
 import QtQuick
-import QtMultimedia
 import QtQuick.Layouts
 import MediaFX
 
@@ -28,24 +27,24 @@ Item {
         anchors.fill: parent
         spacing: 0
 
-        VideoOutput {
+        VideoRenderer {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.rowSpan: 2
-            Media.clip: imageClip
+            mediaClip: imageClip
         }
         ColumnLayout {
             spacing: 0
 
-            VideoOutput {
+            VideoRenderer {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                Media.clip: videoClip
+                mediaClip: videoClip
             }
-            VideoOutput {
+            VideoRenderer {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.75
-                Media.clip: videoClip
+                mediaClip: videoClip
             }
         }
     }

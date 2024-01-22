@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtMultimedia
 import MediaFX
 
 Item {
@@ -15,15 +14,15 @@ Item {
             videoClip.clipEnded.connect(MediaManager.finishEncoding);
         }
     }
-    VideoOutput {
-        id: videoOutput
+    VideoRenderer {
+        id: videoRenderer
 
         anchors.fill: parent
-        Media.clip: videoClip
+        mediaClip: videoClip
 
         states: ShaderEffectState {
             name: "filter"
-            videoOutput: videoOutput
+            videoRenderer: videoRenderer
             // From 1-2 sec into the video, switch to greyscale
             when: (videoClip.currentFrameTime.containedBy(1000, 2000))
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import QtMultimedia
 import MediaFX
 
 Item {
@@ -16,8 +15,8 @@ Item {
             videoClip.clipEnded.connect(MediaManager.finishEncoding);
         }
     }
-    VideoOutput {
-        Media.clip: videoClip
+    VideoRenderer {
+        mediaClip: videoClip
         anchors.fill: parent
     }
 }

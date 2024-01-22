@@ -69,7 +69,7 @@ protected:
     VideoTrack* videoTrack() { return m_videoTrack.get(); };
     AudioTrack* audioTrack() { return m_audioTrack.get(); };
 
-    friend class MediaAttached;
+    friend class MediaManager;
 
 private:
     bool m_componentComplete = false;

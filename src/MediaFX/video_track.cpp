@@ -156,10 +156,17 @@ qint64 VideoTrack::duration() const
     return round(videoProps->LastEndTime * 1000);
 }
 
-void VideoTrack::setVideoSinks(const QList<QVideoSink*>& videoSinks)
+void VideoTrack::addVideoSink(QVideoSink* videoSink)
 {
-    if (m_videoSinks != videoSinks) {
-        m_videoSinks = videoSinks;
+    if (!m_videoSinks.contains(videoSink)) {
+        m_videoSinks.append(videoSink);
+        updateActive();
+    }
+}
+
+void VideoTrack::removeVideoSink(const QVideoSink* videoSink)
+{
+    if (m_videoSinks.removeOne(videoSink)) {
         updateActive();
     }
 }

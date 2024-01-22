@@ -130,7 +130,7 @@ void MediaClip::render()
 /*!
     \qmlproperty bool MediaClip::active
 
-    \c true if the clip is currently rendering video frames into a \l VideoOutput.
+    \c true if the clip is currently rendering video frames into a \l VideoRenderer.
 */
 void MediaClip::setActive(bool active)
 {

@@ -3,7 +3,9 @@
 
 #include "media_manager.h"
 #include "media_clip.h"
+#include "video_track.h"
 #include <QObject>
+#include <QVideoSink>
 #include <chrono>
 using namespace std::chrono;
 
@@ -71,6 +73,22 @@ void MediaManager::registerClip(MediaClip* clip)
 void MediaManager::unregisterClip(MediaClip* clip)
 {
     activeClips.removeOne(clip);
+}
+
+void MediaManager::updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVideoSink* videoSink)
+{
+    if (oldClip) {
+        VideoTrack* videoTrack = oldClip->videoTrack();
+        if (videoTrack) {
+            videoTrack->removeVideoSink(videoSink);
+        }
+    }
+    if (newClip) {
+        VideoTrack* videoTrack = newClip->videoTrack();
+        if (videoTrack) {
+            videoTrack->addVideoSink(videoSink);
+        }
+    }
 }
 
 void MediaManager::nextRenderTime()
