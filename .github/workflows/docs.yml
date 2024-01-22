@@ -1,8 +1,10 @@
 name: Documentation
 
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -20,17 +22,21 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install kramdown
-        run: |
-          sudo gem install kramdown kramdown-parser-gfm rouge
+      - name: Copy README
+        run: cp README.md .github/workflows/doc
+      - name: Build with jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ".github/workflows/doc"
+          destination: "./jekyll"
       - name: Build with qdoc
         run: |
           builders/Linux/docker-run.sh /mediafx/builders/Linux/build-docs.sh
-          kramdown --extension parser-gfm --input GFM --template .github/workflows/doc/kramdown.html README.md > build/Linux/doc/index.html
-          cp .github/workflows/doc/kramdown.css build/Linux/doc/style
+          cp -R jekyll/* build/Linux/doc/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

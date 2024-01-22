@@ -5,7 +5,6 @@
 #include "media_clip.h"
 #include "video_track.h"
 #include <QObject>
-#include <QVideoSink>
 #include <chrono>
 using namespace std::chrono;
 

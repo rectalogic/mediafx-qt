@@ -5,7 +5,6 @@
 #include "media_manager.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
-#include <QList>
 #include <QQuickView>
 #include <QStringList>
 #include <QUrl>

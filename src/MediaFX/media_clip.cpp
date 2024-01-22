@@ -20,12 +20,6 @@
 #include <ffms.h>
 
 /*!
-    \qmlsignal MediaClip::clipEnded()
-
-    This signal is emitted when the clip has finished playback.
-*/
-
-/*!
     \qmltype MediaClip
     //! \instantiates MediaClip
     \inqmlmodule MediaFX
@@ -205,4 +199,10 @@ void MediaClip::componentComplete()
     \qmlproperty interval MediaClip::currentFrameTime
 
     The time \l interval of the currently rendered video frame.
+*/
+
+/*!
+    \qmlsignal MediaClip::clipEnded()
+
+    This signal is emitted when the clip has finished playback.
 */
