@@ -14,8 +14,8 @@ and so on.
 
 ## Documentation
 
-See the [MediaFX module](https://mediafx.org/mediafx-qmlmodule.html) documentation for the QML
-elements the module exposes.
+See the full [MediaFX documentation](https://mediafx.org/modules.html)
+for the QML elements and modules.
 
 ## Dependencies
 
