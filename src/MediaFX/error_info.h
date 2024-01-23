@@ -4,7 +4,9 @@
 
 #include <QDebug>
 #include <QDebugStateSaver>
+#include <cstdio>
 #include <ffms.h>
+#include <string>
 
 class ErrorInfo {
 public:
@@ -13,12 +15,24 @@ public:
         reset();
     }
 
-    inline void reset()
+    inline void set(int errorType, int subType)
     {
         errorInfo.Buffer = errorMessage;
         errorInfo.BufferSize = sizeof(errorMessage);
-        errorInfo.ErrorType = FFMS_ERROR_SUCCESS;
-        errorInfo.SubType = FFMS_ERROR_SUCCESS;
+        errorInfo.ErrorType = errorType;
+        errorInfo.SubType = subType;
+    }
+
+    inline void set(int errorType, int subType, const std::string& message)
+    {
+        set(errorType, subType);
+        int count = message.copy(errorInfo.Buffer, errorInfo.BufferSize - 1);
+        errorInfo.Buffer[count] = 0;
+    }
+
+    inline void reset()
+    {
+        set(FFMS_ERROR_SUCCESS, FFMS_ERROR_SUCCESS);
     }
 
     inline FFMS_ErrorInfo* operator&()

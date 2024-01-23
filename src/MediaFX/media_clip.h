@@ -10,6 +10,7 @@
 #include <QtQmlIntegration>
 #include <QtTypes>
 #include <memory>
+class AudioRenderer;
 class AudioTrack;
 class VideoTrack;
 
@@ -20,6 +21,7 @@ class MediaClip : public QObject, public QQmlParserStatus {
     Q_PROPERTY(int startTime READ startTime WRITE setStartTime NOTIFY startTimeChanged FINAL)
     Q_PROPERTY(int endTime READ endTime WRITE setEndTime NOTIFY endTimeChanged FINAL)
     Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
+    Q_PROPERTY(AudioRenderer* audioRenderer READ audioRenderer WRITE setAudioRenderer NOTIFY audioRendererChanged FINAL)
     Q_PROPERTY(bool active READ isActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(Interval currentFrameTime READ currentFrameTime NOTIFY currentFrameTimeChanged FINAL)
     QML_ELEMENT
@@ -28,7 +30,8 @@ signals:
     void startTimeChanged();
     void endTimeChanged();
     void durationChanged();
-    void activeChanged(bool);
+    void audioRendererChanged();
+    void activeChanged();
     void currentFrameTimeChanged();
     void clipEnded();
 
@@ -48,6 +51,9 @@ public:
     void setEndTime(qint64 ms);
 
     qint64 duration() const { return m_endTime - m_startTime; };
+
+    AudioRenderer* audioRenderer() const { return m_audioRenderer; };
+    void setAudioRenderer(AudioRenderer* audioRenderer);
 
     const Interval& currentFrameTime() const { return m_currentFrameTime; };
 
@@ -82,4 +88,5 @@ private:
 
     std::unique_ptr<VideoTrack> m_videoTrack;
     std::unique_ptr<AudioTrack> m_audioTrack;
+    AudioRenderer* m_audioRenderer;
 };

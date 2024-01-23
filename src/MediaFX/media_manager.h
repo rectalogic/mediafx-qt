@@ -4,17 +4,23 @@
 #pragma once
 
 #include "interval.h"
-#include "media_clip.h" // IWYU pragma: keep
+#include <QAudioBuffer>
+#include <QAudioFormat>
 #include <QJSEngine>
 #include <QList>
 #include <QObject>
-#include <QQuickView> // IWYU pragma: keep
-#include <QVideoSink> // IWYU pragma: keep
-#include <QtAssert>
+#include <QtCore>
 #include <QtQml>
 #include <QtQmlIntegration>
-#include <QtTypes>
 #include <chrono>
+Q_MOC_INCLUDE("audio_renderer.h")
+Q_MOC_INCLUDE("media_clip.h")
+Q_MOC_INCLUDE(<QQuickView>)
+Q_MOC_INCLUDE(<QVideoSink>)
+class AudioRenderer;
+class MediaClip;
+class QQuickView;
+class QVideoSink;
 using namespace std::chrono;
 
 class MediaManager : public QObject {
@@ -24,9 +30,12 @@ class MediaManager : public QObject {
 
 public:
     using QObject::QObject;
-    MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent = nullptr);
+    MediaManager(const microseconds& outputVideoFrameDuration, int outputAudioSampleRate, QQuickView* quickView, QObject* parent = nullptr);
+    ~MediaManager();
 
     static MediaManager* singletonInstance();
+
+    void initialize();
 
     Q_INVOKABLE Interval createInterval(qint64 start, qint64 end) const
     {
@@ -36,9 +45,12 @@ public:
     Q_INVOKABLE void updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVideoSink* videoSink);
 
     QQuickView* window() const { return m_quickView; };
-    const microseconds& frameDuration() { return m_frameDuration; };
+    const microseconds& outputVideoFrameDuration() const { return m_outputVideoFrameDuration; };
+    QAudioBuffer createOutputAudioBuffer();
     const Interval& currentRenderTime() const { return m_currentRenderTime; };
     void nextRenderTime();
+
+    AudioRenderer* audioRenderer() const { return m_rootAudioRenderer; };
 
     void registerClip(MediaClip* clip);
     void unregisterClip(MediaClip* clip);
@@ -47,6 +59,8 @@ public:
 
     bool isFinishedEncoding() const { return finishedEncoding; }
 
+    void logFatalError(const QDebug& error) const;
+
 signals:
     void currentRenderTimeChanged();
 
@@ -54,9 +68,11 @@ public slots:
     void finishEncoding();
 
 private:
-    microseconds m_frameDuration;
+    microseconds m_outputVideoFrameDuration;
+    QAudioFormat m_outputAudioFormat;
     Interval m_currentRenderTime;
     QQuickView* m_quickView;
+    AudioRenderer* m_rootAudioRenderer;
     QList<MediaClip*> activeClips;
     bool finishedEncoding = false;
 };
@@ -68,7 +84,16 @@ struct MediaManagerForeign {
     QML_SINGLETON
     QML_NAMED_ELEMENT(MediaManager)
 public:
-    inline static MediaManager* s_singletonInstance = nullptr;
+    static void setSingletonInstance(MediaManager* manager)
+    {
+        Q_ASSERT(!s_singletonInstance);
+        s_singletonInstance = manager;
+    }
+
+    static MediaManager* singletonInstance()
+    {
+        return s_singletonInstance;
+    }
 
     static MediaManager* create(QQmlEngine*, QJSEngine* engine)
     {
@@ -91,5 +116,6 @@ public:
     }
 
 private:
+    inline static MediaManager* s_singletonInstance = nullptr;
     inline static QJSEngine* s_engine = nullptr;
 };

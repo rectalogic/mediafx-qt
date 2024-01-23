@@ -4,29 +4,39 @@
 #pragma once
 
 #include "track.h"
+#include <QAudioBuffer>
 #include <QtTypes>
+#include <ffms.h>
+#include <memory>
+class AudioRenderer;
 class ErrorInfo;
 class Interval;
 class MediaClip;
-struct FFMS_AudioSource;
-struct FFMS_Index;
+class Resampler;
 
 class AudioTrack : public Track {
 public:
-    AudioTrack(MediaClip* mediaClip)
-        : Track(mediaClip) {};
-    ~AudioTrack()
-    {
-        stop();
-    }
-    bool initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo) override;
+    AudioTrack(MediaClip* mediaClip);
+    ~AudioTrack();
+    bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) override;
     qint64 duration() const override;
     void stop() override;
-    void render(const Interval& frameTime) override;
+    void render(const Interval& frameTime, AudioRenderer* audioRenderer);
 
 protected:
     void updateActive();
 
 private:
-    FFMS_AudioSource* m_audioSource = nullptr;
+    struct AudioSourceDeleter {
+        void operator()(FFMS_AudioSource* s) const
+        {
+            FFMS_DestroyAudioSource(s);
+        }
+    };
+
+    typedef std::unique_ptr<FFMS_AudioSource, AudioSourceDeleter> AudioSourcePtr;
+    AudioSourcePtr m_audioSourcePtr;
+    int m_nextFrameNum = 0;
+    QAudioBuffer m_outputAudioBuffer;
+    std::unique_ptr<Resampler> m_resamplerPtr;
 };

@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "media_manager.h"
+#include "audio.h"
+#include "audio_renderer.h"
 #include "media_clip.h"
 #include "video_track.h"
+#include <QAudioBuffer>
+#include <QAudioFormat>
 #include <QObject>
+#include <QQmlEngine>
+#include <QQuickView>
 #include <chrono>
 using namespace std::chrono;
 
@@ -49,17 +55,35 @@ using namespace std::chrono;
     \endqml
 */
 
-MediaManager::MediaManager(const microseconds& frameDuration, QQuickView* quickView, QObject* parent)
+MediaManager::MediaManager(const microseconds& outputVideoFrameDuration, int outputAudioSampleRate, QQuickView* quickView, QObject* parent)
     : QObject(parent)
-    , m_frameDuration(frameDuration)
-    , m_currentRenderTime(Interval(0us, frameDuration))
+    , m_outputVideoFrameDuration(outputVideoFrameDuration)
+    , m_currentRenderTime(Interval(0us, outputVideoFrameDuration))
     , m_quickView(quickView)
+    , m_rootAudioRenderer(nullptr)
 {
+    m_outputAudioFormat.setSampleFormat(AudioQtSampleFormat);
+    m_outputAudioFormat.setChannelConfig(AudioQtChannelConfig);
+    m_outputAudioFormat.setSampleRate(outputAudioSampleRate);
+}
+
+MediaManager::~MediaManager() = default;
+
+void MediaManager::initialize()
+{
+    MediaManagerForeign::setSingletonInstance(this);
+    // AudioRenderer depends on the singleton, so create it after initializing singleton
+    m_rootAudioRenderer = new AudioRenderer(true, this);
 }
 
 MediaManager* MediaManager::singletonInstance()
 {
-    return MediaManagerForeign::s_singletonInstance;
+    return MediaManagerForeign::singletonInstance();
+}
+
+QAudioBuffer MediaManager::createOutputAudioBuffer()
+{
+    return QAudioBuffer(m_outputAudioFormat.framesForDuration(outputVideoFrameDuration().count()), m_outputAudioFormat);
 }
 
 void MediaManager::registerClip(MediaClip* clip)
@@ -92,7 +116,7 @@ void MediaManager::updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVid
 
 void MediaManager::nextRenderTime()
 {
-    m_currentRenderTime = m_currentRenderTime.nextInterval(m_frameDuration);
+    m_currentRenderTime = m_currentRenderTime.nextInterval(m_outputVideoFrameDuration);
     emit currentRenderTimeChanged();
 }
 
@@ -122,4 +146,9 @@ void MediaManager::render()
 void MediaManager::finishEncoding()
 {
     finishedEncoding = true;
+}
+
+void MediaManager::logFatalError(const QDebug& error) const
+{
+    emit window()->engine()->exit(1);
 }

@@ -8,33 +8,22 @@
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 #include <QtTypes>
+#include <ffms.h>
+#include <memory>
 #include <utility>
 class ErrorInfo;
 class Interval;
 class MediaClip;
 class QVideoSink;
-struct FFMS_Frame;
-struct FFMS_FrameInfo;
-struct FFMS_Index;
-struct FFMS_Track;
-struct FFMS_TrackTimeBase;
-struct FFMS_VideoSource;
 
 class VideoTrack : public Track {
 public:
-    VideoTrack(MediaClip* mediaClip)
-        : Track(mediaClip)
-        , m_videoFrame(QVideoFrame(), QVideoFrame())
-    {
-    }
-    ~VideoTrack()
-    {
-        stop();
-    }
+    VideoTrack(MediaClip* mediaClip);
+    ~VideoTrack();
 
-    bool initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo) override;
+    bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) override;
     qint64 duration() const override;
-    void render(const Interval& frameTime) override;
+    void render(const Interval& frameTime);
     void stop() override;
 
     void addVideoSink(QVideoSink* videoSink);
@@ -49,7 +38,15 @@ private:
     QVideoFrameFormat formatForFrame(const FFMS_Frame* frameProperties) const;
     void mapVideoFrameData(QVideoFrame& videoFrame, const FFMS_Frame* frameProperties);
 
-    FFMS_VideoSource* m_videoSource = nullptr;
+    struct VideoSourceDeleter {
+        void operator()(FFMS_VideoSource* s) const
+        {
+            FFMS_DestroyVideoSource(s);
+        }
+    };
+
+    typedef std::unique_ptr<FFMS_VideoSource, VideoSourceDeleter> VideoSourcePtr;
+    VideoSourcePtr m_videoSourcePtr;
     FFMS_Track* m_track = nullptr;
     int m_nextFrameNum = 0;
     const FFMS_FrameInfo* m_nextFrameInfo = nullptr;

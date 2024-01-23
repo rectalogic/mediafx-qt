@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "application.h"
+#include "audio.h"
 #include "encoder.h"
 #include "session.h"
 #include <QByteArray>
@@ -11,18 +12,23 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QtProcessorDetection>
 #include <stdio.h>
 #ifdef EVENTLOGGER
 #include "event_logger.h"
 #endif
 using namespace Qt::Literals::StringLiterals;
 
-const auto ffmpegPreamble = u" -hide_banner -loglevel warning -f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -i async:pipe:${MEDIAFX_VIDEOFD} "_s;
-const auto ffplayPreset = u"ffplay -autoexit -infbuf"_s + ffmpegPreamble;
+const auto ffmpegLoglevel = u"warning"_s;
+const auto ffmpegPreamble = u" -loglevel "_s + ffmpegLoglevel + u" -hide_banner "_s
+    + u"-f rawvideo -video_size ${MEDIAFX_FRAMESIZE} -pixel_format rgb0 -framerate ${MEDIAFX_FRAMERATE} -probesize 32 -thread_queue_size 32 -i async:pipe:${MEDIAFX_VIDEOFD} "_s
+    + u"-f "_s + AudioFFMPEGSampleFormat + u" -ar ${MEDIAFX_SAMPLERATE} -guess_layout_max 0 -channel_layout "_s + AudioFFMPEGChannelLayout + u" -ac "_s + AudioFFMPEGChannelCount + u" -probesize 32 -thread_queue_size 32 -i async:pipe:${MEDIAFX_AUDIOFD} "_s;
+// ffplay can't handle multiple input streams, so we pipe ffmpeg
+const auto ffplayPreset = u"ffmpeg"_s + ffmpegPreamble + u"-codec:v copy -codec:a copy -f nut -r ${MEDIAFX_FRAMERATE} - | ffplay -hide_banner -loglevel "_s + ffmpegLoglevel + u" -autoexit -infbuf -f nut -i -"_s;
 // Let ffmpeg choose codec/format based on filename suffix
-const auto ffmpegPreset = u"ffmpeg"_s + ffmpegPreamble + u"-y ${MEDIAFX_OUTPUT}"_s;
-const auto ffmpegLosslessPreset = u"ffmpeg"_s + ffmpegPreamble + u"-f mp4 -codec:v libx264 -preset veryslow -qp 0 -y ${MEDIAFX_OUTPUT}"_s;
-const auto ffmpegCustomPreset = u"ffmpeg"_s + ffmpegPreamble + u"%1 -y ${MEDIAFX_OUTPUT}"_s;
+const auto ffmpegPreset = u"ffmpeg"_s + ffmpegPreamble + u"-r ${MEDIAFX_FRAMERATE} -y ${MEDIAFX_OUTPUT}"_s;
+const auto ffmpegLosslessPreset = u"ffmpeg"_s + ffmpegPreamble + u"-f nut -codec:v libx264 -r ${MEDIAFX_FRAMERATE} -preset veryslow -qp 0 -codec:a wavpack -y ${MEDIAFX_OUTPUT}"_s;
+const auto ffmpegCustomPreset = u"ffmpeg"_s + ffmpegPreamble + u"%1 -r ${MEDIAFX_FRAMERATE} -y ${MEDIAFX_OUTPUT}"_s;
 
 int main(int argc, char* argv[])
 {
@@ -46,7 +52,9 @@ int main(int argc, char* argv[])
     parser.setApplicationDescription(u"MediaFX\nCopyright (C) 2023-2024 Andrew Wason\nSPDX-License-Identifier: GPL-3.0-or-later"_s);
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
+    // XXX add output sampleRate option for audio
     parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be float or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });
+    parser.addOption({ { u"r"_s, u"sampleRate"_s }, u"Output audio sample rate (Hz)"_s, u"sampleRate"_s, u"44100"_s });
     parser.addOption({ { u"s"_s, u"size"_s }, u"Output video frame size, WxH."_s, u"size"_s, u"640x360"_s });
     parser.addOption({ { u"o"_s, u"output"_s }, u"Output filename."_s, u"output"_s });
     parser.addOption({ { u"c"_s, u"command"_s },
@@ -79,11 +87,12 @@ int main(int argc, char* argv[])
     if (frameSize.isEmpty())
         parser.showHelp(1);
 
+    int sampleRate = parser.value(u"sampleRate"_s).toInt();
+
     QString command;
     if (parser.isSet(u"command"_s)) {
         command = parser.value(u"command"_s);
         if (command == u"ffplay"_s) {
-            // XXX need to handle audio eventually
             command = ffplayPreset;
         } else if (command == u"ffmpeg"_s || command.startsWith(u"ffmpeg:"_s)) {
             if (!parser.isSet(u"output"_s)) {
@@ -111,7 +120,7 @@ int main(int argc, char* argv[])
     }
     QUrl url(args.at(0));
 
-    Encoder encoder(frameSize, frameRate);
+    Encoder encoder(frameSize, frameRate, sampleRate);
     if (!encoder.initialize(output, command)) {
         qCritical("Failed to initialize encoder");
         return 1;

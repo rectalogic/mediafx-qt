@@ -10,14 +10,13 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QObject>
-#include <QQmlEngine>
 #include <QQmlInfo>
-#include <QQuickView>
 #include <QString>
 #include <QUrl>
 #include <algorithm>
 #include <chrono>
 #include <ffms.h>
+class AudioRenderer;
 
 /*!
     \qmltype MediaClip
@@ -31,6 +30,7 @@ MediaClip::MediaClip(QObject* parent)
     , m_startTime(-1)
     , m_endTime(-1)
     , m_currentFrameTime(-1, -1)
+    , m_audioRenderer(nullptr)
     , m_videoTrack(new VideoTrack(this))
     , m_audioTrack(new AudioTrack(this))
 {
@@ -97,6 +97,19 @@ void MediaClip::setEndTime(qint64 ms)
     This is (\l endTime - \l startTime).
 */
 
+/*!
+    \qmlproperty int MediaClip::audioRenderer
+
+    The \l AudioRenderer to render audio into.
+*/
+void MediaClip::setAudioRenderer(AudioRenderer* audioRenderer)
+{
+    if (audioRenderer != m_audioRenderer) {
+        m_audioRenderer = audioRenderer;
+        emit audioRendererChanged();
+    }
+}
+
 void MediaClip::render()
 {
     if (!isActive())
@@ -105,11 +118,11 @@ void MediaClip::render()
     emit currentFrameTimeChanged();
 
     if (m_audioTrack)
-        m_audioTrack->render(m_currentFrameTime);
+        m_audioTrack->render(m_currentFrameTime, m_audioRenderer);
     if (m_videoTrack)
         m_videoTrack->render(m_currentFrameTime);
 
-    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->frameDuration());
+    m_currentFrameTime = m_currentFrameTime.nextInterval(MediaManager::singletonInstance()->outputVideoFrameDuration());
 
     if (m_currentFrameTime.start() >= m_endTime) {
         if (m_audioTrack)
@@ -130,25 +143,26 @@ void MediaClip::setActive(bool active)
 {
     if (m_active != active) {
         m_active = active;
-        auto mediaFX = MediaManager::singletonInstance();
+        auto manager = MediaManager::singletonInstance();
         if (active) {
-            mediaFX->registerClip(this);
+            manager->registerClip(this);
         } else {
-            mediaFX->unregisterClip(this);
+            manager->unregisterClip(this);
         }
+        emit activeChanged();
     }
 }
 
 void MediaClip::updateActive()
 {
-    setActive((m_videoTrack && m_videoTrack->isActive()) || (m_audioTrack && m_audioTrack->isActive()));
+    // We are active if we are rendering video, or we have no video track and are rendering audio
+    setActive((m_videoTrack && m_videoTrack->isActive()) || (!m_videoTrack && m_audioTrack && m_audioTrack->isActive()));
 }
 
 void MediaClip::loadMedia()
 {
     if (!source().isValid()) {
-        qmlWarning(this) << "MediaClip requires source Url";
-        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
+        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip requires source Url");
         return;
     }
     ErrorInfo errorInfo;
@@ -156,31 +170,44 @@ void MediaClip::loadMedia()
     QByteArray sourceFileUtf8 = sourceFile.toUtf8();
     FFMS_Indexer* indexer = FFMS_CreateIndexer(sourceFileUtf8.data(), &errorInfo);
     if (!indexer) {
-        qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo;
-        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
+        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo);
         return;
     }
+    FFMS_TrackTypeIndexSettings(indexer, FFMS_TYPE_VIDEO, 1, 0);
+    FFMS_TrackTypeIndexSettings(indexer, FFMS_TYPE_AUDIO, 1, 0);
 
-    FFMS_Index* index = FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errorInfo);
+    std::unique_ptr<FFMS_Index, decltype(&FFMS_DestroyIndex)> index(FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errorInfo), FFMS_DestroyIndex);
     if (!index) {
-        qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo;
-        emit MediaManager::singletonInstance()->window()->engine()->exit(1);
+        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo);
         return;
     }
 
-    if (!m_videoTrack->initialize(index, sourceFileUtf8.data(), errorInfo)) {
+    int videoTrackNum = FFMS_GetFirstTrackOfType(index.get(), FFMS_TYPE_VIDEO, &errorInfo);
+    if (videoTrackNum >= 0) {
+        if (!m_videoTrack->initialize(index.get(), videoTrackNum, sourceFileUtf8.data(), errorInfo)) {
+            m_videoTrack.reset(nullptr);
+            qmlWarning(this) << "VideoTrack initialize failed:" << errorInfo;
+            errorInfo.reset();
+        }
+    } else {
         m_videoTrack.reset(nullptr);
-        qmlWarning(this) << "VideoTrack initialize failed:" << errorInfo;
-        errorInfo.reset();
     }
 
-    if (m_audioTrack->initialize(index, sourceFileUtf8.data(), errorInfo)) {
+    int audioTrackNum = FFMS_GetFirstTrackOfType(index.get(), FFMS_TYPE_AUDIO, &errorInfo);
+    if (audioTrackNum >= 0) {
+        if (!m_audioTrack->initialize(index.get(), audioTrackNum, sourceFileUtf8.data(), errorInfo)) {
+            m_audioTrack.reset(nullptr);
+            qmlWarning(this) << "AudioTrack initialize failed:" << errorInfo;
+            errorInfo.reset();
+        }
+    } else {
         m_audioTrack.reset(nullptr);
-        qmlWarning(this) << "AudioTrack initialize failed:" << errorInfo;
-        errorInfo.reset();
     }
 
-    FFMS_DestroyIndex(index);
+    if (videoTrackNum < 0 && audioTrackNum < 0) {
+        qmlWarning(this) << "No audio or video tracks found";
+    }
+    updateActive();
 }
 
 void MediaClip::componentComplete()
@@ -192,7 +219,7 @@ void MediaClip::componentComplete()
     if (endTime() < 0) {
         setEndTime(std::max(m_audioTrack ? m_audioTrack->duration() : 0, m_videoTrack ? m_videoTrack->duration() : 0));
     }
-    m_currentFrameTime = Interval(milliseconds(startTime()), milliseconds(startTime()) + MediaManager::singletonInstance()->frameDuration());
+    m_currentFrameTime = Interval(milliseconds(startTime()), milliseconds(startTime()) + MediaManager::singletonInstance()->outputVideoFrameDuration());
 }
 
 /*!

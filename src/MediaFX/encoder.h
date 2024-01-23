@@ -8,9 +8,9 @@
 #include <QSize>
 #include <QString>
 #include <QStringLiteral>
-#include <QtTypes>
 #include <chrono>
 #include <stdio.h>
+class QAudioBuffer;
 using namespace std::chrono;
 
 class Encoder : public QObject {
@@ -98,21 +98,23 @@ public:
         int m_den = 0;
     };
 
-    Encoder(const FrameSize& frameSize, const FrameRate& frameRate, QObject* parent = nullptr)
+    Encoder(const FrameSize& outputFrameSize, const FrameRate& outputFrameRate, int outputSampleRate, QObject* parent = nullptr)
         : QObject(parent)
-        , m_frameSize(frameSize)
-        , m_frameRate(frameRate) {};
+        , m_outputFrameSize(outputFrameSize)
+        , m_outputFrameRate(outputFrameRate)
+        , m_outputSampleRate(outputSampleRate) {};
     ~Encoder();
     bool initialize(const QString& output, const QString& command);
-    constexpr FrameSize frameSize() const noexcept { return m_frameSize; };
-    constexpr FrameRate frameRate() const noexcept { return m_frameRate; };
-    constexpr int audiofd() const noexcept { return m_audiofd; };
-    constexpr int videofd() const noexcept { return m_videofd; };
-    int write(int fd, qsizetype size, const char* data);
+    constexpr FrameSize outputFrameSize() const noexcept { return m_outputFrameSize; };
+    constexpr FrameRate outputFrameRate() const noexcept { return m_outputFrameRate; };
+    constexpr int outputSampleRate() const noexcept { return m_outputSampleRate; };
+
+    bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
 
 private:
-    FrameSize m_frameSize;
-    FrameRate m_frameRate;
+    FrameSize m_outputFrameSize;
+    FrameRate m_outputFrameRate;
+    int m_outputSampleRate;
     int m_pid = -1;
     int m_audiofd = -1;
     int m_videofd = -1;

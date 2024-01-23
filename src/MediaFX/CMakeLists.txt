@@ -4,6 +4,7 @@
 find_package(PkgConfig)
 pkg_search_module(ffms2 REQUIRED IMPORTED_TARGET ffms2)
 pkg_search_module(libavutil REQUIRED IMPORTED_TARGET libavutil)
+pkg_search_module(libswresample REQUIRED IMPORTED_TARGET libswresample)
 
 option(EVENT_LOGGER "Enable event logger" OFF)
 
@@ -17,12 +18,13 @@ qt_add_library(mediafx STATIC
     track.cpp
     video_track.cpp
     audio_track.cpp
+    audio_renderer.cpp
     interval.cpp
 )
 
 target_include_directories(mediafx PUBLIC ./)
-target_include_directories(mediafx PRIVATE ${FFMS2_INCLUDE_DIRS} ${LIBAVUTIL_INCLUDE_DIRS})
-target_compile_options(mediafx PUBLIC ${FFMS2_CFLAGS})
+target_include_directories(mediafx PRIVATE ${FFMS2_INCLUDE_DIRS} ${LIBAVUTIL_INCLUDE_DIRS} ${LIBSWRESAMPLE_INCLUDE_DIRS})
+target_compile_options(mediafx PUBLIC ${FFMS2_CFLAGS} ${LIBSWRESAMPLE_CFLAGS})
 
 qt_add_executable(mediafxtool
     main.cpp
@@ -45,7 +47,7 @@ qt_add_qml_module(mediafx
     ShaderEffectState.qml
 )
 
-target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
+target_link_libraries(mediafx PUBLIC PkgConfig::ffms2 PkgConfig::libswresample PkgConfig::libavutil Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
 target_link_libraries(mediafx PRIVATE mediafxplugin mixersplugin)
 
 if(${Qt6Quick3D_FOUND})

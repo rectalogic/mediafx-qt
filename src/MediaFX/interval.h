@@ -42,6 +42,10 @@ public:
     constexpr qint64 end() const noexcept { return duration_cast<milliseconds>(e).count(); }
     constexpr qint64 duration() const noexcept { return duration_cast<milliseconds>(e - s).count(); }
 
+    constexpr const microseconds& usStart() const noexcept { return s; }
+    constexpr const microseconds& usEnd() const noexcept { return e; }
+    constexpr microseconds usDuration() const noexcept { return e - s; }
+
     Q_INVOKABLE constexpr bool contains(qint64 time) const noexcept
     {
         return (start() <= time && time < end());

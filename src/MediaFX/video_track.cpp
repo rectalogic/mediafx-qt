@@ -90,30 +90,35 @@ QVideoFrameFormat::ColorRange colorRange(const FFMS_Frame* frameProperties)
     }
 }
 
-bool VideoTrack::initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo)
+VideoTrack::VideoTrack(MediaClip* mediaClip)
+    : Track(mediaClip)
+    , m_videoFrame(QVideoFrame(), QVideoFrame())
 {
-    int videoTrackNum = FFMS_GetFirstTrackOfType(index, FFMS_TYPE_VIDEO, &errorInfo);
-    if (videoTrackNum >= 0) {
-        FFMS_VideoSource* videoSource = FFMS_CreateVideoSource(sourceFile, videoTrackNum, index, 1, mediaClip()->startTime() == 0 ? FFMS_SEEK_LINEAR_NO_RW : FFMS_SEEK_NORMAL, &errorInfo);
-        if (videoSource) {
-            const FFMS_Frame* frameProperties = FFMS_GetFrame(videoSource, 0, &errorInfo);
-            if (frameProperties) {
-                int pixelFormats[2] = { FFMS_GetPixFmt("rgba"), -1 };
-                if (FFMS_SetOutputFormatV2(videoSource, pixelFormats, frameProperties->EncodedWidth, frameProperties->EncodedHeight, FFMS_RESIZER_BICUBIC, &errorInfo) == 0) {
-                    m_videoSource = videoSource;
-                    m_track = FFMS_GetTrackFromVideo(m_videoSource);
-                    m_nextFrameInfo = FFMS_GetFrameInfo(m_track, m_nextFrameNum);
-                    m_timebase = FFMS_GetTimeBase(m_track);
-                    QVideoFrameFormat format = formatForFrame(frameProperties);
-                    m_videoFrame.first = QVideoFrame(format);
-                    m_videoFrame.second = QVideoFrame(format);
-                    // Prime first frames data
-                    if (mediaClip()->startTime() == 0) {
-                        mapVideoFrameData(m_videoFrame.first, frameProperties);
-                    }
-                    updateActive();
-                    return true;
+}
+
+VideoTrack::~VideoTrack() = default;
+
+bool VideoTrack::initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo)
+{
+    VideoSourcePtr videoSourcePtr { FFMS_CreateVideoSource(sourceFile, trackNum, index, 1, mediaClip()->startTime() == 0 ? FFMS_SEEK_LINEAR_NO_RW : FFMS_SEEK_NORMAL, &errorInfo) };
+    if (videoSourcePtr) {
+        const FFMS_Frame* frameProperties = FFMS_GetFrame(videoSourcePtr.get(), 0, &errorInfo);
+        if (frameProperties) {
+            int pixelFormats[2] = { FFMS_GetPixFmt("rgba"), -1 };
+            if (FFMS_SetOutputFormatV2(videoSourcePtr.get(), pixelFormats, frameProperties->EncodedWidth, frameProperties->EncodedHeight, FFMS_RESIZER_BICUBIC, &errorInfo) == 0) {
+                m_track = FFMS_GetTrackFromVideo(videoSourcePtr.get());
+                m_nextFrameInfo = FFMS_GetFrameInfo(m_track, m_nextFrameNum);
+                m_timebase = FFMS_GetTimeBase(m_track);
+                QVideoFrameFormat format = formatForFrame(frameProperties);
+                m_videoFrame.first = QVideoFrame(format);
+                m_videoFrame.second = QVideoFrame(format);
+                // Prime first frames data
+                if (mediaClip()->startTime() == 0) {
+                    mapVideoFrameData(m_videoFrame.first, frameProperties);
                 }
+                m_videoSourcePtr.swap(videoSourcePtr);
+                updateActive();
+                return true;
             }
         }
     }
@@ -150,9 +155,9 @@ qint64 VideoTrack::calculateFrameStartTime(const FFMS_FrameInfo* frameInfo) cons
 
 qint64 VideoTrack::duration() const
 {
-    if (!m_videoSource)
+    if (!m_videoSourcePtr)
         return 0;
-    const FFMS_VideoProperties* videoProps = FFMS_GetVideoProperties(m_videoSource);
+    const FFMS_VideoProperties* videoProps = FFMS_GetVideoProperties(m_videoSourcePtr.get());
     return round(videoProps->LastEndTime * 1000);
 }
 
@@ -173,7 +178,7 @@ void VideoTrack::removeVideoSink(const QVideoSink* videoSink)
 
 void VideoTrack::updateActive()
 {
-    setActive(!videoSinks().isEmpty() && m_videoSource);
+    setActive(!videoSinks().isEmpty() && m_videoSourcePtr);
 }
 
 void VideoTrack::render(const Interval& frameTime)
@@ -188,7 +193,7 @@ void VideoTrack::render(const Interval& frameTime)
         m_nextFrameInfo = frameInfo;
         if (isActive()) {
             ErrorInfo errorInfo;
-            const FFMS_Frame* frameProperties = FFMS_GetFrame(m_videoSource, m_nextFrameNum, &errorInfo);
+            const FFMS_Frame* frameProperties = FFMS_GetFrame(m_videoSourcePtr.get(), m_nextFrameNum, &errorInfo);
             if (!frameProperties) {
                 qmlWarning(mediaClip()) << "FFMS_GetFrame failed on frame" << m_nextFrameNum << errorInfo;
                 stop();
@@ -210,9 +215,7 @@ void VideoTrack::render(const Interval& frameTime)
 
 void VideoTrack::stop()
 {
-    if (m_videoSource)
-        FFMS_DestroyVideoSource(m_videoSource);
-    m_videoSource = nullptr;
+    m_videoSourcePtr.reset(nullptr);
     m_track = nullptr;
     m_timebase = nullptr;
     m_videoFrame.first = QVideoFrame();

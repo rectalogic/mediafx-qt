@@ -32,24 +32,26 @@ MediaSequence {
     }
 
     MediaClip {
-        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s-awb44100.nut")
     }
     MediaClip {
         endTime: 3000
-        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s-kal1624000.nut")
     }
     MediaClip {
-        source: Qt.resolvedUrl("../fixtures/assets/green-320x180-15fps-3s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/green-320x180-15fps-3s-kal44100.nut")
     }
     MediaClip {
         endTime: 3000
         source: Qt.resolvedUrl("../fixtures/assets/red-160x120.png")
     }
     MediaClip {
-        source: Qt.resolvedUrl("../fixtures/assets/yellow-320x180-15fps-3s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/yellow-320x180-15fps-3s-slt16000.nut")
     }
     MediaClip {
         endTime: 3000
-        source: Qt.resolvedUrl("../fixtures/assets/edjustforyou-320x180-15fps-5.2s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/edjustforyou-320x180-15fps-5.2s-44100.nut")
+        audioRenderer: AudioRenderer {
+        }
     }
 }

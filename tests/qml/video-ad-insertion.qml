@@ -5,10 +5,14 @@ import QtQuick
 import MediaFX
 
 Item {
+    AudioRenderer {
+        id: audioRenderer
+    }
     MediaClip {
         id: videoClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s-kal1624000.nut")
+        audioRenderer: audioRenderer
 
         Component.onCompleted: {
             // End encoding when main videoClip finishes
@@ -18,7 +22,7 @@ Item {
     MediaClip {
         id: adClip
 
-        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s-awb44100.nut")
 
         // Switch back to default state when ad ends - main videoClip playing
         onClipEnded: videoRenderer.state = ""
@@ -38,6 +42,14 @@ Item {
                 PropertyChanges {
                     mediaClip: adClip
                     target: videoRenderer
+                }
+                PropertyChanges {
+                    audioRenderer: audioRenderer
+                    target: adClip
+                }
+                PropertyChanges {
+                    audioRenderer: null
+                    target: videoClip
                 }
             }
         ]

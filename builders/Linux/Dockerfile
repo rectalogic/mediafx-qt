@@ -36,8 +36,8 @@ RUN apt-get -y update \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     libvulkan-dev mesa-vulkan-drivers \
     python3 python3-pip \
-    curl xz-utils xvfb pkg-config libavutil-dev libffms2-dev ffmpeg \
-    fontconfig fonts-liberation
+    curl xz-utils xvfb pkg-config libavutil-dev libswresample-dev libffms2-dev ffmpeg \
+    fontconfig fonts-liberation bc
 
 COPY --from=build /usr/local/Qt /usr/local/Qt/
 ENV QTDIR /usr/local/Qt/${QT_VER}/gcc_64

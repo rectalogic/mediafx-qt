@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
     QUrl url(args.at(0));
 
     QQuickView quickView;
-    MediaManager* manager = new MediaManager(microseconds(33333), &quickView, &app);
-    MediaManagerForeign::s_singletonInstance = manager;
+    MediaManager* manager = new MediaManager(microseconds(33333), 44100, &quickView, &app);
+    manager->initialize();
     quickView.setSource(url);
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.show();

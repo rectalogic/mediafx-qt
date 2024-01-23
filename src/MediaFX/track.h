@@ -4,10 +4,9 @@
 #pragma once
 
 #include <QtTypes>
-struct FFMS_Index;
-class MediaClip;
-class Interval;
 class ErrorInfo;
+class MediaClip;
+struct FFMS_Index;
 
 class Track {
 public:
@@ -17,10 +16,9 @@ public:
     }
     virtual ~Track() { }
 
-    virtual bool initialize(FFMS_Index* index, const char* sourceFile, ErrorInfo& errorInfo) = 0;
+    virtual bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) = 0;
     bool isActive() const { return m_active; };
     virtual qint64 duration() const = 0;
-    virtual void render(const Interval& frameTime) = 0;
     virtual void stop() = 0;
 
     MediaClip* mediaClip() const { return m_mediaClip; };

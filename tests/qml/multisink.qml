@@ -9,7 +9,7 @@ Item {
         id: videoClip
 
         startTime: 3000
-        source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s.mp4")
+        source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s-rms44100.nut")
 
         Component.onCompleted: {
             videoClip.clipEnded.connect(MediaManager.finishEncoding);

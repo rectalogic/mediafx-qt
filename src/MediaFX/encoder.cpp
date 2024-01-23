@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "encoder.h"
+#include <QAudioBuffer>
+#include <QByteArray>
 #include <QDebug>
 #include <QMessageLogContext>
 #include <QString>
+#include <QtTypes>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -74,8 +77,9 @@ bool Encoder::initialize(const QString& output, const QString& command)
 
         setenv("MEDIAFX_VIDEOFD", QString::number(videofds[0]).toUtf8().constData(), 1);
         setenv("MEDIAFX_AUDIOFD", QString::number(audiofds[0]).toUtf8().constData(), 1);
-        setenv("MEDIAFX_FRAMESIZE", frameSize().toString().toUtf8().constData(), 1);
-        setenv("MEDIAFX_FRAMERATE", frameRate().toString().toUtf8().constData(), 1);
+        setenv("MEDIAFX_FRAMESIZE", outputFrameSize().toString().toUtf8().constData(), 1);
+        setenv("MEDIAFX_FRAMERATE", outputFrameRate().toString().toUtf8().constData(), 1);
+        setenv("MEDIAFX_SAMPLERATE", QString::number(outputSampleRate()).toUtf8().constData(), 1);
         if (!output.isEmpty()) {
             setenv("MEDIAFX_OUTPUT", output.toUtf8().constData(), 1);
         }
@@ -98,7 +102,7 @@ bool Encoder::initialize(const QString& output, const QString& command)
     return true;
 }
 
-int Encoder::write(int fd, qsizetype size, const char* data)
+int writeData(int fd, qsizetype size, const char* data)
 {
     size_t bytesIO = 0;
     while (bytesIO < size) {
@@ -110,4 +114,13 @@ int Encoder::write(int fd, qsizetype size, const char* data)
         bytesIO = bytesIO + n;
     }
     return size;
+}
+
+bool Encoder::encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData)
+{
+    if (writeData(m_videofd, videoData.size(), videoData.constData()) < 0)
+        return false;
+    if (writeData(m_audiofd, audioBuffer.byteCount(), audioBuffer.constData<char>()) < 0)
+        return false;
+    return true;
 }

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QAudioBuffer>
 #include <QEvent>
 #include <QList>
 #include <QObject>
@@ -33,7 +34,7 @@ public:
 
     bool initialize(const QUrl& url);
 
-    microseconds frameDuration() const noexcept { return m_frameDuration; };
+    microseconds outputVideoFrameDuration() const noexcept { return m_outputVideoFrameDuration; };
 
     void render();
 
@@ -44,10 +45,13 @@ private slots:
     void engineWarnings(const QList<QQmlError>& warnings);
 
 private:
+    const QAudioBuffer& silentOutputAudioBuffer();
+
+    QAudioBuffer m_silentOutputAudioBuffer;
     static QEvent::Type renderEventType;
     bool exitOnWarning;
     Encoder* encoder;
-    microseconds m_frameDuration;
+    microseconds m_outputVideoFrameDuration;
     AnimationDriver* animationDriver;
 #ifdef MEDIAFX_ENABLE_VULKAN
     QVulkanInstance vulkanInstance;

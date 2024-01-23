@@ -3,6 +3,7 @@
 
 #include "session.h"
 #include "animation.h"
+#include "audio_renderer.h"
 #include "encoder.h"
 #include "media_manager.h"
 #include "render_control.h"
@@ -28,8 +29,8 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     : QObject(parent)
     , exitOnWarning(exitOnWarning)
     , encoder(encoder)
-    , m_frameDuration(encoder->frameRate().toFrameDuration())
-    , animationDriver(new AnimationDriver(m_frameDuration, this))
+    , m_outputVideoFrameDuration(encoder->outputFrameRate().toFrameDuration())
+    , animationDriver(new AnimationDriver(m_outputVideoFrameDuration, this))
     , renderControl(nullptr)
     , quickView(nullptr)
 {
@@ -48,11 +49,11 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     }
 #endif
 
-    manager = new MediaManager(m_frameDuration, quickView.get(), this);
-    MediaManagerForeign::s_singletonInstance = manager;
+    manager = new MediaManager(m_outputVideoFrameDuration, encoder->outputSampleRate(), quickView.get(), this);
+    manager->initialize();
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView->resize(encoder->frameSize().toSize());
+    quickView->resize(encoder->outputFrameSize().toSize());
     connect(quickView.get(), &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
 }
@@ -111,13 +112,24 @@ bool Session::event(QEvent* event)
     return QObject::event(event);
 }
 
+const QAudioBuffer& Session::silentOutputAudioBuffer()
+{
+    if (!m_silentOutputAudioBuffer.isValid()) {
+        m_silentOutputAudioBuffer = manager->createOutputAudioBuffer();
+    }
+    return m_silentOutputAudioBuffer;
+}
+
 void Session::render()
 {
     manager->render();
-    auto frameData = renderControl->renderVideoFrame();
+    QByteArray videoData = renderControl->renderVideoFrame();
+    QAudioBuffer audioBuffer = manager->audioRenderer()->mix();
+    if (!audioBuffer.isValid())
+        audioBuffer = silentOutputAudioBuffer();
     manager->nextRenderTime();
 
-    if (encoder->write(encoder->videofd(), frameData.size(), frameData.constData()) == -1)
+    if (!encoder->encode(audioBuffer, videoData))
         return;
 
     if (manager->isFinishedEncoding()) {
