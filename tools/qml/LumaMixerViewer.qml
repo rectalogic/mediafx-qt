@@ -50,18 +50,26 @@ ColumnLayout {
                 Layout.fillWidth: true
             }
             LabeledSlider {
-                id: tw1Slider
+                id: softness1Slider
 
-                label: "transitionWidth"
-                to: linearMixer.width
+                label: "softness"
+                to: 4.0
                 Layout.fillWidth: true
+            }
+            LabeledCheckbox {
+                id: invert1Checkbox
+
+                label: "invert"
             }
             LumaGradientMixer {
                 id: linearMixer
 
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                transitionWidth: tw1Slider.value
+
+                softness: softness1Slider.value
+                invert: invert1Checkbox.checked
+
                 fillGradient: LinearGradient {
                     x1: x1Slider.value
                     y1: y1Slider.value
@@ -110,16 +118,22 @@ ColumnLayout {
                 Layout.fillWidth: true
             }
             LabeledSlider {
-                id: tw2Slider
+                id: softness2Slider
 
-                label: "transitionWidth"
-                to: conicalMixer.width
+                label: "softness"
+                to: 4.0
                 Layout.fillWidth: true
+            }
+            LabeledCheckbox {
+                id: invert2Checkbox
+
+                label: "invert"
             }
             LumaGradientMixer {
                 id: conicalMixer
 
-                transitionWidth: tw2Slider.value
+                softness: softness2Slider.value
+                invert: invert2Checkbox.checked
 
                 fillGradient: ConicalGradient {
                     angle: angleSlider.value
@@ -158,6 +172,17 @@ ColumnLayout {
             ToolTip.text: slider.value
             ToolTip.visible: hovered
             hoverEnabled: true
+        }
+    }
+    component LabeledCheckbox: RowLayout {
+        property alias label: label.text
+        property alias checked: checkbox.checked
+
+        Label {
+            id: label
+        }
+        CheckBox {
+            id: checkbox
         }
     }
 }

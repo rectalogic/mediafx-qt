@@ -63,7 +63,7 @@ LumaGradientMixer {
         return root.blindsEffect > 0 ? (dimension * root.blindsEffect) : dimension;
     }
 
-    transitionWidth: 1.0
+    softness: 1.0
 
     fillGradient: LinearGradient {
         spread: root.blindsEffect > 0 ? ShapeGradient.RepeatSpread : ShapeGradient.PadSpread

@@ -14,9 +14,11 @@ MediaMixer {
 
     /*! The item to use as the greyscale luma image. */
     default required property Item luma
-    /*! Softness of the wip, 0.0 is a hard wipe, higher values are softer. */
-    property real transitionWidth: 1.0
-    readonly property real premultipliedTransitionWidth: root.time * (transitionWidth + 1.0)
+    /*! Softness of the wipe, 0.0 is a hard wipe, larger values are softer. */
+    property real softness: 0.0
+    readonly property real softTime: root.time * (root.softness + 1.0)
+    /*! Invert the luma. */
+    property bool invert: false
 
     fragmentShader: "qrc:/shaders/luma.frag.qsb"
     state: "default"

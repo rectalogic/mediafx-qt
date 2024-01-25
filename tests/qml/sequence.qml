@@ -19,7 +19,7 @@ MediaSequence {
         },
         WipeMixer {
             direction: WipeMixer.Direction.Right
-            transitionWidth: 2.0
+            softness: 2.0
         },
         WipeMixer {
             direction: WipeMixer.Direction.Left
