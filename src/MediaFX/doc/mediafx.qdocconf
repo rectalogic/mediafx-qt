@@ -32,6 +32,7 @@ HTML.templatedir = .
 HTML.stylesheets = style/offline.css style/highlight.css
 
 HTML.headerstyles = \
+    "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" \
     "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/offline.css\" />\n" \
     "  <link rel=\"stylesheet\" type=\"text/css\" href=\"style/highlight.css\" />\n"
 HTML.endheader = \
