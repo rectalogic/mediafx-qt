@@ -2,7 +2,7 @@
 # Copyright (C) 2023 Andrew Wason
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-MOUNT="$(cd "${BASH_SOURCE%/*/*/*}"; pwd)"
+MOUNT="$(cd "${BASH_SOURCE%/*}/../.."; pwd)"
 
 # opengl or vulkan
 TARGET=${TARGET:-opengl}
