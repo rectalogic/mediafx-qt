@@ -9,8 +9,11 @@
 #include <QString>
 #include <QStringLiteral>
 #include <chrono>
+#include <memory>
 #include <stdio.h>
+class OutputStream;
 class QAudioBuffer;
+struct AVFormatContext;
 using namespace std::chrono;
 
 class Encoder : public QObject {
@@ -98,24 +101,21 @@ public:
         int m_den = 0;
     };
 
-    Encoder(const FrameSize& outputFrameSize, const FrameRate& outputFrameRate, int outputSampleRate, QObject* parent = nullptr)
-        : QObject(parent)
-        , m_outputFrameSize(outputFrameSize)
-        , m_outputFrameRate(outputFrameRate)
-        , m_outputSampleRate(outputSampleRate) {};
+    Encoder(const QString& outputFile, const FrameSize& outputFrameSize, const FrameRate& outputFrameRate, int outputSampleRate, QObject* parent = nullptr);
     ~Encoder();
-    bool initialize(const QString& output, const QString& command);
+    bool initialize();
+    bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
+    bool finish();
     constexpr FrameSize outputFrameSize() const noexcept { return m_outputFrameSize; };
     constexpr FrameRate outputFrameRate() const noexcept { return m_outputFrameRate; };
     constexpr int outputSampleRate() const noexcept { return m_outputSampleRate; };
-
-    bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
 
 private:
     FrameSize m_outputFrameSize;
     FrameRate m_outputFrameRate;
     int m_outputSampleRate;
-    int m_pid = -1;
-    int m_audiofd = -1;
-    int m_videofd = -1;
+    QString m_outputFile;
+    AVFormatContext* m_formatCtx = nullptr;
+    std::unique_ptr<OutputStream> m_videoStream;
+    std::unique_ptr<OutputStream> m_audioStream;
 };

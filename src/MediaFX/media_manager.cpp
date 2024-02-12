@@ -62,8 +62,8 @@ MediaManager::MediaManager(const microseconds& outputVideoFrameDuration, int out
     , m_quickView(quickView)
     , m_rootAudioRenderer(nullptr)
 {
-    m_outputAudioFormat.setSampleFormat(AudioQtSampleFormat);
-    m_outputAudioFormat.setChannelConfig(AudioQtChannelConfig);
+    m_outputAudioFormat.setSampleFormat(AudioSampleFormat_Qt);
+    m_outputAudioFormat.setChannelConfig(AudioChannelLayout_Qt);
     m_outputAudioFormat.setSampleRate(outputAudioSampleRate);
 }
 

@@ -133,6 +133,9 @@ void Session::render()
         return;
 
     if (manager->isFinishedEncoding()) {
+        int rc = 0;
+        if (!encoder->finish())
+            rc = 1;
         emit quickView->engine()->exit(0);
         return;
     }

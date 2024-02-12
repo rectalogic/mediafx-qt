@@ -47,16 +47,16 @@ public:
     {
         m_audioProperties = FFMS_GetAudioProperties(audioSource);
 
-        if (m_audioProperties->ChannelLayout != AudioFFMSChannelLayout
-            || m_audioProperties->SampleFormat != AudioFFMSSampleFormat
+        if (m_audioProperties->ChannelLayout != AudioChannelLayout_FFMS2
+            || m_audioProperties->SampleFormat != AudioSampleFormat_FFMS2
             || m_audioProperties->SampleRate != outAudioFormat.sampleRate()) {
             ResampleContextPtr resampleContextPtr { swr_alloc() };
             av_opt_set_int(resampleContextPtr.get(), "in_channel_layout", m_audioProperties->ChannelLayout, 0);
-            av_opt_set_int(resampleContextPtr.get(), "out_channel_layout", AudioFFMSChannelLayout, 0);
+            av_opt_set_int(resampleContextPtr.get(), "out_channel_layout", AudioChannelLayout_FFMS2, 0);
             av_opt_set_int(resampleContextPtr.get(), "in_sample_rate", m_audioProperties->SampleRate, 0);
             av_opt_set_int(resampleContextPtr.get(), "out_sample_rate", outAudioFormat.sampleRate(), 0);
             av_opt_set_sample_fmt(resampleContextPtr.get(), "in_sample_fmt", static_cast<AVSampleFormat>(m_audioProperties->SampleFormat), 0);
-            av_opt_set_sample_fmt(resampleContextPtr.get(), "out_sample_fmt", static_cast<AVSampleFormat>(AudioFFMSSampleFormat), 0);
+            av_opt_set_sample_fmt(resampleContextPtr.get(), "out_sample_fmt", static_cast<AVSampleFormat>(AudioSampleFormat_FFMS2), 0);
             if (swr_init(resampleContextPtr.get())) {
                 errorInfo.set(FFMS_ERROR_RESAMPLING, FFMS_ERROR_UNSUPPORTED, "swr_init failed to initialize audio resampling");
                 return false;

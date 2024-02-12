@@ -6,18 +6,26 @@
 #include <QAudioFormat>
 #include <QString>
 #include <ffms.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavutil/channel_layout.h>
+}
 using namespace Qt::Literals::StringLiterals;
 
-inline constexpr int64_t AudioFFMSChannelLayout = FFMS_CH_FRONT_LEFT | FFMS_CH_FRONT_RIGHT;
-inline constexpr auto AudioQtChannelConfig = QAudioFormat::ChannelConfigStereo;
-inline constexpr FFMS_SampleFormat AudioFFMSSampleFormat = FFMS_FMT_FLT;
-inline constexpr auto AudioQtSampleFormat = QAudioFormat::Float;
-
-inline constexpr auto AudioFFMPEGChannelLayout = "stereo";
-inline constexpr auto AudioFFMPEGChannelCount = "2";
-inline constexpr auto AudioFFMPEGSampleFormat =
-#if Q_BYTE_ORDER == Q_BIG_ENDIAN
-    "f32be";
+inline constexpr int64_t AudioChannelLayout_FFMS2 = FFMS_CH_FRONT_LEFT | FFMS_CH_FRONT_RIGHT;
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
+inline constexpr int64_t AudioChannelLayout_FFMPEG = AV_CH_LAYOUT_STEREO;
 #else
-    "f32le";
+inline constexpr AVChannelLayout AudioChannelLayout_FFMPEG = AV_CHANNEL_LAYOUT_STEREO;
+#endif
+inline constexpr auto AudioChannelLayout_Qt = QAudioFormat::ChannelConfigStereo;
+
+inline constexpr FFMS_SampleFormat AudioSampleFormat_FFMS2 = FFMS_FMT_FLT;
+inline constexpr auto AudioSampleFormat_Qt = QAudioFormat::Float;
+inline constexpr auto AudioSampleFormat_FFMPEG = AV_SAMPLE_FMT_FLT;
+inline constexpr auto AudioCodec_FFMPEG =
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    AV_CODEC_ID_PCM_F32BE;
+#else
+    AV_CODEC_ID_PCM_F32LE;
 #endif

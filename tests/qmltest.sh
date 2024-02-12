@@ -23,7 +23,7 @@ shift
 
 echo Testing ${QML}
 export QT_LOGGING_RULES="qt.qml.binding.removal.info=true"
-"${MEDIAFX}" --exitOnWarning --fps ${FRAMERATE} --size ${SIZE} --output "${OUTPUT}" --command "ffmpeg:lossless" "${QML}" || exit 1
+"${MEDIAFX}" --exitOnWarning --fps ${FRAMERATE} --size ${SIZE} "${QML}" - | ffmpeg -f nut -i - -f nut -codec:v libx264 -preset veryslow -qp 0 -codec:a wavpack -y "${OUTPUT}" || exit 1
 
 "${BASE}/../tools/framehash.sh" "${OUTPUT}" > "${OUTPUT}.framehash" || exit 1
 

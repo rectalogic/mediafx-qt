@@ -42,6 +42,8 @@ Item {
         startTime: 2000
         endTime: 3000
         source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s.mp4")
+        audioRenderer: AudioRenderer {
+        }
 
         Component.onCompleted: {
             videoClip.clipEnded.connect(MediaManager.finishEncoding);
@@ -70,7 +72,12 @@ When the clip finishes, it's [clipEnded](https://mediafx.org/qml-mediafx-mediacl
 
 See [Qt signals and slots](https://doc.qt.io/qt-6/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals).
 
-To run this and encode a video:
+To run this and generate a video:
 ```sh-session
-$ mediafx --command ffmpeg --output encoded.mp4 demo.qml
+$ mediafx demo.qml output.nut
+```
+This will create a NUT format video with raw audio and video.
+To encode to another format, pipe into `ffmpeg`, e.g.
+```sh-session
+$ mediafx demo.qml - | ffmpeg -i - output.mp4
 ```
