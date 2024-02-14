@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     parser.setApplicationDescription(u"MediaFX\nCopyright (C) 2023-2024 Andrew Wason\nSPDX-License-Identifier: GPL-3.0-or-later"_s);
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
-    parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be float or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });
+    parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be integer or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });
     parser.addOption({ { u"r"_s, u"sampleRate"_s }, u"Output audio sample rate (Hz)"_s, u"sampleRate"_s, u"44100"_s });
     parser.addOption({ { u"s"_s, u"size"_s }, u"Output video frame size, WxH."_s, u"size"_s, u"640x360"_s });
     parser.addOption({ { u"w"_s, u"exitOnWarning"_s }, u"Exit on QML warnings."_s });

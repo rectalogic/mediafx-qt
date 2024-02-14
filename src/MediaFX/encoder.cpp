@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QtLogging>
+#include <array>
 #include <stdint.h>
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -35,13 +36,17 @@ extern "C" {
 
 av_always_inline QString av_err2qstring(int errnum)
 {
-    char str[AV_ERROR_MAX_STRING_SIZE];
-    return av_make_error_string(str, AV_ERROR_MAX_STRING_SIZE, errnum);
+    std::array<char, AV_ERROR_MAX_STRING_SIZE> str; // NOLINT(cppcoreguidelines-pro-type-member-init)
+    return av_make_error_string(str.data(), AV_ERROR_MAX_STRING_SIZE, errnum);
 }
 
 class OutputStream {
 public:
     explicit OutputStream() = default;
+    OutputStream(OutputStream&&) = delete;
+    OutputStream(const OutputStream&) = delete;
+    OutputStream& operator=(OutputStream&&) = delete;
+    OutputStream& operator=(const OutputStream&) = delete;
     ~OutputStream()
     {
         if (m_codecCtx)
@@ -69,7 +74,7 @@ public:
             qCritical() << "Could not allocate stream, avformat_new_stream";
             return false;
         }
-        m_stream->id = formatCtx->nb_streams - 1;
+        m_stream->id = static_cast<int>(formatCtx->nb_streams - 1);
         m_codecCtx = avcodec_alloc_context3(m_codec);
         if (!m_codecCtx) {
             qCritical() << "Could not allocate an encoding context, avcodec_alloc_context3";
@@ -211,14 +216,16 @@ bool Encoder::encode(const QAudioBuffer& audioBuffer, const QByteArray& videoDat
 {
     AVPacket* videoPacket = m_videoStream->packet();
     videoPacket->flags |= AV_PKT_FLAG_KEY;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast, cppcoreguidelines-pro-type-reinterpret-cast)
     videoPacket->data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(videoData.constData()));
-    videoPacket->size = videoData.size();
+    videoPacket->size = static_cast<int>(videoData.size());
     if (!m_videoStream->writePacket(m_formatCtx, 1))
         return false;
 
     AVPacket* audioPacket = m_audioStream->packet();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     audioPacket->data = const_cast<uint8_t*>(audioBuffer.constData<uint8_t>());
-    audioPacket->size = audioBuffer.byteCount();
+    audioPacket->size = static_cast<int>(audioBuffer.byteCount());
     if (!m_audioStream->writePacket(m_formatCtx, audioBuffer.frameCount()))
         return false;
 

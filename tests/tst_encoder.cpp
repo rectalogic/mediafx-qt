@@ -43,6 +43,7 @@ private slots:
 
     void encode()
     {
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
         QString uname(QSysInfo::kernelType());
         uname.replace(0, 1, uname[0].toUpper());
         QDir outputDir(QFINDTESTDATA("../"));
@@ -52,7 +53,7 @@ private slots:
 
         QFile encodedFile(outputDir.filePath("encoder.nut"));
 
-        int sampleRate = 44100;
+        constexpr int sampleRate = 44100;
         auto frameRate = Encoder::FrameRate(5, 1);
         auto frameSize = Encoder::FrameSize(160, 120);
 
@@ -67,30 +68,33 @@ private slots:
 
         QByteArray videoData(frameSize.width() * frameSize.height() * 4, Qt::Uninitialized);
 
-        int frames = 2.0 * frameRate.toDouble(); // 2 seconds
+        const int frames = static_cast<const int>(2.0 * frameRate.toDouble()); // 2 seconds
         double audioTime = 0;
         double audioIncr = 2 * M_PI * 110.0 / sampleRate;
-        double audioIncr2 = 2 * M_PI * 110.0 / sampleRate / sampleRate;
+        constexpr double audioIncr2 = 2 * M_PI * 110.0 / sampleRate / sampleRate;
 
         for (int i = 0; i < frames; i++) {
             // Audio sine wave
             float* q = audioBuffer.data<float>();
             for (int j = 0; j < audioBuffer.frameCount(); j++) {
-                float v = sin(audioTime);
+                float v = static_cast<float>(sin(audioTime));
                 for (int c = 0; c < audioFormat.channelCount(); c++)
-                    *q++ = v;
+                    *q++ = v; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 audioTime += audioIncr;
                 audioIncr += audioIncr2;
             }
             // Video RGBA colors
-            int step = frameRate.toDouble() * i;
+            int step = static_cast<int>(frameRate.toDouble() * i);
             for (int y = 0; y < frameSize.height(); y++) {
                 for (int x = 0; x < frameSize.width(); x++) {
+                    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                     uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[(y * frameSize.width() + x) * 4]));
                     pixel[0] = x + y + step * 3;
                     pixel[1] = 128 + y + step * 2;
                     pixel[2] = 64 + x + step * 5;
                     pixel[3] = 0xff; // alpha
+                    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 }
             }
 
@@ -109,6 +113,7 @@ private slots:
         fixtureFile.close();
 
         QCOMPARE(fixtureData, encodedData);
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
 };
 

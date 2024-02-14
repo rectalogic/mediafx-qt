@@ -37,6 +37,11 @@ public:
         : Interval(milliseconds(start), milliseconds(end))
     {
     }
+    Interval(Interval&&) = default;
+    Interval(const Interval&) = default;
+    Interval& operator=(Interval&&) = default;
+    Interval& operator=(const Interval&) = default;
+    ~Interval() = default;
 
     constexpr qint64 start() const noexcept { return duration_cast<milliseconds>(s).count(); }
     constexpr qint64 end() const noexcept { return duration_cast<milliseconds>(e).count(); }
@@ -70,15 +75,14 @@ public:
         return lhs.start() != rhs.start() || lhs.end() != rhs.end();
     }
 
+    friend inline QDebug& operator<<(QDebug& dbg, const Interval& interval)
+    {
+        QDebugStateSaver saver(dbg);
+        dbg.nospace() << "(" << interval.s << "/" << duration_cast<milliseconds>(interval.s) << ", " << interval.e << "/" << duration_cast<milliseconds>(interval.e) << ")";
+        return dbg;
+    }
+
 private:
-    friend QDebug inline operator<<(QDebug dbg, const Interval& interval);
     microseconds s = microseconds::zero();
     microseconds e = microseconds::zero();
 };
-
-QDebug inline operator<<(QDebug dbg, const Interval& interval)
-{
-    QDebugStateSaver saver(dbg);
-    dbg.nospace() << "(" << interval.s << "/" << duration_cast<milliseconds>(interval.s) << ", " << interval.e << "/" << duration_cast<milliseconds>(interval.e) << ")";
-    return dbg;
-}

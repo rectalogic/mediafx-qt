@@ -41,6 +41,10 @@ public:
     };
 
     explicit Resampler() = default;
+    Resampler(Resampler&&) = delete;
+    Resampler(const Resampler&) = delete;
+    Resampler& operator=(Resampler&&) = delete;
+    Resampler& operator=(const Resampler&) = delete;
     ~Resampler() = default;
 
     bool initialize(FFMS_AudioSource* audioSource, const QAudioFormat& outAudioFormat, ErrorInfo& errorInfo)
@@ -71,7 +75,7 @@ public:
         return true;
     }
 
-    int read(FFMS_AudioSource* audioSource, void* buffer, int startFrame, int frameCount, ErrorInfo& errorInfo)
+    int64_t read(FFMS_AudioSource* audioSource, void* buffer, int64_t startFrame, int64_t frameCount, ErrorInfo& errorInfo)
     {
         if (startFrame >= m_audioProperties->NumSamples)
             return 0;
@@ -83,15 +87,15 @@ public:
         return frameCount;
     }
 
-    void padSilence(QAudioBuffer& outAudioBuffer, qsizetype startFrame)
+    void padSilence(QAudioBuffer& outAudioBuffer, int64_t startFrame)
     {
         qsizetype frameCount = outAudioBuffer.frameCount();
         if (startFrame < frameCount) {
             auto data = outAudioBuffer.data<float>();
             int channelCount = outAudioBuffer.format().channelCount();
             qsizetype sampleCount = channelCount * frameCount;
-            for (int i = startFrame * channelCount; i < sampleCount; i++) {
-                data[i] = 0.0;
+            for (int64_t i = startFrame * channelCount; i < sampleCount; i++) {
+                data[i] = 0.0; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             }
         }
     }
@@ -107,17 +111,17 @@ public:
     bool resampleInternal(FFMS_AudioSource* audioSource, QAudioBuffer& outAudioBuffer, ErrorInfo& errorInfo)
     {
         auto outData = outAudioBuffer.data<uint8_t>();
-        auto outFrameCount = outAudioBuffer.frameCount();
+        int outFrameCount = static_cast<int>(outAudioBuffer.frameCount());
 
         // Flush any leftover input samples
         int leftoverFrameCount = resampleConvert(&outData, outFrameCount, NULL, 0, errorInfo);
         if (leftoverFrameCount == -1)
             return false;
         outFrameCount -= leftoverFrameCount;
-        outData += leftoverFrameCount * outAudioBuffer.format().bytesPerFrame();
+        outData += leftoverFrameCount * outAudioBuffer.format().bytesPerFrame(); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
         while (outFrameCount > 0) {
-            int sourceFrameCount = read(audioSource, m_sourceAudioData.data(), m_nextAudioFrameNum, m_sourceAudioDataFrameCount, errorInfo);
+            int sourceFrameCount = static_cast<int>(read(audioSource, m_sourceAudioData.data(), m_nextAudioFrameNum, m_sourceAudioDataFrameCount, errorInfo));
             if (sourceFrameCount == -1)
                 return false;
             if (sourceFrameCount == 0) {
@@ -127,11 +131,12 @@ public:
             m_nextAudioFrameNum += sourceFrameCount;
 
             auto sourceData = m_sourceAudioData.constData();
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             int convertedFrameCount = resampleConvert(&outData, outFrameCount, reinterpret_cast<const uint8_t**>(&sourceData), sourceFrameCount, errorInfo);
             if (convertedFrameCount == -1)
                 return false;
             outFrameCount -= convertedFrameCount;
-            outData += convertedFrameCount * outAudioBuffer.format().bytesPerFrame();
+            outData += convertedFrameCount * outAudioBuffer.format().bytesPerFrame(); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         return true;
     }
@@ -142,7 +147,7 @@ public:
             // Audio start time in fractional seconds (since samplerate is per second)
             auto audioStartTime = duration<double>(frameTime.usStart() / frameTime.usDuration().count());
             // Start audio at the beginning of the current output frame time
-            m_nextAudioFrameNum = std::round((audioStartTime * m_audioProperties->SampleRate).count());
+            m_nextAudioFrameNum = static_cast<int64_t>(std::round((audioStartTime * m_audioProperties->SampleRate).count()));
         }
 
         if (m_resampleContextPtr) {
@@ -150,7 +155,7 @@ public:
         } else {
             // No need to resample, read directly into output buffer
             // FFMS2/ffmpeg call "samples" what Qt calls "frames"
-            int frameCount = read(audioSource, outAudioBuffer.data<void>(), m_nextAudioFrameNum, outAudioBuffer.frameCount(), errorInfo);
+            int64_t frameCount = read(audioSource, outAudioBuffer.data<void>(), m_nextAudioFrameNum, outAudioBuffer.frameCount(), errorInfo);
             if (frameCount == -1) {
                 return false;
             }
@@ -165,7 +170,7 @@ private:
     ResampleContextPtr m_resampleContextPtr;
     const FFMS_AudioProperties* m_audioProperties = nullptr;
     QByteArray m_sourceAudioData;
-    int64_t m_sourceAudioDataFrameCount;
+    int m_sourceAudioDataFrameCount = 0;
     int64_t m_nextAudioFrameNum = -1;
 };
 
@@ -199,7 +204,8 @@ qint64 AudioTrack::duration() const
     if (!m_audioSourcePtr)
         return 0;
     const FFMS_AudioProperties* audioProps = FFMS_GetAudioProperties(m_audioSourcePtr.get());
-    return round(audioProps->LastEndTime * 1000);
+    std::chrono::duration<float> endTime(audioProps->LastEndTime);
+    return std::chrono::round<std::chrono::milliseconds>(endTime).count();
 }
 
 void AudioTrack::updateActive()
@@ -211,7 +217,8 @@ void AudioTrack::render(const Interval& frameTime, AudioRenderer* audioRenderer)
 {
     ErrorInfo errorInfo;
     if (!m_resamplerPtr->resample(m_audioSourcePtr.get(), frameTime, m_outputAudioBuffer, errorInfo)) {
-        MediaManager::singletonInstance()->logFatalError(qmlWarning(mediaClip()) << "Failed to decode audio:" << errorInfo);
+        qmlWarning(mediaClip()) << "Failed to decode audio:" << errorInfo;
+        MediaManager::singletonInstance()->fatalError();
         return;
     }
     if (audioRenderer)

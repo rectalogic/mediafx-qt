@@ -23,7 +23,11 @@ public:
 
     explicit AudioRenderer(QObject* parent = nullptr);
     AudioRenderer(bool isRoot, QObject* parent = nullptr);
-    ~AudioRenderer();
+    AudioRenderer(AudioRenderer&&) = delete;
+    AudioRenderer(const AudioRenderer&) = delete;
+    AudioRenderer& operator=(AudioRenderer&&) = delete;
+    AudioRenderer& operator=(const AudioRenderer&) = delete;
+    ~AudioRenderer() override;
 
     float volume() const { return m_volume; };
     void setVolume(float volume);

@@ -33,6 +33,7 @@ public:
         static FrameSize parse(const QString& fs)
         {
             int w = 0, h = 0;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             if (sscanf(fs.toUtf8().constData(), "%dx%d", &w, &h) == 2 && w > 0 && h > 0) {
                 return FrameSize(w, h);
             }
@@ -69,12 +70,13 @@ public:
         constexpr microseconds toFrameDuration() const noexcept { return round<microseconds>(duration<double> { 1 / toDouble() }); }
         static FrameRate parse(const QString& fr)
         {
-            float num = 0, den = 0;
-            num = fr.toDouble();
+            int num = 0, den = 0;
+            num = fr.toInt();
             if (num > 0) {
                 return FrameRate(num, 1);
             } else {
-                if (sscanf(fr.toUtf8().constData(), "%f/%f", &num, &den) == 2 && num > 0 && den > 0) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+                if (sscanf(fr.toUtf8().constData(), "%d/%d", &num, &den) == 2 && num > 0 && den > 0) {
                     return FrameRate(num, den);
                 }
             }
@@ -102,7 +104,11 @@ public:
     };
 
     Encoder(const QString& outputFile, const FrameSize& outputFrameSize, const FrameRate& outputFrameRate, int outputSampleRate, QObject* parent = nullptr);
-    ~Encoder();
+    Encoder(Encoder&&) = delete;
+    Encoder(const Encoder&) = delete;
+    Encoder& operator=(Encoder&&) = delete;
+    Encoder& operator=(const Encoder&) = delete;
+    ~Encoder() override;
     bool initialize();
     bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
     bool finish();

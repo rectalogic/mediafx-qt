@@ -17,7 +17,7 @@ class VideoTrack;
 class MediaClip : public QObject, public QQmlParserStatus {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QUrl source READ source WRITE setSource REQUIRED FINAL)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged REQUIRED FINAL)
     Q_PROPERTY(int startTime READ startTime WRITE setStartTime NOTIFY startTimeChanged FINAL)
     Q_PROPERTY(int endTime READ endTime WRITE setEndTime NOTIFY endTimeChanged FINAL)
     Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
@@ -27,6 +27,7 @@ class MediaClip : public QObject, public QQmlParserStatus {
     QML_ELEMENT
 
 signals:
+    void sourceChanged();
     void startTimeChanged();
     void endTimeChanged();
     void durationChanged();
@@ -39,7 +40,11 @@ public:
     using QObject::QObject;
 
     explicit MediaClip(QObject* parent = nullptr);
-    ~MediaClip();
+    MediaClip(MediaClip&&) = delete;
+    MediaClip(const MediaClip&) = delete;
+    MediaClip& operator=(MediaClip&&) = delete;
+    MediaClip& operator=(const MediaClip&) = delete;
+    ~MediaClip() override;
 
     QUrl source() const { return m_source; };
     void setSource(const QUrl&);

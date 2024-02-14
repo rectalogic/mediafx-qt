@@ -10,6 +10,7 @@
 #include <QAudioFormat>
 #include <QObject>
 #include <QQmlEngine>
+#include <QQmlInfo>
 #include <QQuickView>
 #include <chrono>
 using namespace std::chrono;
@@ -60,7 +61,6 @@ MediaManager::MediaManager(const microseconds& outputVideoFrameDuration, int out
     , m_outputVideoFrameDuration(outputVideoFrameDuration)
     , m_currentRenderTime(Interval(0us, outputVideoFrameDuration))
     , m_quickView(quickView)
-    , m_rootAudioRenderer(nullptr)
 {
     m_outputAudioFormat.setSampleFormat(AudioSampleFormat_Qt);
     m_outputAudioFormat.setChannelConfig(AudioChannelLayout_Qt);
@@ -73,7 +73,7 @@ void MediaManager::initialize()
 {
     MediaManagerForeign::setSingletonInstance(this);
     // AudioRenderer depends on the singleton, so create it after initializing singleton
-    m_rootAudioRenderer = new AudioRenderer(true, this);
+    m_rootAudioRenderer = std::make_unique<AudioRenderer>(true);
 }
 
 MediaManager* MediaManager::singletonInstance()
@@ -148,7 +148,7 @@ void MediaManager::finishEncoding()
     finishedEncoding = true;
 }
 
-void MediaManager::logFatalError(const QDebug& error) const
+void MediaManager::fatalError() const
 {
     emit window()->engine()->exit(1);
 }

@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     QUrl url(args.at(0));
 
     QQuickView quickView;
-    MediaManager* manager = new MediaManager(microseconds(33333), 44100, &quickView, &app);
+    MediaManager* manager = new MediaManager(microseconds(33333), 44100, &quickView, &app); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     manager->initialize();
     quickView.setSource(url);
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);

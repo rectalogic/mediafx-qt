@@ -19,7 +19,11 @@ class QVideoSink;
 class VideoTrack : public Track {
 public:
     VideoTrack(MediaClip* mediaClip);
-    ~VideoTrack();
+    VideoTrack(VideoTrack&&) = delete;
+    VideoTrack(const VideoTrack&) = delete;
+    VideoTrack& operator=(VideoTrack&&) = delete;
+    VideoTrack& operator=(const VideoTrack&) = delete;
+    ~VideoTrack() override;
 
     bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) override;
     qint64 duration() const override;

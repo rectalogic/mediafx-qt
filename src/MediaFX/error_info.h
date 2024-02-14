@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QDebugStateSaver>
+#include <array>
 #include <cstdio>
 #include <ffms.h>
 #include <string>
@@ -17,7 +18,7 @@ public:
 
     inline void set(int errorType, int subType)
     {
-        errorInfo.Buffer = errorMessage;
+        errorInfo.Buffer = errorMessage.data();
         errorInfo.BufferSize = sizeof(errorMessage);
         errorInfo.ErrorType = errorType;
         errorInfo.SubType = subType;
@@ -26,8 +27,8 @@ public:
     inline void set(int errorType, int subType, const std::string& message)
     {
         set(errorType, subType);
-        int count = message.copy(errorInfo.Buffer, errorInfo.BufferSize - 1);
-        errorInfo.Buffer[count] = 0;
+        std::size_t count = message.copy(errorMessage.data(), errorMessage.size() - 1);
+        errorMessage.at(count) = 0;
     }
 
     inline void reset()
@@ -40,14 +41,15 @@ public:
         return &errorInfo;
     }
 
-    friend QDebug inline operator<<(QDebug dbg, const ErrorInfo& error)
+    friend inline QDebug& operator<<(QDebug& dbg, const ErrorInfo& error)
     {
         QDebugStateSaver saver(dbg);
-        dbg.nospace() << error.errorMessage << " (error: " << error.errorInfo.ErrorType << ", sub: " << error.errorInfo.SubType << ")";
+        dbg.nospace() << error.errorMessage.data() << " (error: " << error.errorInfo.ErrorType << ", sub: " << error.errorInfo.SubType << ")";
         return dbg.maybeSpace();
     }
 
 private:
-    char errorMessage[1024];
-    FFMS_ErrorInfo errorInfo;
+    static constexpr int MAX_ERROR = 1024;
+    std::array<char, MAX_ERROR> errorMessage { 0 };
+    FFMS_ErrorInfo errorInfo { 0 };
 };

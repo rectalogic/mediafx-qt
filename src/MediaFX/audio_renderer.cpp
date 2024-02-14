@@ -122,14 +122,14 @@ QAudioBuffer AudioRenderer::mix()
         for (int i = 0; i < outputBuffer.sampleCount(); i++) {
             for (const auto& buffer : audioBuffers) {
                 Q_ASSERT(buffer.format() == outputBuffer.format() && buffer.frameCount() == outputBuffer.frameCount());
-                outputBuffer.data<float>()[i] += buffer.constData<float>()[i];
+                outputBuffer.data<float>()[i] += buffer.constData<float>()[i]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             }
         }
     }
     // Apply volume to mixed buffer
     if (volume() != 1.0) {
         for (int i = 0; i < outputBuffer.sampleCount(); i++) {
-            outputBuffer.data<float>()[i] *= volume();
+            outputBuffer.data<float>()[i] *= volume(); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
     }
     audioBuffers.clear();

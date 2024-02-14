@@ -17,7 +17,11 @@ class Resampler;
 class AudioTrack : public Track {
 public:
     AudioTrack(MediaClip* mediaClip);
-    ~AudioTrack();
+    AudioTrack(AudioTrack&&) = delete;
+    AudioTrack(const AudioTrack&) = delete;
+    AudioTrack& operator=(AudioTrack&&) = delete;
+    AudioTrack& operator=(const AudioTrack&) = delete;
+    ~AudioTrack() override;
     bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) override;
     qint64 duration() const override;
     void stop() override;

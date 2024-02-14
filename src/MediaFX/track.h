@@ -14,6 +14,10 @@ public:
         : m_mediaClip(mediaClip)
     {
     }
+    Track(Track&&) = delete;
+    Track(const Track&) = delete;
+    Track& operator=(Track&&) = delete;
+    Track& operator=(const Track&) = delete;
     virtual ~Track() { }
 
     virtual bool initialize(FFMS_Index* index, int trackNum, const char* sourceFile, ErrorInfo& errorInfo) = 0;

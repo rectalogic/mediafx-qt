@@ -117,6 +117,8 @@ jobs:
       uses: jidicula/clang-format-action@v4.9.0
       with:
         clang-format-version: '15'
+    - name: clang-tidy/clazy
+      run: builders/Linux/docker-run.sh /mediafx/builders/Linux/lint.sh
     - name: qmlformat
       run: builders/Linux/docker-run.sh bash -c 'cd /mediafx && qmlformat -i $(git ls-files "**/*.qml") && git diff --exit-code'
     - name: qmllint

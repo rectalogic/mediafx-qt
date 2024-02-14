@@ -54,6 +54,7 @@ void MediaClip::setSource(const QUrl& url)
         return;
     }
     m_source = url;
+    emit sourceChanged();
 }
 
 /*!
@@ -162,7 +163,8 @@ void MediaClip::updateActive()
 void MediaClip::loadMedia()
 {
     if (!source().isValid()) {
-        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip requires source Url");
+        qmlWarning(this) << "MediaClip requires source Url";
+        MediaManager::singletonInstance()->fatalError();
         return;
     }
     ErrorInfo errorInfo;
@@ -170,7 +172,8 @@ void MediaClip::loadMedia()
     QByteArray sourceFileUtf8 = sourceFile.toUtf8();
     FFMS_Indexer* indexer = FFMS_CreateIndexer(sourceFileUtf8.data(), &errorInfo);
     if (!indexer) {
-        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo);
+        qmlWarning(this) << "MediaClip FFMS_CreateIndexer failed:" << errorInfo;
+        MediaManager::singletonInstance()->fatalError();
         return;
     }
     FFMS_TrackTypeIndexSettings(indexer, FFMS_TYPE_VIDEO, 1, 0);
@@ -178,7 +181,8 @@ void MediaClip::loadMedia()
 
     std::unique_ptr<FFMS_Index, decltype(&FFMS_DestroyIndex)> index(FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errorInfo), FFMS_DestroyIndex);
     if (!index) {
-        MediaManager::singletonInstance()->logFatalError(qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo);
+        qmlWarning(this) << "MediaClip FFMS_DoIndexing2 failed:" << errorInfo;
+        MediaManager::singletonInstance()->fatalError();
         return;
     }
 

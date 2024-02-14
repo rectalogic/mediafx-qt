@@ -25,13 +25,17 @@ using namespace std::chrono;
 
 class MediaManager : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QQuickView* window READ window FINAL)
+    Q_PROPERTY(QQuickView* window READ window CONSTANT FINAL)
     Q_PROPERTY(Interval currentRenderTime READ currentRenderTime NOTIFY currentRenderTimeChanged FINAL)
 
 public:
     using QObject::QObject;
     MediaManager(const microseconds& outputVideoFrameDuration, int outputAudioSampleRate, QQuickView* quickView, QObject* parent = nullptr);
-    ~MediaManager();
+    MediaManager(MediaManager&&) = delete;
+    MediaManager(const MediaManager&) = delete;
+    MediaManager& operator=(MediaManager&&) = delete;
+    MediaManager& operator=(const MediaManager&) = delete;
+    ~MediaManager() override;
 
     static MediaManager* singletonInstance();
 
@@ -50,7 +54,7 @@ public:
     const Interval& currentRenderTime() const { return m_currentRenderTime; };
     void nextRenderTime();
 
-    AudioRenderer* audioRenderer() const { return m_rootAudioRenderer; };
+    AudioRenderer* audioRenderer() const { return m_rootAudioRenderer.get(); };
 
     void registerClip(MediaClip* clip);
     void unregisterClip(MediaClip* clip);
@@ -59,7 +63,7 @@ public:
 
     bool isFinishedEncoding() const { return finishedEncoding; }
 
-    void logFatalError(const QDebug& error) const;
+    void fatalError() const;
 
 signals:
     void currentRenderTimeChanged();
@@ -72,7 +76,7 @@ private:
     QAudioFormat m_outputAudioFormat;
     Interval m_currentRenderTime;
     QQuickView* m_quickView;
-    AudioRenderer* m_rootAudioRenderer;
+    std::unique_ptr<AudioRenderer> m_rootAudioRenderer;
     QList<MediaClip*> activeClips;
     bool finishedEncoding = false;
 };
@@ -116,6 +120,6 @@ public:
     }
 
 private:
-    inline static MediaManager* s_singletonInstance = nullptr;
-    inline static QJSEngine* s_engine = nullptr;
+    inline static MediaManager* s_singletonInstance = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    inline static QJSEngine* s_engine = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 };

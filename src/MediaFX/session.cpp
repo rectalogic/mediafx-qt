@@ -23,7 +23,7 @@
 #include <QQuickGraphicsConfiguration>
 #endif
 
-QEvent::Type Session::renderEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
+const QEvent::Type renderEventType = static_cast<const QEvent::Type>(QEvent::registerEventType());
 
 Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     : QObject(parent)
@@ -31,14 +31,12 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     , encoder(encoder)
     , m_outputVideoFrameDuration(encoder->outputFrameRate().toFrameDuration())
     , animationDriver(new AnimationDriver(m_outputVideoFrameDuration, this))
-    , renderControl(nullptr)
-    , quickView(nullptr)
+    , renderControl(std::make_unique<RenderControl>())
+    , quickView(std::make_unique<QQuickView>(QUrl(), renderControl.get()))
 {
     FFMS_Init(0, 0);
 
     animationDriver->install();
-    renderControl.reset(new RenderControl());
-    quickView.reset(new QQuickView(QUrl(), renderControl.get()));
     // Enables Qt.exit(0) in QML
     connect(quickView->engine(), &QQmlEngine::exit, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
 
@@ -49,7 +47,7 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     }
 #endif
 
-    manager = new MediaManager(m_outputVideoFrameDuration, encoder->outputSampleRate(), quickView.get(), this);
+    manager = std::make_unique<MediaManager>(m_outputVideoFrameDuration, encoder->outputSampleRate(), quickView.get());
     manager->initialize();
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
@@ -92,7 +90,7 @@ void Session::quickViewStatusChanged(QQuickView::Status status)
         emit quickView->engine()->exit(1);
     } else if (status == QQuickView::Ready) {
         quickView->rootObject()->setEnabled(false);
-        QCoreApplication::postEvent(this, new QEvent(renderEventType));
+        QCoreApplication::postEvent(this, new QEvent(renderEventType)); // NOLINT(cppcoreguidelines-owning-memory)
     }
 }
 
@@ -136,11 +134,11 @@ void Session::render()
         int rc = 0;
         if (!encoder->finish())
             rc = 1;
-        emit quickView->engine()->exit(0);
+        emit quickView->engine()->exit(rc);
         return;
     }
 
     animationDriver->advance();
 
-    QCoreApplication::postEvent(this, new QEvent(renderEventType));
+    QCoreApplication::postEvent(this, new QEvent(renderEventType)); // NOLINT(cppcoreguidelines-owning-memory)
 }

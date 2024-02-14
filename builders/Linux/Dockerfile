@@ -28,10 +28,10 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-# iwyu needs clang-13
+# iwyu & clazy needs clang-13
 RUN apt-get -y update \
     && apt-get -y install sudo gosu build-essential cmake ninja-build git \
-    clang-15 clang-format-15 clang-13 iwyu \
+    clang-15 clang-format-15 clang-tidy-15 clang-13 iwyu clazy \
     libglx-mesa0 libglvnd-dev libxkbcommon-dev libxkbcommon-x11-0 libpulse-dev libxcb1 libx11-xcb1 libxcb-glx0 libxcb-cursor0 \
     libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
     libvulkan-dev mesa-vulkan-drivers \

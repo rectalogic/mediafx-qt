@@ -32,7 +32,8 @@ private slots:
     void qdebug()
     {
         QString result;
-        QDebug { &result } << Interval(100, 200);
+        QDebug dbg { &result };
+        dbg << Interval(100, 200); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
         QCOMPARE(result, QStringLiteral("(100000us/100ms, 200000us/200ms) "));
     }
 };

@@ -12,6 +12,7 @@
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 #include <QVideoSink>
+#include <array>
 #include <ffms.h>
 #include <libavutil/pixfmt.h>
 #include <math.h>
@@ -104,8 +105,8 @@ bool VideoTrack::initialize(FFMS_Index* index, int trackNum, const char* sourceF
     if (videoSourcePtr) {
         const FFMS_Frame* frameProperties = FFMS_GetFrame(videoSourcePtr.get(), 0, &errorInfo);
         if (frameProperties) {
-            int pixelFormats[2] = { FFMS_GetPixFmt("rgba"), -1 };
-            if (FFMS_SetOutputFormatV2(videoSourcePtr.get(), pixelFormats, frameProperties->EncodedWidth, frameProperties->EncodedHeight, FFMS_RESIZER_BICUBIC, &errorInfo) == 0) {
+            std::array<int, 2> pixelFormats { FFMS_GetPixFmt("rgba"), -1 };
+            if (FFMS_SetOutputFormatV2(videoSourcePtr.get(), pixelFormats.data(), frameProperties->EncodedWidth, frameProperties->EncodedHeight, FFMS_RESIZER_BICUBIC, &errorInfo) == 0) {
                 m_track = FFMS_GetTrackFromVideo(videoSourcePtr.get());
                 m_nextFrameInfo = FFMS_GetFrameInfo(m_track, m_nextFrameNum);
                 m_timebase = FFMS_GetTimeBase(m_track);
@@ -150,7 +151,7 @@ void VideoTrack::mapVideoFrameData(QVideoFrame& videoFrame, const FFMS_Frame* fr
 
 qint64 VideoTrack::calculateFrameStartTime(const FFMS_FrameInfo* frameInfo) const
 {
-    return (qint64)((frameInfo->PTS * m_timebase->Num) / (double)m_timebase->Den);
+    return static_cast<qint64>(static_cast<double>(frameInfo->PTS * m_timebase->Num) / static_cast<double>(m_timebase->Den));
 }
 
 qint64 VideoTrack::duration() const
@@ -158,7 +159,8 @@ qint64 VideoTrack::duration() const
     if (!m_videoSourcePtr)
         return 0;
     const FFMS_VideoProperties* videoProps = FFMS_GetVideoProperties(m_videoSourcePtr.get());
-    return round(videoProps->LastEndTime * 1000);
+    std::chrono::duration<float> endTime(videoProps->LastEndTime);
+    return std::chrono::round<std::chrono::milliseconds>(endTime).count();
 }
 
 void VideoTrack::addVideoSink(QVideoSink* videoSink)

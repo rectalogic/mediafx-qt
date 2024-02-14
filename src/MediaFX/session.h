@@ -30,7 +30,11 @@ class Session : public QObject {
 
 public:
     Session(Encoder* encoder, bool exitOnWarning, QObject* parent = nullptr);
-    ~Session();
+    Session(Session&&) = delete;
+    Session(const Session&) = delete;
+    Session& operator=(Session&&) = delete;
+    Session& operator=(const Session&) = delete;
+    ~Session() override;
 
     bool initialize(const QUrl& url);
 
@@ -48,7 +52,6 @@ private:
     const QAudioBuffer& silentOutputAudioBuffer();
 
     QAudioBuffer m_silentOutputAudioBuffer;
-    static QEvent::Type renderEventType;
     bool exitOnWarning;
     Encoder* encoder;
     microseconds m_outputVideoFrameDuration;
@@ -58,5 +61,5 @@ private:
 #endif
     std::unique_ptr<RenderControl> renderControl;
     std::unique_ptr<QQuickView> quickView;
-    MediaManager* manager;
+    std::unique_ptr<MediaManager> manager;
 };
