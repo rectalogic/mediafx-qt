@@ -90,7 +90,7 @@ jobs:
       run: |
         builders/Darwin/install-qt6.sh
     - name: Save cached installation
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: steps.restore-cache.outputs.cache-hit != 'true'
       with:
         path: build/Darwin/installed
