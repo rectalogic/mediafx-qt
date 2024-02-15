@@ -4,7 +4,6 @@
 #pragma once
 
 #include <QAudioBuffer>
-#include <QEvent>
 #include <QList>
 #include <QObject>
 #include <QQuickView>

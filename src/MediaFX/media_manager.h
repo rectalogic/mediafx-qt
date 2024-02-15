@@ -13,6 +13,7 @@
 #include <QtQml>
 #include <QtQmlIntegration>
 #include <chrono>
+#include <memory>
 Q_MOC_INCLUDE("audio_renderer.h")
 Q_MOC_INCLUDE("media_clip.h")
 Q_MOC_INCLUDE(<QQuickView>)

@@ -4,13 +4,11 @@
 #pragma once
 
 #include <QDebug>
-#include <QDebugStateSaver>
 #include <QObject>
 #include <QtQmlIntegration>
 #include <QtTypes>
 #include <chrono>
 #include <compare>
-#include <ratio>
 #include <utility>
 using namespace std::chrono;
 

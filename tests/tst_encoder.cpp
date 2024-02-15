@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "encoder.h"
+#include "util.h"
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QByteArray>
@@ -10,35 +11,26 @@
 #include <QFile>
 #include <QIODevice>
 #include <QObject>
+#include <QSize>
 #include <QString>
-#include <QStringLiteral>
 #include <QSysInfo>
 #include <QtCore>
 #include <QtTest>
 #include <chrono>
 #include <math.h>
 #include <stdint.h>
+extern "C" {
+#include <libavutil/rational.h>
+}
 using namespace std::chrono;
 
 class tst_Encoder : public QObject {
     Q_OBJECT
 
 private slots:
-    void frameSize()
-    {
-        QCOMPARE(Encoder::FrameSize::parse("640x360"), Encoder::FrameSize(640, 360));
-        QCOMPARE(Encoder::FrameSize(640, 360).toString(), QStringLiteral("640x360"));
-        QVERIFY(Encoder::FrameSize().isEmpty());
-    }
-
     void frameRate()
     {
-        QCOMPARE(Encoder::FrameRate::parse("30"), Encoder::FrameRate(30, 1));
-        QCOMPARE(Encoder::FrameRate::parse("30000/1001"), Encoder::FrameRate(30000, 1001));
-        QCOMPARE(Encoder::FrameRate(30000, 1001).toString(), QStringLiteral("30000/1001"));
-        QCOMPARE(Encoder::FrameRate(30, 1).toString(), QStringLiteral("30"));
-        QVERIFY(Encoder::FrameRate().isEmpty());
-        QCOMPARE(Encoder::FrameRate(30, 1).toFrameDuration(), 33333us);
+        QCOMPARE(frameRateToDuration(AVRational { 30, 1 }), 33333us);
     }
 
     void encode()
@@ -54,8 +46,8 @@ private slots:
         QFile encodedFile(outputDir.filePath("encoder.nut"));
 
         constexpr int sampleRate = 44100;
-        auto frameRate = Encoder::FrameRate(5, 1);
-        auto frameSize = Encoder::FrameSize(160, 120);
+        auto frameRate = AVRational { 5, 1 };
+        auto frameSize = QSize(160, 120);
 
         Encoder encoder(encodedFile.fileName(), frameSize, frameRate, sampleRate);
         QVERIFY(encoder.initialize());
@@ -64,11 +56,11 @@ private slots:
         audioFormat.setSampleFormat(QAudioFormat::Float);
         audioFormat.setChannelConfig(QAudioFormat::ChannelConfigStereo);
         audioFormat.setSampleRate(sampleRate);
-        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRate.toFrameDuration().count()), audioFormat);
+        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToDuration(frameRate).count()), audioFormat);
 
         QByteArray videoData(frameSize.width() * frameSize.height() * 4, Qt::Uninitialized);
 
-        const int frames = static_cast<const int>(2.0 * frameRate.toDouble()); // 2 seconds
+        const int frames = static_cast<const int>(2.0 * av_q2d(frameRate)); // 2 seconds
         double audioTime = 0;
         double audioIncr = 2 * M_PI * 110.0 / sampleRate;
         constexpr double audioIncr2 = 2 * M_PI * 110.0 / sampleRate / sampleRate;
@@ -84,7 +76,7 @@ private slots:
                 audioIncr += audioIncr2;
             }
             // Video RGBA colors
-            int step = static_cast<int>(frameRate.toDouble() * i);
+            int step = static_cast<int>(av_q2d(frameRate) * i);
             for (int y = 0; y < frameSize.height(); y++) {
                 for (int x = 0; x < frameSize.width(); x++) {
                     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)

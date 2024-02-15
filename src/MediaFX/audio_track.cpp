@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "audio_track.h"
-#include "audio.h"
 #include "audio_renderer.h"
 #include "error_info.h"
+#include "formats.h"
 #include "interval.h"
 #include "media_clip.h"
 #include "media_manager.h"
@@ -22,6 +22,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
+#include <type_traits>
 extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/samplefmt.h>

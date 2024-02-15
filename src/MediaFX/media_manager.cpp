@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "media_manager.h"
-#include "audio.h"
 #include "audio_renderer.h"
+#include "formats.h"
 #include "media_clip.h"
 #include "video_track.h"
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QObject>
 #include <QQmlEngine>
-#include <QQmlInfo>
 #include <QQuickView>
 #include <chrono>
 using namespace std::chrono;

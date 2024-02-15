@@ -5,10 +5,12 @@
 
 #include <QAudioFormat>
 #include <QString>
+#include <QVideoFrameFormat>
 #include <ffms.h>
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/channel_layout.h>
+#include <libavutil/pixfmt.h>
 }
 using namespace Qt::Literals::StringLiterals;
 
@@ -29,3 +31,6 @@ inline constexpr auto AudioCodec_FFMPEG =
 #else
     AV_CODEC_ID_PCM_F32LE;
 #endif
+
+inline constexpr AVPixelFormat VideoPixelFormat_FFMPEG = AV_PIX_FMT_RGBA;
+inline constexpr QVideoFrameFormat::PixelFormat VideoPixelFormat_Qt = QVideoFrameFormat::Format_RGBA8888;

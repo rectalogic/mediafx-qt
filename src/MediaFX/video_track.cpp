@@ -3,6 +3,7 @@
 
 #include "video_track.h"
 #include "error_info.h"
+#include "formats.h"
 #include "interval.h"
 #include "media_clip.h"
 #include <QDebug>
@@ -13,11 +14,14 @@
 #include <QVideoFrameFormat>
 #include <QVideoSink>
 #include <array>
+#include <chrono>
 #include <ffms.h>
-#include <libavutil/pixfmt.h>
-#include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include <type_traits>
+extern "C" {
+#include <libavutil/pixfmt.h>
+}
 
 QVideoFrameFormat::ColorTransfer colorTransfer(const FFMS_Frame* frameProperties)
 {
@@ -128,7 +132,7 @@ bool VideoTrack::initialize(FFMS_Index* index, int trackNum, const char* sourceF
 
 QVideoFrameFormat VideoTrack::formatForFrame(const FFMS_Frame* frameProperties) const
 {
-    QVideoFrameFormat format(QSize(frameProperties->EncodedWidth, frameProperties->EncodedHeight), QVideoFrameFormat::Format_RGBA8888);
+    QVideoFrameFormat format(QSize(frameProperties->EncodedWidth, frameProperties->EncodedHeight), VideoPixelFormat_Qt);
     format.setColorTransfer(colorTransfer(frameProperties));
     format.setColorSpace(colorSpace(frameProperties));
     format.setColorRange(colorRange(frameProperties));

@@ -8,9 +8,14 @@
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QMessageLogContext>
+#include <QSize>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+extern "C" {
+#include <libavutil/parseutils.h>
+#include <libavutil/rational.h>
+}
 #ifdef EVENTLOGGER
 #include "event_logger.h"
 #endif
@@ -47,13 +52,13 @@ int main(int argc, char* argv[])
 
     parser.process(app);
 
-    Encoder::FrameRate frameRate = Encoder::FrameRate::parse(parser.value(u"fps"_s));
-    if (frameRate.isEmpty())
+    AVRational frameRate { 0 };
+    if (av_parse_video_rate(&frameRate, parser.value(u"fps"_s).toUtf8()) < 0)
         parser.showHelp(1);
-
-    Encoder::FrameSize frameSize = Encoder::FrameSize::parse(parser.value(u"size"_s));
-    if (frameSize.isEmpty())
+    int width = 0, height = 0;
+    if (av_parse_video_size(&width, &height, parser.value(u"size"_s).toUtf8()) < 0)
         parser.showHelp(1);
+    QSize frameSize(width, height);
 
     int sampleRate = parser.value(u"sampleRate"_s).toInt();
 

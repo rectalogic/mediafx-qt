@@ -9,12 +9,13 @@
  */
 
 #include "encoder.h"
-#include "audio.h"
+#include "formats.h"
+#include "util.h"
 #include <QAudioBuffer>
+#include <QByteArray>
 #include <QDebug>
-#include <QObject>
+#include <QSize>
 #include <QtLogging>
-#include <array>
 #include <stdint.h>
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -23,21 +24,12 @@ extern "C" {
 #include <libavcodec/packet.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
-#include <libavutil/attributes.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/common.h>
 #include <libavutil/dict.h>
-#include <libavutil/error.h>
 #include <libavutil/mathematics.h>
-#include <libavutil/pixfmt.h>
 #include <libavutil/rational.h>
 #include <libavutil/version.h>
-}
-
-av_always_inline QString av_err2qstring(int errnum)
-{
-    std::array<char, AV_ERROR_MAX_STRING_SIZE> str; // NOLINT(cppcoreguidelines-pro-type-member-init)
-    return av_make_error_string(str.data(), AV_ERROR_MAX_STRING_SIZE, errnum);
 }
 
 class OutputStream {
@@ -126,9 +118,8 @@ private:
     int64_t m_nextPTS = 0;
 };
 
-Encoder::Encoder(const QString& outputFile, const FrameSize& outputFrameSize, const FrameRate& outputFrameRate, int outputSampleRate, QObject* parent)
-    : QObject(parent)
-    , m_outputFile(outputFile)
+Encoder::Encoder(const QString& outputFile, const QSize& outputFrameSize, const AVRational& outputFrameRate, int outputSampleRate)
+    : m_outputFile(outputFile)
     , m_outputFrameSize(outputFrameSize)
     , m_outputFrameRate(outputFrameRate)
     , m_outputSampleRate(outputSampleRate) {};
@@ -155,10 +146,10 @@ bool Encoder::initialize()
     if (!video->initialize(m_formatCtx, AV_CODEC_ID_RAWVIDEO))
         return false;
     AVCodecContext* videoCodecCtx = video->codecContext();
-    videoCodecCtx->pix_fmt = AV_PIX_FMT_RGBA;
+    videoCodecCtx->pix_fmt = VideoPixelFormat_FFMPEG;
     videoCodecCtx->width = m_outputFrameSize.width();
     videoCodecCtx->height = m_outputFrameSize.height();
-    AVRational timeBase = { m_outputFrameRate.den(), m_outputFrameRate.num() };
+    AVRational timeBase(av_inv_q(m_outputFrameRate));
     int64_t gcd = av_gcd(FFABS(timeBase.num), FFABS(timeBase.den));
     if (gcd) {
         timeBase.num = FFABS(timeBase.num) / gcd;

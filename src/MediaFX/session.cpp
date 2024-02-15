@@ -7,6 +7,7 @@
 #include "encoder.h"
 #include "media_manager.h"
 #include "render_control.h"
+#include "util.h"
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QDebug>
@@ -29,7 +30,7 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     : QObject(parent)
     , exitOnWarning(exitOnWarning)
     , encoder(encoder)
-    , m_outputVideoFrameDuration(encoder->outputFrameRate().toFrameDuration())
+    , m_outputVideoFrameDuration(frameRateToDuration(encoder->outputFrameRate()))
     , animationDriver(new AnimationDriver(m_outputVideoFrameDuration, this))
     , renderControl(std::make_unique<RenderControl>())
     , quickView(std::make_unique<QQuickView>(QUrl(), renderControl.get()))
@@ -51,7 +52,7 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
     manager->initialize();
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView->resize(encoder->outputFrameSize().toSize());
+    quickView->resize(encoder->outputFrameSize());
     connect(quickView.get(), &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
 }
