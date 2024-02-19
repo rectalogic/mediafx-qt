@@ -36,7 +36,7 @@ private:
     AVRational m_outputFrameRate;
     int m_outputSampleRate;
     QString m_outputFile;
-    AVFormatContext* m_formatCtx = nullptr;
+    AVFormatContext* m_formatContext = nullptr;
     std::unique_ptr<OutputStream> m_videoStream;
     std::unique_ptr<OutputStream> m_audioStream;
 };
