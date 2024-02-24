@@ -50,7 +50,7 @@ private slots:
         auto frameSize = QSize(160, 120);
 
         Encoder encoder(encodedFile.fileName(), frameSize, frameRate, sampleRate);
-        QVERIFY(encoder.initialize());
+        QVERIFY(encoder.isValid());
 
         QAudioFormat audioFormat;
         audioFormat.setSampleFormat(QAudioFormat::Float);

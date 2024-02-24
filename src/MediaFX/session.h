@@ -21,6 +21,7 @@ class AnimationDriver;
 class Encoder;
 class MediaManager;
 class QQmlError;
+class QUrl;
 class RenderControl;
 using namespace std::chrono;
 
@@ -28,14 +29,14 @@ class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(Encoder* encoder, bool exitOnWarning, QObject* parent = nullptr);
+    Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject* parent = nullptr);
     Session(Session&&) = delete;
     Session(const Session&) = delete;
     Session& operator=(Session&&) = delete;
     Session& operator=(const Session&) = delete;
     ~Session() override;
 
-    bool initialize(const QUrl& url);
+    bool isValid() const { return m_isValid; }
 
     microseconds outputVideoFrameDuration() const noexcept { return m_outputVideoFrameDuration; };
 
@@ -50,6 +51,7 @@ private slots:
 private:
     const QAudioBuffer& silentOutputAudioBuffer();
 
+    bool m_isValid = false;
     QAudioBuffer m_silentOutputAudioBuffer;
     bool exitOnWarning;
     Encoder* encoder;

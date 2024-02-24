@@ -72,12 +72,12 @@ int main(int argc, char* argv[])
         output = u"pipe:"_s;
 
     Encoder encoder(output, frameSize, frameRate, sampleRate);
-    if (!encoder.initialize()) {
+    if (!encoder.isValid()) {
         qCritical("Failed to initialize encoder");
         return 1;
     }
-    Session session(&encoder, parser.isSet(u"exitOnWarning"_s));
-    if (!session.initialize(url)) {
+    Session session(&encoder, url, parser.isSet(u"exitOnWarning"_s));
+    if (!session.isValid()) {
         qCritical("Failed to initialize session");
         return 1;
     }

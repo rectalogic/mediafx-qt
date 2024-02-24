@@ -64,16 +64,13 @@ MediaManager::MediaManager(const microseconds& outputVideoFrameDuration, int out
     m_outputAudioFormat.setSampleFormat(AudioSampleFormat_Qt);
     m_outputAudioFormat.setChannelConfig(AudioChannelLayout_Qt);
     m_outputAudioFormat.setSampleRate(outputAudioSampleRate);
-}
 
-MediaManager::~MediaManager() = default;
-
-void MediaManager::initialize()
-{
     MediaManagerForeign::setSingletonInstance(this);
     // AudioRenderer depends on the singleton, so create it after initializing singleton
     m_rootAudioRenderer = std::make_unique<AudioRenderer>(true);
 }
+
+MediaManager::~MediaManager() = default;
 
 MediaManager* MediaManager::singletonInstance()
 {

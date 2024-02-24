@@ -24,7 +24,7 @@ public:
     Encoder& operator=(Encoder&&) = delete;
     Encoder& operator=(const Encoder&) = delete;
     ~Encoder();
-    bool initialize();
+    bool isValid() const { return m_isValid; }
     bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
     bool finish();
     constexpr const QSize& outputFrameSize() const noexcept { return m_outputFrameSize; };
@@ -32,6 +32,7 @@ public:
     constexpr int outputSampleRate() const noexcept { return m_outputSampleRate; };
 
 private:
+    bool m_isValid = false;
     QSize m_outputFrameSize;
     AVRational m_outputFrameRate;
     int m_outputSampleRate;

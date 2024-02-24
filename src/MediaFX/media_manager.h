@@ -40,8 +40,6 @@ public:
 
     static MediaManager* singletonInstance();
 
-    void initialize();
-
     Q_INVOKABLE Interval createInterval(qint64 start, qint64 end) const
     {
         return Interval(start, end);

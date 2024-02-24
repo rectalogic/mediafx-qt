@@ -26,7 +26,7 @@
 
 const QEvent::Type renderEventType = static_cast<const QEvent::Type>(QEvent::registerEventType());
 
-Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
+Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject* parent)
     : QObject(parent)
     , exitOnWarning(exitOnWarning)
     , encoder(encoder)
@@ -49,40 +49,35 @@ Session::Session(Encoder* encoder, bool exitOnWarning, QObject* parent)
 #endif
 
     manager = std::make_unique<MediaManager>(m_outputVideoFrameDuration, encoder->outputSampleRate(), quickView.get());
-    manager->initialize();
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView->resize(encoder->outputFrameSize());
     connect(quickView.get(), &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
     connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
-}
 
-Session::~Session()
-{
-    animationDriver->uninstall();
-    FFMS_Deinit();
-}
-
-bool Session::initialize(const QUrl& url)
-{
 #ifdef MEDIAFX_ENABLE_VULKAN
     if (quickView->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
         if (!vulkanInstance.isValid()) {
             qCritical() << "Invalid Vulkan instance";
-            return false;
+            return;
         }
         quickView->setVulkanInstance(&vulkanInstance);
     }
 #endif
     if (!renderControl->install(quickView.get())) {
         qCritical() << "Failed to install QQuickRenderControl";
-        return false;
+        return;
     }
     quickView->setSource(url);
     if (quickView->status() == QQuickView::Error)
-        return false;
-    else
-        return true;
+        return;
+    m_isValid = true;
+}
+
+Session::~Session()
+{
+    animationDriver->uninstall();
+    FFMS_Deinit();
 }
 
 void Session::quickViewStatusChanged(QQuickView::Status status)
