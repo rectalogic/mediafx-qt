@@ -20,7 +20,6 @@ for the QML elements and modules.
 ## Dependencies
 
 MediaFX use [Qt 6.6](https://doc.qt.io/qt-6/),
-the [FFMS2](https://github.com/FFMS/ffms2) decoding library,
 and [FFmpeg](https://ffmpeg.org/).
 
 ## Example

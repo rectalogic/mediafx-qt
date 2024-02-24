@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # syntax = docker/dockerfile:1.2
+
+ARG UBUNTU=noble
+
 # linux arm64 not supported by Qt https://doc.qt.io/qt-6/supported-platforms.html
-FROM --platform=linux/amd64 ubuntu:jammy as build
+FROM --platform=linux/amd64 ubuntu:jammy as qt
 
 ARG QT_VER
 ENV container docker
@@ -11,35 +14,76 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 RUN apt-get -y update \
-    && apt-get -y install python3 python3-pip
+    && apt-get -y install python3 python3-pip python3-venv
 
 COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
-RUN pip3 install --requirement /tmp/aqtinstall-requirements.txt \
-    && python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
-    && python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
+RUN python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
+    && venv/bin/python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
+    && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
     && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete
 
 
-FROM --platform=linux/amd64 ubuntu:jammy as mediafx
+FROM --platform=linux/amd64 ubuntu:jammy as jammy
+
+
+FROM --platform=linux/amd64 ubuntu:noble as noble
+RUN apt-get -y update && apt-get -y install \
+    clang-format \
+    clang-tidy \
+    clazy \
+    iwyu
+
+
+FROM --platform=linux/amd64 ${UBUNTU} as mediafx
 LABEL maintainer=rectalogic
 ARG QT_VER
+
+ENV GALLIUM_DRIVER=softpipe
+ENV LIBGL_ALWAYS_SOFTWARE=1
+ENV DRI_NO_MSAA=1
 
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-# iwyu & clazy needs clang-13
-RUN apt-get -y update \
-    && apt-get -y install sudo gosu build-essential cmake ninja-build git \
-    clang-15 clang-format-15 clang-tidy-15 clang-13 iwyu clazy \
-    libglx-mesa0 libglvnd-dev libxkbcommon-dev libxkbcommon-x11-0 libpulse-dev libxcb1 libx11-xcb1 libxcb-glx0 libxcb-cursor0 \
-    libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-keysyms1 libicu70 \
-    libvulkan-dev mesa-vulkan-drivers \
-    python3 python3-pip \
-    curl xz-utils xvfb pkg-config libavutil-dev libswresample-dev libffms2-dev ffmpeg \
-    fontconfig fonts-liberation bc
+RUN apt-get -y update  && apt-get -y install \
+    bc \
+    build-essential \
+    cmake \
+    curl \
+    ffmpeg \
+    fontconfig \
+    fonts-liberation \
+    git \
+    gosu \
+    libavcodec-dev \
+    libavfilter-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libglvnd-dev \
+    libglx-mesa0 \
+    libpulse-dev \
+    libvulkan-dev \
+    libx11-xcb1 \
+    libxcb-cursor0 \
+    libxcb-glx0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb1 \
+    libxkbcommon-dev \
+    libxkbcommon-x11-0 \
+    mesa-vulkan-drivers \
+    ninja-build \
+    pkg-config \
+    python3 \
+    python3-pip \
+    sudo \
+    xvfb \
+    xz-utils
 
-COPY --from=build /usr/local/Qt /usr/local/Qt/
+COPY --from=qt /usr/local/Qt /usr/local/Qt/
 ENV QTDIR /usr/local/Qt/${QT_VER}/gcc_64
 ENV PATH /usr/local/Qt/${QT_VER}/gcc_64/bin:$PATH
 ENV QT_VER=${QT_VER}

@@ -91,7 +91,7 @@ void AudioRenderer::removeParentRenderer(AudioRenderer* parent)
     m_parentRenderers.removeAll(parent);
 }
 
-void AudioRenderer::addAudioBuffer(QAudioBuffer& audioBuffer)
+void AudioRenderer::addAudioBuffer(QAudioBuffer audioBuffer)
 {
     audioBuffers.append(audioBuffer);
 }

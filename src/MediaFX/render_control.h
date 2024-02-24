@@ -15,10 +15,16 @@ class RenderControl : public QQuickRenderControl {
 public:
     RenderControl(QObject* parent = nullptr)
         : QQuickRenderControl(parent) {};
+    RenderControl(RenderControl&&) = delete;
+    RenderControl& operator=(RenderControl&&) = delete;
+    ~RenderControl() override = default;
+
     bool install(QQuickWindow* window);
     QByteArray renderVideoFrame();
 
 private:
+    Q_DISABLE_COPY(RenderControl);
+
     std::unique_ptr<QRhiTexture> texture;
     std::unique_ptr<QRhiRenderBuffer> stencilBuffer;
     std::unique_ptr<QRhiTextureRenderTarget> textureRenderTarget;

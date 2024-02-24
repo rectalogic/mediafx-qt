@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import MediaFX
 import MediaFX.Mixers
 import "sequence.js" as Sequence
 

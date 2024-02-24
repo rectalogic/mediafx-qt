@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtQuick.Effects
-import MediaFX
 
 /*!
     \qmltype MultiEffectState

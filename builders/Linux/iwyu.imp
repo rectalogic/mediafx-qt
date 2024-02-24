@@ -1,0 +1,4 @@
+[
+    # https://github.com/include-what-you-use/include-what-you-use/issues/1277
+    { include: ["<bits/chrono.h>", "private", "<chrono>", "public"] }
+]

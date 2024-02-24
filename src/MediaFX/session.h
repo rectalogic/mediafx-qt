@@ -4,7 +4,6 @@
 #pragma once
 
 #include <QAudioBuffer>
-#include <QList>
 #include <QObject>
 #include <QQuickView>
 #include <QtCore>
@@ -21,7 +20,6 @@ class AnimationDriver;
 class Encoder;
 class MediaManager;
 class QQmlError;
-class QUrl;
 class RenderControl;
 using namespace std::chrono;
 
@@ -31,14 +29,10 @@ class Session : public QObject {
 public:
     Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject* parent = nullptr);
     Session(Session&&) = delete;
-    Session(const Session&) = delete;
     Session& operator=(Session&&) = delete;
-    Session& operator=(const Session&) = delete;
     ~Session() override;
 
     bool isValid() const { return m_isValid; }
-
-    microseconds outputVideoFrameDuration() const noexcept { return m_outputVideoFrameDuration; };
 
     void render();
 
@@ -49,13 +43,14 @@ private slots:
     void engineWarnings(const QList<QQmlError>& warnings);
 
 private:
+    Q_DISABLE_COPY(Session);
+
     const QAudioBuffer& silentOutputAudioBuffer();
 
     bool m_isValid = false;
     QAudioBuffer m_silentOutputAudioBuffer;
     bool exitOnWarning;
     Encoder* encoder;
-    microseconds m_outputVideoFrameDuration;
     AnimationDriver* animationDriver;
 #ifdef MEDIAFX_ENABLE_VULKAN
     QVulkanInstance vulkanInstance;

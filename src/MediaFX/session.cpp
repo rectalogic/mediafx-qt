@@ -19,7 +19,6 @@
 #include <QQuickView>
 #include <QSGRendererInterface>
 #include <QUrl>
-#include <ffms.h>
 #ifdef MEDIAFX_ENABLE_VULKAN
 #include <QQuickGraphicsConfiguration>
 #endif
@@ -30,13 +29,10 @@ Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject*
     : QObject(parent)
     , exitOnWarning(exitOnWarning)
     , encoder(encoder)
-    , m_outputVideoFrameDuration(frameRateToDuration(encoder->outputFrameRate()))
-    , animationDriver(new AnimationDriver(m_outputVideoFrameDuration, this))
+    , animationDriver(new AnimationDriver(frameRateToFrameDuration<microseconds>(encoder->outputFrameRate()), this))
     , renderControl(std::make_unique<RenderControl>())
     , quickView(std::make_unique<QQuickView>(QUrl(), renderControl.get()))
 {
-    FFMS_Init(0, 0);
-
     animationDriver->install();
     // Enables Qt.exit(0) in QML
     connect(quickView->engine(), &QQmlEngine::exit, qApp, &QCoreApplication::exit, Qt::QueuedConnection);
@@ -48,7 +44,7 @@ Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject*
     }
 #endif
 
-    manager = std::make_unique<MediaManager>(m_outputVideoFrameDuration, encoder->outputSampleRate(), quickView.get());
+    manager = std::make_unique<MediaManager>(encoder->outputFrameRate(), encoder->outputSampleRate(), quickView.get());
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView->resize(encoder->outputFrameSize());
@@ -77,7 +73,6 @@ Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject*
 Session::~Session()
 {
     animationDriver->uninstall();
-    FFMS_Deinit();
 }
 
 void Session::quickViewStatusChanged(QQuickView::Status status)

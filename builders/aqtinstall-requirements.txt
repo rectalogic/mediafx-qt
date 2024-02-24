@@ -1,8 +1,8 @@
-aqtinstall==3.1.11
+aqtinstall==3.1.12
 beautifulsoup4==4.12.3
 Brotli==1.1.0
 bs4==0.0.2
-certifi==2023.11.17
+certifi==2024.2.2
 charset-normalizer==3.3.2
 defusedxml==0.7.1
 humanize==4.9.0
@@ -10,8 +10,8 @@ idna==3.6
 inflate64==1.0.0
 multivolumefile==0.2.3
 patch==1.16
-psutil==5.9.7
-py7zr==0.20.8
+psutil==5.9.8
+py7zr==0.21.0
 pybcj==1.0.2
 pycryptodomex==3.20.0
 pyppmd==1.1.0
@@ -20,4 +20,4 @@ requests==2.31.0
 semantic-version==2.10.0
 soupsieve==2.5
 texttable==1.7.0
-urllib3==2.1.0
+urllib3==2.2.1

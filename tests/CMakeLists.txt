@@ -50,6 +50,10 @@ qt_add_executable(tst_encoder tst_encoder.cpp)
 add_test(NAME tst_encoder COMMAND tst_encoder)
 target_link_libraries(tst_encoder PRIVATE mediafx Qt::Test)
 
+qt_add_executable(tst_decoder tst_decoder.cpp)
+add_test(NAME tst_decoder COMMAND tst_decoder)
+target_link_libraries(tst_decoder PRIVATE mediafx Qt::Test)
+
 add_qml_test(NAME tst_qml_static OUTPUTSPEC 15:320x180 QMLFILE static.qml OUTPUTFILE static.nut THRESHOLD 99.999)
 add_qml_test(NAME tst_qml_animated OUTPUTSPEC 15:320x180 QMLFILE animated.qml OUTPUTFILE animated.nut THRESHOLD 99.999)
 add_qml_test(NAME tst_qml_video_clipstart OUTPUTSPEC 15:320x180 QMLFILE video-clipstart.qml OUTPUTFILE video-clipstart.nut THRESHOLD 99.999)

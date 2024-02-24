@@ -14,6 +14,9 @@
 #include <QtQmlIntegration>
 #include <chrono>
 #include <memory>
+extern "C" {
+#include <libavutil/rational.h>
+}
 Q_MOC_INCLUDE("audio_renderer.h")
 Q_MOC_INCLUDE("media_clip.h")
 Q_MOC_INCLUDE(<QQuickView>)
@@ -27,30 +30,29 @@ using namespace std::chrono;
 class MediaManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(QQuickView* window READ window CONSTANT FINAL)
-    Q_PROPERTY(Interval currentRenderTime READ currentRenderTime NOTIFY currentRenderTimeChanged FINAL)
+    Q_PROPERTY(IntervalGadget currentRenderTime READ currentRenderTime NOTIFY currentRenderTimeChanged FINAL)
 
 public:
     using QObject::QObject;
-    MediaManager(const microseconds& outputVideoFrameDuration, int outputAudioSampleRate, QQuickView* quickView, QObject* parent = nullptr);
+    MediaManager(const AVRational& outputFrameRate, int outputAudioSampleRate, QQuickView* quickView, QObject* parent = nullptr);
     MediaManager(MediaManager&&) = delete;
-    MediaManager(const MediaManager&) = delete;
     MediaManager& operator=(MediaManager&&) = delete;
-    MediaManager& operator=(const MediaManager&) = delete;
     ~MediaManager() override;
 
     static MediaManager* singletonInstance();
 
-    Q_INVOKABLE Interval createInterval(qint64 start, qint64 end) const
+    Q_INVOKABLE IntervalGadget createInterval(qint64 start, qint64 end) const
     {
-        return Interval(start, end);
+        return IntervalGadget(start, end);
     };
 
     Q_INVOKABLE void updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVideoSink* videoSink);
 
     QQuickView* window() const { return m_quickView; };
-    const microseconds& outputVideoFrameDuration() const { return m_outputVideoFrameDuration; };
+    const AVRational& outputFrameRate() const { return m_outputFrameRate; }
+    const QAudioFormat& outputAudioFormat() const { return m_outputAudioFormat; }
     QAudioBuffer createOutputAudioBuffer();
-    const Interval& currentRenderTime() const { return m_currentRenderTime; };
+    const IntervalGadget currentRenderTime() const { return IntervalGadget(m_currentRenderTime); };
     void nextRenderTime();
 
     AudioRenderer* audioRenderer() const { return m_rootAudioRenderer.get(); };
@@ -71,9 +73,12 @@ public slots:
     void finishEncoding();
 
 private:
-    microseconds m_outputVideoFrameDuration;
+    Q_DISABLE_COPY(MediaManager);
+
+    AVRational m_outputFrameRate;
     QAudioFormat m_outputAudioFormat;
-    Interval m_currentRenderTime;
+    Interval<microseconds> m_currentRenderTime;
+    int m_frameCount = 1;
     QQuickView* m_quickView;
     std::unique_ptr<AudioRenderer> m_rootAudioRenderer;
     QList<MediaClip*> activeClips;

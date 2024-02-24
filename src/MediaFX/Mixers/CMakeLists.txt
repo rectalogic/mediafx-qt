@@ -3,6 +3,20 @@
 
 qt_add_library(mixers STATIC)
 
+# https://bugreports.qt.io/browse/QTBUG-103723
+qt_add_shaders(mixers "shaders"
+    PREFIX
+    "/shaders"
+    FILES
+    crossfade.frag
+    luma.frag
+    OUTPUT_TARGETS shader_output_targets
+)
+
+foreach(shader_output_target ${shader_output_targets})
+    add_dependencies(mixers ${shader_output_target})
+endforeach()
+
 qt_add_qml_module(mixers
     URI MediaFX.Mixers
     QML_FILES
@@ -11,11 +25,4 @@ qt_add_qml_module(mixers
     LumaMixer.qml
     LumaGradientMixer.qml
     WipeMixer.qml
-)
-qt_add_shaders(mixers "shaders"
-    PREFIX
-    "/shaders"
-    FILES
-    crossfade.frag
-    luma.frag
 )

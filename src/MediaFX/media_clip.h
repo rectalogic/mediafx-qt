@@ -3,16 +3,20 @@
 
 #pragma once
 
+#include "decoder.h"
 #include "interval.h"
+#include <QList>
 #include <QObject>
 #include <QQmlParserStatus>
+#include <QString>
 #include <QUrl>
 #include <QtQmlIntegration>
 #include <QtTypes>
-#include <memory>
+#include <chrono>
 class AudioRenderer;
-class AudioTrack;
-class VideoTrack;
+class QVideoSink;
+using namespace std::chrono;
+using namespace std::chrono_literals;
 
 class MediaClip : public QObject, public QQmlParserStatus {
     Q_OBJECT
@@ -23,7 +27,7 @@ class MediaClip : public QObject, public QQmlParserStatus {
     Q_PROPERTY(int duration READ duration NOTIFY durationChanged FINAL)
     Q_PROPERTY(AudioRenderer* audioRenderer READ audioRenderer WRITE setAudioRenderer NOTIFY audioRendererChanged FINAL)
     Q_PROPERTY(bool active READ isActive NOTIFY activeChanged FINAL)
-    Q_PROPERTY(Interval currentFrameTime READ currentFrameTime NOTIFY currentFrameTimeChanged FINAL)
+    Q_PROPERTY(IntervalGadget currentFrameTime READ currentFrameTime NOTIFY currentFrameTimeChanged FINAL)
     QML_ELEMENT
 
 signals:
@@ -41,9 +45,7 @@ public:
 
     explicit MediaClip(QObject* parent = nullptr);
     MediaClip(MediaClip&&) = delete;
-    MediaClip(const MediaClip&) = delete;
     MediaClip& operator=(MediaClip&&) = delete;
-    MediaClip& operator=(const MediaClip&) = delete;
     ~MediaClip() override;
 
     QUrl source() const { return m_source; };
@@ -60,38 +62,48 @@ public:
     AudioRenderer* audioRenderer() const { return m_audioRenderer; };
     void setAudioRenderer(AudioRenderer* audioRenderer);
 
-    const Interval& currentFrameTime() const { return m_currentFrameTime; };
+    const IntervalGadget currentFrameTime() const { return IntervalGadget(m_currentFrameTime); };
 
     void setActive(bool active);
     bool isActive() const { return m_active; };
 
-    void render();
+    bool hasAudio() const { return m_decoder.hasAudio(); }
+    bool hasVideo() const { return m_decoder.hasVideo(); }
 
-    void classBegin() override {};
-    void componentComplete() override;
+    void addVideoSink(QVideoSink* videoSink);
+    void removeVideoSink(const QVideoSink* videoSink);
+
+    void render();
 
     void updateActive();
 
 protected:
-    void loadMedia();
+    void classBegin() override {};
+    void componentComplete() override;
 
+    void loadMedia();
     bool isComponentComplete() { return m_componentComplete; };
 
-    VideoTrack* videoTrack() { return m_videoTrack.get(); };
-    AudioTrack* audioTrack() { return m_audioTrack.get(); };
-
-    friend class MediaManager;
+private slots:
+    void onDecoderErrorMessage(const QString& message);
 
 private:
+    Q_DISABLE_COPY(MediaClip);
+
+    void setEndTime(const microseconds& us);
+
     bool m_componentComplete = false;
     bool m_active = false;
     QUrl m_source;
-    qint64 m_startTime;
-    qint64 m_endTime;
+    qint64 m_startTime = -1;
+    microseconds m_startTimeAdjusted { -1 };
+    qint64 m_endTime = -1;
+    microseconds m_endTimeAdjusted { -1 };
 
-    Interval m_currentFrameTime;
+    int m_frameCount = 1;
+    Interval<microseconds> m_currentFrameTime { -1us, -1us };
 
-    std::unique_ptr<VideoTrack> m_videoTrack;
-    std::unique_ptr<AudioTrack> m_audioTrack;
-    AudioRenderer* m_audioRenderer;
+    Decoder m_decoder;
+    QList<QVideoSink*> m_videoSinks;
+    AudioRenderer* m_audioRenderer = nullptr;
 };

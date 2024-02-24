@@ -5,14 +5,12 @@
 #include "audio_renderer.h"
 #include "formats.h"
 #include "media_clip.h"
-#include "video_track.h"
+#include "util.h"
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QObject>
 #include <QQmlEngine>
 #include <QQuickView>
-#include <chrono>
-using namespace std::chrono;
 
 /*!
     \qmltype MediaManager
@@ -55,10 +53,10 @@ using namespace std::chrono;
     \endqml
 */
 
-MediaManager::MediaManager(const microseconds& outputVideoFrameDuration, int outputAudioSampleRate, QQuickView* quickView, QObject* parent)
+MediaManager::MediaManager(const AVRational& outputFrameRate, int outputAudioSampleRate, QQuickView* quickView, QObject* parent)
     : QObject(parent)
-    , m_outputVideoFrameDuration(outputVideoFrameDuration)
-    , m_currentRenderTime(Interval(0us, outputVideoFrameDuration))
+    , m_outputFrameRate(outputFrameRate)
+    , m_currentRenderTime(Interval(0us, frameRateToFrameDuration<microseconds>(outputFrameRate)))
     , m_quickView(quickView)
 {
     m_outputAudioFormat.setSampleFormat(AudioSampleFormat_Qt);
@@ -79,7 +77,7 @@ MediaManager* MediaManager::singletonInstance()
 
 QAudioBuffer MediaManager::createOutputAudioBuffer()
 {
-    return QAudioBuffer(m_outputAudioFormat.framesForDuration(outputVideoFrameDuration().count()), m_outputAudioFormat);
+    return QAudioBuffer(m_outputAudioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(m_outputFrameRate).count()), m_outputAudioFormat);
 }
 
 void MediaManager::registerClip(MediaClip* clip)
@@ -94,25 +92,19 @@ void MediaManager::unregisterClip(MediaClip* clip)
     activeClips.removeOne(clip);
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void MediaManager::updateVideoSinks(MediaClip* oldClip, MediaClip* newClip, QVideoSink* videoSink)
 {
-    if (oldClip) {
-        VideoTrack* videoTrack = oldClip->videoTrack();
-        if (videoTrack) {
-            videoTrack->removeVideoSink(videoSink);
-        }
-    }
-    if (newClip) {
-        VideoTrack* videoTrack = newClip->videoTrack();
-        if (videoTrack) {
-            videoTrack->addVideoSink(videoSink);
-        }
-    }
+    if (oldClip)
+        oldClip->removeVideoSink(videoSink);
+    if (newClip)
+        newClip->addVideoSink(videoSink);
 }
 
 void MediaManager::nextRenderTime()
 {
-    m_currentRenderTime = m_currentRenderTime.nextInterval(m_outputVideoFrameDuration);
+    m_frameCount++;
+    m_currentRenderTime = m_currentRenderTime.nextInterval(duration_cast<microseconds>(m_frameCount * frameRateToFrameDuration(m_outputFrameRate)));
     emit currentRenderTimeChanged();
 }
 

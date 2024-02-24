@@ -22,6 +22,7 @@ extern "C" {
 #include <libavcodec/codec.h>
 #include <libavcodec/codec_id.h>
 #include <libavcodec/packet.h>
+#include <libavcodec/version.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/channel_layout.h>
@@ -32,11 +33,13 @@ extern "C" {
 #include <libavutil/version.h>
 }
 
+// NOLINTBEGIN(bugprone-assignment-in-if-condition)
+
 class OutputStream {
 public:
     explicit OutputStream(AVFormatContext* formatContext, enum AVCodecID codecID)
+        : m_codec(avcodec_find_encoder(codecID))
     {
-        m_codec = avcodec_find_encoder(codecID);
         if (!m_codec) {
             qCritical() << "Could not find encoder for" << avcodec_get_name(codecID);
             return;
@@ -158,7 +161,7 @@ Encoder::Encoder(const QString& outputFile, const QSize& outputFrameSize, const 
     AVCodecContext* audioCodecContext = audio->codecContext();
     audioCodecContext->sample_fmt = AudioSampleFormat_FFMPEG;
     audioCodecContext->sample_rate = m_outputSampleRate;
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 37, 100)
     audioCodecContext->channel_layout = AudioChannelLayout_FFMPEG;
     audioCodecContext->channels = av_get_channel_layout_nb_channels(audioCodecContext->channel_layout);
 #else
@@ -238,3 +241,5 @@ bool Encoder::finish()
     }
     return true;
 }
+
+// NOLINTEND(bugprone-assignment-in-if-condition)

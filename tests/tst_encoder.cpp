@@ -18,6 +18,7 @@
 #include <QtTest>
 #include <chrono>
 #include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 extern "C" {
 #include <libavutil/rational.h>
@@ -30,7 +31,7 @@ class tst_Encoder : public QObject {
 private slots:
     void frameRate()
     {
-        QCOMPARE(frameRateToDuration(AVRational { 30, 1 }), 33333us);
+        QCOMPARE(frameRateToFrameDuration<microseconds>(AVRational { 30, 1 }), 33333us);
     }
 
     void encode()
@@ -56,9 +57,9 @@ private slots:
         audioFormat.setSampleFormat(QAudioFormat::Float);
         audioFormat.setChannelConfig(QAudioFormat::ChannelConfigStereo);
         audioFormat.setSampleRate(sampleRate);
-        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToDuration(frameRate).count()), audioFormat);
+        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(frameRate).count()), audioFormat);
 
-        QByteArray videoData(frameSize.width() * frameSize.height() * 4, Qt::Uninitialized);
+        QByteArray videoData(static_cast<qsizetype>(frameSize.width() * frameSize.height() * 4), Qt::Uninitialized);
 
         const int frames = static_cast<const int>(2.0 * av_q2d(frameRate)); // 2 seconds
         double audioTime = 0;
@@ -81,7 +82,7 @@ private slots:
                 for (int x = 0; x < frameSize.width(); x++) {
                     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[(y * frameSize.width() + x) * 4]));
+                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[static_cast<ptrdiff_t>((y * frameSize.width() + x) * 4)]));
                     pixel[0] = x + y + step * 3;
                     pixel[1] = 128 + y + step * 2;
                     pixel[2] = 64 + x + step * 5;

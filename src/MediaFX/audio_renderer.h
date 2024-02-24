@@ -24,9 +24,7 @@ public:
     explicit AudioRenderer(QObject* parent = nullptr);
     AudioRenderer(bool isRoot, QObject* parent = nullptr);
     AudioRenderer(AudioRenderer&&) = delete;
-    AudioRenderer(const AudioRenderer&) = delete;
     AudioRenderer& operator=(AudioRenderer&&) = delete;
-    AudioRenderer& operator=(const AudioRenderer&) = delete;
     ~AudioRenderer() override;
 
     float volume() const { return m_volume; };
@@ -35,10 +33,12 @@ public:
     AudioRenderer* nextRenderer() const { return m_nextRenderer; };
     void setNextRenderer(AudioRenderer* nextRenderer);
 
-    void addAudioBuffer(QAudioBuffer& audioBuffer);
+    void addAudioBuffer(QAudioBuffer audioBuffer);
     QAudioBuffer mix();
 
 private:
+    Q_DISABLE_COPY(AudioRenderer);
+
     AudioRenderer* nextRendererInternal() const;
     void addParentRenderer(AudioRenderer* parent);
     void removeParentRenderer(AudioRenderer* parent);

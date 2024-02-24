@@ -12,9 +12,15 @@ extern "C" {
 }
 using namespace std::chrono;
 
-inline microseconds frameRateToDuration(const AVRational& frameRate)
+inline duration<double> frameRateToFrameDuration(const AVRational& frameRate)
 {
-    return round<microseconds>(duration<double>(av_q2d(av_inv_q(frameRate))));
+    return duration<double>(av_q2d(av_inv_q(frameRate)));
+}
+
+template <class T>
+inline T frameRateToFrameDuration(const AVRational& frameRate)
+{
+    return round<T>(frameRateToFrameDuration(frameRate));
 }
 
 av_always_inline QString av_err2qstring(int errnum)

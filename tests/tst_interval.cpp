@@ -18,22 +18,33 @@ private slots:
 
     void contains()
     {
-        QVERIFY(Interval(100, 200).contains(150));
-        QVERIFY(!Interval(100, 200).contains(300));
-        QVERIFY(Interval(100, 200).contains(100));
-        QVERIFY(!Interval(100, 200).contains(200));
+        QVERIFY(Interval<microseconds>(100ms, 200ms).contains(150ms));
+        QVERIFY(!Interval<microseconds>(100ms, 200ms).contains(300ms));
+        QVERIFY(Interval<microseconds>(100ms, 200ms).contains(100ms));
+        QVERIFY(!Interval<microseconds>(100ms, 200ms).contains(200ms));
+    }
+
+    void conversion()
+    {
+        Interval<microseconds> i1(100ms, 200ms);
+        Interval<nanoseconds> i2(i1);
+        QCOMPARE(i2.start(), i1.start());
+        QCOMPARE(i2.end(), i1.end());
+        Interval<milliseconds> i3(i1);
+        QCOMPARE(i3.start(), i1.start());
+        QCOMPARE(i3.end(), i1.end());
     }
 
     void nextInterval()
     {
-        QCOMPARE(Interval(3333, 6666), Interval(0, 3333).nextInterval(3333000us));
+        QCOMPARE(Interval<microseconds>(0ms, 3333ms).nextInterval(6666000us), Interval<microseconds>(3333ms, 6666ms));
     }
 
     void qdebug()
     {
         QString result;
         QDebug dbg { &result };
-        dbg << Interval(100, 200); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+        dbg << Interval<microseconds>(100ms, 200ms); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
         QCOMPARE(result, QStringLiteral("(100000us/100ms, 200000us/200ms) "));
     }
 };

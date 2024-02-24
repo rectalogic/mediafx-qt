@@ -10,8 +10,11 @@
 class EventLogger : public QObject {
     Q_OBJECT
 public:
-    EventLogger(QObject* parent = nullptr)
+    explicit EventLogger(QObject* parent = nullptr)
         : QObject(parent) {};
+    EventLogger(EventLogger&&) = delete;
+    EventLogger& operator=(EventLogger&&) = delete;
+    ~EventLogger() override = default;
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override
@@ -19,4 +22,7 @@ protected:
         qDebug() << obj << event->type();
         return false;
     }
+
+private:
+    Q_DISABLE_COPY(EventLogger);
 };

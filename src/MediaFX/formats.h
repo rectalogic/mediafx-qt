@@ -6,7 +6,6 @@
 #include <QAudioFormat>
 #include <QString>
 #include <QVideoFrameFormat>
-#include <ffms.h>
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/channel_layout.h>
@@ -14,15 +13,14 @@ extern "C" {
 }
 using namespace Qt::Literals::StringLiterals;
 
-inline constexpr int64_t AudioChannelLayout_FFMS2 = FFMS_CH_FRONT_LEFT | FFMS_CH_FRONT_RIGHT;
 #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 inline constexpr int64_t AudioChannelLayout_FFMPEG = AV_CH_LAYOUT_STEREO;
 #else
 inline constexpr AVChannelLayout AudioChannelLayout_FFMPEG = AV_CHANNEL_LAYOUT_STEREO;
 #endif
+inline constexpr auto AudioChannelLayoutName_FFMPEG = "stereo";
 inline constexpr auto AudioChannelLayout_Qt = QAudioFormat::ChannelConfigStereo;
 
-inline constexpr FFMS_SampleFormat AudioSampleFormat_FFMS2 = FFMS_FMT_FLT;
 inline constexpr auto AudioSampleFormat_Qt = QAudioFormat::Float;
 inline constexpr auto AudioSampleFormat_FFMPEG = AV_SAMPLE_FMT_FLT;
 inline constexpr auto AudioCodec_FFMPEG =
@@ -33,4 +31,9 @@ inline constexpr auto AudioCodec_FFMPEG =
 #endif
 
 inline constexpr AVPixelFormat VideoPixelFormat_FFMPEG = AV_PIX_FMT_RGBA;
-inline constexpr QVideoFrameFormat::PixelFormat VideoPixelFormat_Qt = QVideoFrameFormat::Format_RGBA8888;
+inline constexpr auto VideoPixelFormatName_FFMPEG = "rgba";
+inline constexpr auto VideoPixelFormat_Qt = QVideoFrameFormat::Format_RGBA8888;
+inline constexpr auto VideoColorSpace_Qt = QVideoFrameFormat::ColorSpace_AdobeRgb;
+inline constexpr auto VideoColorSpace_FFMPEG = AVCOL_SPC_RGB;
+inline constexpr auto VideoColorRange_Qt = QVideoFrameFormat::ColorRange_Full;
+inline constexpr auto VideoColorRange_FFMPEG = AVCOL_RANGE_JPEG;

@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 class AnimationDriver : public QAnimationDriver {
 public:
-    AnimationDriver(microseconds frameDuration, QObject* parent = nullptr)
+    AnimationDriver(const microseconds& frameDuration, QObject* parent = nullptr)
         : QAnimationDriver(parent)
         , m_frameDuration(frameDuration)
     {

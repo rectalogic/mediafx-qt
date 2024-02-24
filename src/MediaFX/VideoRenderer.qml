@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtMultimedia
-import MediaFX
 
 /*!
     \qmltype VideoRenderer

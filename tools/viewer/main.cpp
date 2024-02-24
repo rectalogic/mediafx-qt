@@ -6,11 +6,14 @@
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QQuickView>
+#include <QString>
 #include <QStringList>
 #include <QUrl>
-#include <QtCore>
 #include <QtLogging>
 #include <chrono>
+extern "C" {
+#include <libavutil/rational.h>
+}
 using namespace std::chrono;
 using namespace Qt::Literals::StringLiterals;
 
@@ -39,7 +42,7 @@ int main(int argc, char* argv[])
     QUrl url(args.at(0));
 
     QQuickView quickView;
-    MediaManager* manager = new MediaManager(microseconds(33333), 44100, &quickView, &app); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    MediaManager manager(AVRational { 30, 1 }, 44100, &quickView); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     quickView.setSource(url);
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.show();
