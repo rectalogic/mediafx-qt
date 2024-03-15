@@ -62,12 +62,17 @@ public:
 
     void render();
 
+    Q_INVOKABLE void pauseRendering();
+    Q_INVOKABLE void resumeRendering();
+    bool isRenderingPaused() const { return m_pauseRendering > 0; }
+
     bool isFinishedEncoding() const { return finishedEncoding; }
 
     void fatalError() const;
 
 signals:
     void currentRenderTimeChanged();
+    void renderingPausedChanged();
 
 public slots:
     void finishEncoding();
@@ -83,6 +88,7 @@ private:
     std::unique_ptr<AudioRenderer> m_rootAudioRenderer;
     QList<MediaClip*> activeClips;
     bool finishedEncoding = false;
+    int m_pauseRendering = 0;
 };
 
 // https://doc.qt.io/qt-6/qqmlengine.html#QML_SINGLETON

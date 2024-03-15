@@ -45,11 +45,12 @@ Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject*
 #endif
 
     manager = std::make_unique<MediaManager>(encoder->outputFrameRate(), encoder->outputSampleRate(), quickView.get());
+    connect(manager.get(), &MediaManager::renderingPausedChanged, this, &Session::onRenderingPausedChanged);
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView->resize(encoder->outputFrameSize());
-    connect(quickView.get(), &QQuickView::statusChanged, this, &Session::quickViewStatusChanged);
-    connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::engineWarnings);
+    connect(quickView.get(), &QQuickView::statusChanged, this, &Session::onQuickViewStatusChanged);
+    connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::onEngineWarnings);
 
 #ifdef MEDIAFX_ENABLE_VULKAN
     if (quickView->rendererInterface()->graphicsApi() == QSGRendererInterface::Vulkan) {
@@ -75,17 +76,25 @@ Session::~Session()
     animationDriver->uninstall();
 }
 
-void Session::quickViewStatusChanged(QQuickView::Status status)
+void Session::postRenderEvent()
+{
+    if (m_isRenderEventPosted)
+        return;
+    m_isRenderEventPosted = true;
+    QCoreApplication::postEvent(this, new QEvent(renderEventType)); // NOLINT(cppcoreguidelines-owning-memory)
+}
+
+void Session::onQuickViewStatusChanged(QQuickView::Status status)
 {
     if (status == QQuickView::Error) {
         emit quickView->engine()->exit(1);
     } else if (status == QQuickView::Ready) {
         quickView->rootObject()->setEnabled(false);
-        QCoreApplication::postEvent(this, new QEvent(renderEventType)); // NOLINT(cppcoreguidelines-owning-memory)
+        postRenderEvent();
     }
 }
 
-void Session::engineWarnings(const QList<QQmlError>& warnings)
+void Session::onEngineWarnings(const QList<QQmlError>& warnings)
 {
     // Warnings are logged
     if (exitOnWarning)
@@ -95,6 +104,7 @@ void Session::engineWarnings(const QList<QQmlError>& warnings)
 bool Session::event(QEvent* event)
 {
     if (event->type() == renderEventType) {
+        m_isRenderEventPosted = false;
         render();
         return true;
     }
@@ -109,9 +119,24 @@ const QAudioBuffer& Session::silentOutputAudioBuffer()
     return m_silentOutputAudioBuffer;
 }
 
+void Session::onRenderingPausedChanged()
+{
+    if (!manager->isRenderingPaused())
+        postRenderEvent();
+}
+
 void Session::render()
 {
-    manager->render();
+    if (manager->isRenderingPaused())
+        return;
+    if (!m_isResumingRender)
+        manager->render();
+    if (manager->isRenderingPaused()) {
+        m_isResumingRender = true;
+        return;
+    }
+    m_isResumingRender = false;
+
     QByteArray videoData = renderControl->renderVideoFrame();
     QAudioBuffer audioBuffer = manager->audioRenderer()->mix();
     if (!audioBuffer.isValid())
@@ -131,5 +156,5 @@ void Session::render()
 
     animationDriver->advance();
 
-    QCoreApplication::postEvent(this, new QEvent(renderEventType)); // NOLINT(cppcoreguidelines-owning-memory)
+    postRenderEvent();
 }

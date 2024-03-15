@@ -16,6 +16,11 @@ jobs:
       contents: read
       packages: write
     steps:
+    - name: Free space
+      run: |
+        # Workaround to provide additional free space.
+        #   https://github.com/actions/runner-images/issues/2840#issuecomment-790492173
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
     - name: Checkout
       uses: actions/checkout@v4
       with:

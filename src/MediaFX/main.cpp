@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     parser.addOption({ { u"r"_s, u"sampleRate"_s }, u"Output audio sample rate (Hz)"_s, u"sampleRate"_s, u"44100"_s });
     parser.addOption({ { u"s"_s, u"size"_s }, u"Output video frame size, WxH."_s, u"size"_s, u"640x360"_s });
     parser.addOption({ { u"w"_s, u"exitOnWarning"_s }, u"Exit on QML warnings."_s });
-    parser.addOption({ { u"l"_s, u"loglevel"_s }, u"FFmpeg log level."_s, u"loglevel"_s, u"info"_s });
+    parser.addOption({ { u"l"_s, u"loglevel"_s }, u"FFmpeg log level."_s, u"loglevel"_s, u"warning"_s });
     parser.addPositionalArgument(u"source"_s, u"QML source URL."_s);
     parser.addPositionalArgument(u"output"_s, u"Output nut video path (or '-' for stdout)."_s);
 
@@ -92,7 +92,8 @@ int main(int argc, char* argv[])
             qCritical() << u"Invalid loglevel, must be one of "_s % levels;
             parser.showHelp(1);
         }
-    }
+    } else
+        av_log_set_level(AV_LOG_WARNING);
 
     AVRational frameRate { 0 };
     if (av_parse_video_rate(&frameRate, qUtf8Printable(parser.value(u"fps"_s))) < 0)

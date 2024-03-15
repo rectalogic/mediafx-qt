@@ -38,9 +38,13 @@ public:
 
     bool event(QEvent* event) override;
 
+protected:
+    void postRenderEvent();
+
 private slots:
-    void quickViewStatusChanged(QQuickView::Status status);
-    void engineWarnings(const QList<QQmlError>& warnings);
+    void onQuickViewStatusChanged(QQuickView::Status status);
+    void onEngineWarnings(const QList<QQmlError>& warnings);
+    void onRenderingPausedChanged();
 
 private:
     Q_DISABLE_COPY(Session);
@@ -58,4 +62,6 @@ private:
     std::unique_ptr<RenderControl> renderControl;
     std::unique_ptr<QQuickView> quickView;
     std::unique_ptr<MediaManager> manager;
+    bool m_isRenderEventPosted = false;
+    bool m_isResumingRender = false;
 };

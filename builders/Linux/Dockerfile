@@ -6,7 +6,7 @@
 ARG UBUNTU=noble
 
 # linux arm64 not supported by Qt https://doc.qt.io/qt-6/supported-platforms.html
-FROM --platform=linux/amd64 ubuntu:jammy as qt
+FROM --platform=linux/amd64 ubuntu:${UBUNTU} as qt
 
 ARG QT_VER
 ENV container docker
@@ -18,7 +18,7 @@ RUN apt-get -y update \
 
 COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
 RUN python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
-    && venv/bin/python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
+    && venv/bin/python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
     && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
     && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete
 
@@ -47,7 +47,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 RUN apt-get -y update  && apt-get -y install \
-    bc \
     build-essential \
     cmake \
     curl \
@@ -60,8 +59,10 @@ RUN apt-get -y update  && apt-get -y install \
     libavfilter-dev \
     libavformat-dev \
     libavutil-dev \
+    libasound2 \
     libglvnd-dev \
     libglx-mesa0 \
+    libnss3 \
     libpulse-dev \
     libvulkan-dev \
     libx11-xcb1 \
@@ -71,9 +72,16 @@ RUN apt-get -y update  && apt-get -y install \
     libxcb-image0 \
     libxcb-keysyms1 \
     libxcb-render-util0 \
+    libxcb-shape0 \
     libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxi6 \
     libxkbcommon-dev \
     libxkbcommon-x11-0 \
+    libxrandr2 \
+    libxrender1 \
+    libxtst6 \
     mesa-vulkan-drivers \
     ninja-build \
     pkg-config \

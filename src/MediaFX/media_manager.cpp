@@ -108,6 +108,36 @@ void MediaManager::nextRenderTime()
     emit currentRenderTimeChanged();
 }
 
+/*!
+    \qmlmethod void MediaManager::pauseRendering
+
+    Pause rendering to allow for asynchronous processing.
+    \l resumeRendering must be called as many times as \a pauseRendering.
+*/
+void MediaManager::pauseRendering()
+{
+    m_pauseRendering++;
+    if (m_pauseRendering == 1)
+        emit renderingPausedChanged();
+}
+
+/*!
+    \qmlmethod void MediaManager::resumeRendering
+
+    Resume rendering after asynchronous processing.
+    \a resumeRendering must be called as many times as \l pauseRendering.
+*/
+void MediaManager::resumeRendering()
+{
+    m_pauseRendering--;
+    if (m_pauseRendering < 0) {
+        qmlWarning(this) << "MediaManager resumeRendering called too many times";
+        m_pauseRendering = 0;
+    }
+    if (m_pauseRendering == 0)
+        emit renderingPausedChanged();
+}
+
 void MediaManager::render()
 {
     for (auto clip : activeClips) {
