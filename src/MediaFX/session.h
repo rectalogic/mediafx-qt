@@ -17,8 +17,8 @@
 #include <QVulkanInstance>
 #endif
 class AnimationDriver;
-class Encoder;
 class MediaManager;
+class OutputFormat;
 class QQmlError;
 class RenderControl;
 using namespace std::chrono;
@@ -27,7 +27,7 @@ class Session : public QObject {
     Q_OBJECT
 
 public:
-    Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject* parent = nullptr);
+    Session(const OutputFormat& outputFormat, const QUrl& url, bool exitOnWarning, QObject* parent = nullptr);
     Session(Session&&) = delete;
     Session& operator=(Session&&) = delete;
     ~Session() override;
@@ -37,6 +37,10 @@ public:
     void render();
 
     bool event(QEvent* event) override;
+
+signals:
+    void frameReady(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
+    void sessionFinished();
 
 protected:
     void postRenderEvent();
@@ -54,7 +58,6 @@ private:
     bool m_isValid = false;
     QAudioBuffer m_silentOutputAudioBuffer;
     bool exitOnWarning;
-    Encoder* encoder;
     AnimationDriver* animationDriver;
 #ifdef MEDIAFX_ENABLE_VULKAN
     QVulkanInstance vulkanInstance;

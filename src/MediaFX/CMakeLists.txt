@@ -18,6 +18,7 @@ qt_add_library(mediafx STATIC
     audio_stream.cpp
     video_stream.cpp
     encoder.cpp
+    output_stream.cpp
     render_control.cpp
     media_clip.cpp
     audio_renderer.cpp

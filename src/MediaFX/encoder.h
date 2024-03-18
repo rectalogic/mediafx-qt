@@ -3,39 +3,41 @@
 
 #pragma once
 
-#include <QSize>
+#include <QObject>
 #include <QString>
+#include <QtCore>
 #include <chrono>
 #include <memory>
-extern "C" {
-#include <libavutil/rational.h>
-}
+Q_MOC_INCLUDE("output_stream.h")
+class OutputFormat;
 class OutputStream;
 class QAudioBuffer;
-class QByteArray;
 struct AVFormatContext;
 using namespace std::chrono;
 
-class Encoder {
+class Encoder : public QObject {
+    Q_OBJECT
+
 public:
-    Encoder(const QString& outputFile, const QSize& outputFrameSize, const AVRational& outputFrameRate, int outputSampleRate);
+    using QObject::QObject;
+
+    Encoder(const QString& outputFile, const OutputFormat& outputFormat);
     Encoder(Encoder&&) = delete;
-    Encoder(const Encoder&) = delete;
     Encoder& operator=(Encoder&&) = delete;
-    Encoder& operator=(const Encoder&) = delete;
-    ~Encoder();
+    ~Encoder() override;
     bool isValid() const { return m_isValid; }
+
+signals:
+    void encodingError();
+
+public slots:
     bool encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
     bool finish();
-    constexpr const QSize& outputFrameSize() const noexcept { return m_outputFrameSize; };
-    constexpr const AVRational& outputFrameRate() const noexcept { return m_outputFrameRate; };
-    constexpr int outputSampleRate() const noexcept { return m_outputSampleRate; };
 
 private:
+    Q_DISABLE_COPY(Encoder);
+
     bool m_isValid = false;
-    QSize m_outputFrameSize;
-    AVRational m_outputFrameRate;
-    int m_outputSampleRate;
     QString m_outputFile;
     AVFormatContext* m_formatContext = nullptr;
     std::unique_ptr<OutputStream> m_videoStream;

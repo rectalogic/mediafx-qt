@@ -3,9 +3,11 @@
 
 #include "application.h"
 #include "media_manager.h"
+#include "output_format.h"
 #include <QCommandLineParser>
 #include <QGuiApplication>
 #include <QQuickView>
+#include <QSize>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -42,7 +44,8 @@ int main(int argc, char* argv[])
     QUrl url(args.at(0));
 
     QQuickView quickView;
-    MediaManager manager(AVRational { 30, 1 }, 44100, &quickView); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    OutputFormat outputFormat(QSize(), AVRational { 30, 1 }, 44100); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    MediaManager manager(outputFormat, &quickView);
     quickView.setSource(url);
     quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
     quickView.show();

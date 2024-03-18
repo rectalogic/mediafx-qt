@@ -4,8 +4,8 @@
 #include "session.h"
 #include "animation.h"
 #include "audio_renderer.h"
-#include "encoder.h"
 #include "media_manager.h"
+#include "output_format.h"
 #include "render_control.h"
 #include "util.h"
 #include <QByteArray>
@@ -25,11 +25,10 @@
 
 const QEvent::Type renderEventType = static_cast<const QEvent::Type>(QEvent::registerEventType());
 
-Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject* parent)
+Session::Session(const OutputFormat& outputFormat, const QUrl& url, bool exitOnWarning, QObject* parent)
     : QObject(parent)
     , exitOnWarning(exitOnWarning)
-    , encoder(encoder)
-    , animationDriver(new AnimationDriver(frameRateToFrameDuration<microseconds>(encoder->outputFrameRate()), this))
+    , animationDriver(new AnimationDriver(frameRateToFrameDuration<microseconds>(outputFormat.frameRate()), this))
     , renderControl(std::make_unique<RenderControl>())
     , quickView(std::make_unique<QQuickView>(QUrl(), renderControl.get()))
 {
@@ -44,11 +43,11 @@ Session::Session(Encoder* encoder, const QUrl& url, bool exitOnWarning, QObject*
     }
 #endif
 
-    manager = std::make_unique<MediaManager>(encoder->outputFrameRate(), encoder->outputSampleRate(), quickView.get());
+    manager = std::make_unique<MediaManager>(outputFormat, quickView.get());
     connect(manager.get(), &MediaManager::renderingPausedChanged, this, &Session::onRenderingPausedChanged);
 
     quickView->setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView->resize(encoder->outputFrameSize());
+    quickView->resize(outputFormat.frameSize());
     connect(quickView.get(), &QQuickView::statusChanged, this, &Session::onQuickViewStatusChanged);
     connect(quickView->engine(), &QQmlEngine::warnings, this, &Session::onEngineWarnings);
 
@@ -143,14 +142,12 @@ void Session::render()
         audioBuffer = silentOutputAudioBuffer();
     manager->nextRenderTime();
 
-    if (!encoder->encode(audioBuffer, videoData))
-        return;
+    emit frameReady(audioBuffer, videoData);
 
     if (manager->isFinishedEncoding()) {
-        int rc = 0;
-        if (!encoder->finish())
-            rc = 1;
-        emit quickView->engine()->exit(rc);
+        emit sessionFinished();
+        // Exit 0, the above slot should have exited with an error if necessary
+        emit quickView->engine()->exit(0);
         return;
     }
 

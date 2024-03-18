@@ -23,6 +23,7 @@ Q_MOC_INCLUDE(<QQuickView>)
 Q_MOC_INCLUDE(<QVideoSink>)
 class AudioRenderer;
 class MediaClip;
+class OutputFormat;
 class QQuickView;
 class QVideoSink;
 using namespace std::chrono;
@@ -34,7 +35,7 @@ class MediaManager : public QObject {
 
 public:
     using QObject::QObject;
-    MediaManager(const AVRational& outputFrameRate, int outputAudioSampleRate, QQuickView* quickView, QObject* parent = nullptr);
+    MediaManager(const OutputFormat& outputFormat, QQuickView* quickView, QObject* parent = nullptr);
     MediaManager(MediaManager&&) = delete;
     MediaManager& operator=(MediaManager&&) = delete;
     ~MediaManager() override;
@@ -65,10 +66,7 @@ public:
     Q_INVOKABLE void pauseRendering();
     Q_INVOKABLE void resumeRendering();
     bool isRenderingPaused() const { return m_pauseRendering > 0; }
-
     bool isFinishedEncoding() const { return finishedEncoding; }
-
-    void fatalError() const;
 
 signals:
     void currentRenderTimeChanged();
@@ -76,6 +74,7 @@ signals:
 
 public slots:
     void finishEncoding();
+    void fatalError() const;
 
 private:
     Q_DISABLE_COPY(MediaManager);

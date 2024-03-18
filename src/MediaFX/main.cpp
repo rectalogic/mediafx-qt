@@ -3,12 +3,15 @@
 
 #include "application.h"
 #include "encoder.h"
+#include "media_manager.h"
+#include "output_format.h"
 #include "session.h"
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDebug>
 #include <QGuiApplication>
 #include <QMessageLogContext>
+#include <QObject>
 #include <QSize>
 #include <QString>
 #include <QStringBuilder>
@@ -114,15 +117,21 @@ int main(int argc, char* argv[])
     if (output == u"-"_s)
         output = u"pipe:"_s;
 
-    Encoder encoder(output, frameSize, frameRate, sampleRate);
+    OutputFormat outputFormat(frameSize, frameRate, sampleRate);
+    Encoder encoder(output, outputFormat);
     if (!encoder.isValid()) {
         qCritical("Failed to initialize encoder");
         return 1;
     }
-    Session session(&encoder, url, parser.isSet(u"exitOnWarning"_s));
+    Session session(outputFormat, url, parser.isSet(u"exitOnWarning"_s));
     if (!session.isValid()) {
         qCritical("Failed to initialize session");
         return 1;
     }
+
+    QObject::connect(&session, &Session::frameReady, &encoder, &Encoder::encode);
+    QObject::connect(&session, &Session::sessionFinished, &encoder, &Encoder::finish);
+    QObject::connect(&encoder, &Encoder::encodingError, MediaManager::singletonInstance(), &MediaManager::fatalError);
+
     return app.exec();
 }

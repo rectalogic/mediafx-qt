@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QSize>
 #include <QString>
 #include <array>
 #include <chrono>

@@ -5,11 +5,13 @@
 #include "audio_renderer.h"
 #include "formats.h"
 #include "media_clip.h"
+#include "output_format.h"
 #include "util.h"
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QObject>
 #include <QQmlEngine>
+#include <QQmlInfo>
 #include <QQuickView>
 
 /*!
@@ -53,15 +55,15 @@
     \endqml
 */
 
-MediaManager::MediaManager(const AVRational& outputFrameRate, int outputAudioSampleRate, QQuickView* quickView, QObject* parent)
+MediaManager::MediaManager(const OutputFormat& outputFormat, QQuickView* quickView, QObject* parent)
     : QObject(parent)
-    , m_outputFrameRate(outputFrameRate)
-    , m_currentRenderTime(Interval(0us, frameRateToFrameDuration<microseconds>(outputFrameRate)))
+    , m_outputFrameRate(outputFormat.frameRate())
+    , m_currentRenderTime(Interval(0us, frameRateToFrameDuration<microseconds>(outputFormat.frameRate())))
     , m_quickView(quickView)
 {
     m_outputAudioFormat.setSampleFormat(AudioSampleFormat_Qt);
     m_outputAudioFormat.setChannelConfig(AudioChannelLayout_Qt);
-    m_outputAudioFormat.setSampleRate(outputAudioSampleRate);
+    m_outputAudioFormat.setSampleRate(outputFormat.sampleRate());
 
     MediaManagerForeign::setSingletonInstance(this);
     // AudioRenderer depends on the singleton, so create it after initializing singleton

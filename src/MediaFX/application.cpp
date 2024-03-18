@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "application.h"
+#include <QCoreApplication>
+#include <Qt>
 #ifdef WEBENGINEQUICK
 #include <QtWebEngineQuick>
 #endif
