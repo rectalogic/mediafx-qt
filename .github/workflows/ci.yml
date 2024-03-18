@@ -67,17 +67,25 @@ jobs:
         ubuntu: ["jammy", "noble"]
         include:
           - ubuntu: "noble"
-            test: "-e MEDIAFX_TEST=--verbose"
+            test: "builders/Linux/docker-run.sh /mediafx/builders/mediafx-test.sh --verbose"
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         submodules: true
     - name: Build/test mediaFX
-      run: DOCKER_OPTS="${{ matrix.test }}" TARGET=opengl UBUNTU=${{ matrix.ubuntu }} builders/Linux/docker-run.sh
+      run: |
+        export TARGET=opengl
+        export UBUNTU=${{ matrix.ubuntu }}
+        builders/Linux/docker-run.sh
+        ${{ matrix.test }}
     - name: Build/test mediaFX vulkan
       if: matrix.ubuntu == 'noble'
-      run: DOCKER_OPTS="${{ matrix.test }}" TARGET=vulkan UBUNTU=${{ matrix.ubuntu }} builders/Linux/docker-run.sh
+      run: |
+        export TARGET=vulkan
+        export UBUNTU=${{ matrix.ubuntu }}
+        builders/Linux/docker-run.sh
+        ${{ matrix.test }}
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v4
@@ -93,7 +101,7 @@ jobs:
         ffmpeg: ["ffmpeg@4", "ffmpeg@6"]
         include:
           - ffmpeg: "ffmpeg@6"
-            test: "MEDIAFX_TEST=--verbose"
+            test: "builders/mediafx-test.sh --verbose"
     env:
       XCODE_VER: "15.2"
     steps:
@@ -127,7 +135,8 @@ jobs:
       run: |
         export PATH="$(brew --prefix ${{ matrix.ffmpeg }})/bin:$PATH"
         export PKG_CONFIG_PATH="$(brew --prefix ${{ matrix.ffmpeg }})/lib/pkgconfig"
-        ${{ matrix.test }} builders/mediafx-build.sh
+        builders/mediafx-build.sh
+        ${{ matrix.test }}
     - name: Upload Failed Artifacts
       if: failure()
       uses: actions/upload-artifact@v4
