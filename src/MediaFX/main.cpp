@@ -6,6 +6,7 @@
 #include "media_manager.h"
 #include "output_format.h"
 #include "session.h"
+#include "version.h"
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDebug>
@@ -47,7 +48,7 @@ int main(int argc, char* argv[])
     app.setApplicationName(u"MediaFX"_s);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(u"MediaFX\nCopyright (C) 2023-2024 Andrew Wason\nSPDX-License-Identifier: GPL-3.0-or-later"_s);
+    parser.setApplicationDescription(u"MediaFX\nCopyright (C) 2023-2024 Andrew Wason\nSPDX-License-Identifier: GPL-3.0-or-later\nVersion: %1"_s.arg(MediaFXVersion));
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.addHelpOption();
     parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be integer or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });

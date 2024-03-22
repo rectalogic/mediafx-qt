@@ -9,6 +9,19 @@ pkg_search_module(libavutil REQUIRED IMPORTED_TARGET libavutil>=56.70.100)
 
 option(EVENT_LOGGER "Enable event logger" OFF)
 
+find_package(Git QUIET)
+
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --dirty --always
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE MEDIAFX_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+    set(MEDIAFX_VERSION dev)
+endif()
+
+configure_file("version.h.in" "version.h")
+
 qt_add_library(mediafx STATIC
     application.cpp
     session.cpp
@@ -33,6 +46,9 @@ target_compile_options(mediafx PRIVATE ${LIBAVFORMAT_CFLAGS} ${LIBAVCODEC_CFLAGS
 qt_add_executable(mediafxtool
     main.cpp
 )
+
+# For generated version.h
+target_include_directories(mediafxtool PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(EVENT_LOGGER)
     target_sources(mediafxtool PRIVATE event_logger.h)
