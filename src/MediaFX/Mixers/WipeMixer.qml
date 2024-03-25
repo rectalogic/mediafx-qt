@@ -7,6 +7,7 @@ import MediaFX
 
 /*!
     \qmltype WipeMixer
+    \inherits LumaGradientMixer
     \inqmlmodule MediaFX.Mixers
     \brief Wipe source to dest using a generated gradient luma map.
 */

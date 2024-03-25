@@ -10,6 +10,7 @@ qt_add_shaders(mixers "shaders"
     FILES
     crossfade.frag
     luma.frag
+    pageCurl.frag
     OUTPUT_TARGETS shader_output_targets
 )
 
@@ -24,5 +25,6 @@ qt_add_qml_module(mixers
     CrossFadeMixer.qml
     LumaMixer.qml
     LumaGradientMixer.qml
+    PageCurlMixer.qml
     WipeMixer.qml
 )

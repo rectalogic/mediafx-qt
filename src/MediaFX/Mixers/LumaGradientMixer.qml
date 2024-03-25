@@ -7,6 +7,7 @@ import MediaFX
 
 /*!
     \qmltype LumaGradientMixer
+    \inherits LumaMixer
     \inqmlmodule MediaFX.Mixers
     \brief LumaMixer that uses a ShapeGradient as the luma map.
 */

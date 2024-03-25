@@ -24,6 +24,8 @@ MediaSequence {
         WipeMixer {
             direction: WipeMixer.Direction.Left
             blindsEffect: 0.05
+        },
+        PageCurlMixer {
         }
     ]
 

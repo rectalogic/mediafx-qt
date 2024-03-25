@@ -114,7 +114,7 @@ void MediaManager::nextRenderTime()
     \qmlmethod void MediaManager::pauseRendering
 
     Pause rendering to allow for asynchronous processing.
-    \l resumeRendering must be called as many times as \a pauseRendering.
+    \l resumeRendering must be called as many times as \c pauseRendering.
 */
 void MediaManager::pauseRendering()
 {
@@ -127,7 +127,7 @@ void MediaManager::pauseRendering()
     \qmlmethod void MediaManager::resumeRendering
 
     Resume rendering after asynchronous processing.
-    \a resumeRendering must be called as many times as \l pauseRendering.
+    \c resumeRendering must be called as many times as \l pauseRendering.
 */
 void MediaManager::resumeRendering()
 {

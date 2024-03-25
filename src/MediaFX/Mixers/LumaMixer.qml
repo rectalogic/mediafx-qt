@@ -6,6 +6,7 @@ import MediaFX
 
 /*!
     \qmltype LumaMixer
+    \inherits MediaMixer
     \inqmlmodule MediaFX.Mixers
     \brief Crossfade/wipe source to dest using a greyscale luma "map" image.
 */

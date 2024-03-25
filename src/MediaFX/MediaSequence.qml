@@ -8,7 +8,7 @@ import "sequence.js" as Sequence
 /*!
     \qmltype MediaSequence
     \inqmlmodule MediaFX
-    \brief Plays a sequence of MediaClips in order, with MediaMixer transitions between them.
+    \brief Plays a sequence of \l {MediaClip}s in order, with \l MediaMixer transitions between them.
 
     \quotefile sequence.qml
 
