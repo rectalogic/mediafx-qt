@@ -59,7 +59,6 @@ RUN apt-get -y update  && apt-get -y install \
     libavfilter-dev \
     libavformat-dev \
     libavutil-dev \
-    libasound2 \
     libglvnd-dev \
     libglx-mesa0 \
     libnss3 \
