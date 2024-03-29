@@ -4,50 +4,40 @@
 import QtQuick
 
 /*!
-    \qmltype MediaMixer
+    \qmltype MediaTransition
     \inherits Item
-    \inqmlmodule MediaFX.Mixers
+    \inqmlmodule MediaFX.Transition
     \brief Renders a video transition between two \l {MediaClip}s in a \l MediaSequence.
     \sa MediaSequence
 */
 Item {
     id: root
 
-    /*! The source item, mixer transitions from \c source to \c dest */
+    /*! The source item, transition from \c source to \c dest */
     property Item source
-    /*! The destination item, mixer transitions from \c source to \c dest */
+    /*! The destination item, transition from \c source to \c dest */
     property Item dest
     /*! The duration of the transition in milliseconds */
     property int duration: 1000
     property real time: 0.0
+    /*! Optional UI to display in viewer */
+    property Component ui
 
     visible: false
 
     states: [
         State {
             name: "active"
+            when: root.source && root.dest
 
-            ParentChange {
-                parent: root
-                target: root.source
-            }
             PropertyChanges {
-                anchors.fill: root
                 visible: false
                 target: root.source
             }
-            ParentChange {
-                parent: root
-                target: root.dest
-            }
             PropertyChanges {
-                anchors.fill: root
                 visible: false
                 target: root.dest
             }
         }
     ]
-
-    onSourceChanged: root.dest ? root.state = "active" : root.state = ""
-    onDestChanged: root.source ? root.state = "active" : root.state = ""
 }

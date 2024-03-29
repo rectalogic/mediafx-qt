@@ -6,36 +6,36 @@ function onClipEnded() {
 };
 
 function onCurrentFrameTimechanged() {
-    var clip = root.mediaClips[internal.currentClipIndex];
-    if (clip.currentFrameTime.start >= internal.mixStartTime) {
-        internal.state = "mixer";
-        root.mediaMixers[internal.currentMixerIndex].time = (clip.currentFrameTime.start - internal.mixStartTime) / (clip.endTime - internal.mixStartTime);
+    const clip = root.mediaClips[internal.currentClipIndex];
+    if (clip.currentFrameTime.start >= internal.transitionStartTime) {
+        internal.state = "transition";
+        root.mediaTransitions[internal.currentTransitionIndex].time = (clip.currentFrameTime.start - internal.transitionStartTime) / (clip.endTime - internal.transitionStartTime);
     }
 };
 
 function nextClip() {
     MediaManager.currentRenderTimeChanged.disconnect(nextClip);
     if (internal.currentClipIndex + 1 < root.mediaClips.length) {
-        var clip = root.mediaClips[internal.currentClipIndex];
+        const clip = root.mediaClips[internal.currentClipIndex];
         clip.currentFrameTimeChanged.disconnect(onCurrentFrameTimechanged);
         clip.clipEnded.disconnect(onClipEnded);
         internal.currentClipIndex += 1;
         initializeClip();
     }
-    internal.currentMixerIndex = (internal.currentMixerIndex + 1) % root.mediaMixers.length;
-    root.mediaMixers[internal.currentMixerIndex].time = 0;
+    internal.currentTransitionIndex = (internal.currentTransitionIndex + 1) % root.mediaTransitions.length;
+    root.mediaTransitions[internal.currentTransitionIndex].time = 0;
 };
 
 function initializeClip() {
-    var clip = root.mediaClips[internal.currentClipIndex];
+    const clip = root.mediaClips[internal.currentClipIndex];
     // Last clip
     if (internal.currentClipIndex >= root.mediaClips.length - 1) {
         clip.onClipEnded.connect(root.mediaSequenceEnded)
     }
     else {
-        var mixer = root.mediaMixers[internal.currentMixerIndex];
-        var clampedMixDuration = Math.min(Math.min(mixer.duration, clip.duration), root.mediaClips[internal.currentClipIndex + 1].duration);
-        internal.mixStartTime = clip.endTime - clampedMixDuration;
+        const transition = root.mediaTransitions[internal.currentTransitionIndex];
+        const clampedTransitionDuration = Math.min(Math.min(transition.duration, clip.duration), root.mediaClips[internal.currentClipIndex + 1].duration);
+        internal.transitionStartTime = clip.endTime - clampedTransitionDuration;
         clip.currentFrameTimeChanged.connect(onCurrentFrameTimechanged);
         clip.clipEnded.connect(onClipEnded);
     }

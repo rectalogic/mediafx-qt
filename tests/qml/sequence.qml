@@ -5,29 +5,29 @@ import QtQuick
 import QtQuick.Effects
 import QtMultimedia
 import MediaFX
-import MediaFX.Mixers
+import MediaFX.Transition as T
 
 MediaSequence {
     id: sequence
 
-    mediaMixers: [
-        CrossFadeMixer {
+    mediaTransitions: [
+        T.CrossFade {
         },
-        WipeMixer {
-            direction: WipeMixer.Direction.Down
+        T.Wipe {
+            direction: T.Wipe.Direction.Down
             blindsEffect: 0.05
         },
-        WipeMixer {
-            direction: WipeMixer.Direction.Right
+        T.Wipe {
+            direction: T.Wipe.Direction.Right
             softness: 2.0
         },
-        WipeMixer {
-            direction: WipeMixer.Direction.Left
+        T.Wipe {
+            direction: T.Wipe.Direction.Left
             blindsEffect: 0.05
         },
-        PageCurlMixer {
+        T.PageCurl {
         },
-        Demo3DMediaMixer {
+        Demo3DTransition {
         }
     ]
 

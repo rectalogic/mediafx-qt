@@ -5,15 +5,15 @@ import QtQuick
 import MediaFX
 
 /*!
-    \qmltype PageCurlMixer
-    \inherits MediaMixer
-    \inqmlmodule MediaFX.Mixers
-    \brief Transition from \l {MediaMixer::} {source} to \l {MediaMixer::} {dest} using a page curl effect.
+    \qmltype PageCurl
+    \inherits MediaTransition
+    \inqmlmodule MediaFX.Transition
+    \brief Transition from \l {MediaTransition::} {source} to \l {MediaTransition::} {dest} using a page curl effect.
 */
-MediaMixer {
+MediaTransition {
     id: root
 
-    MediaMixerShaderEffect {
+    TransitionShaderEffect {
         source: root.source
         dest: root.dest
         time: root.time

@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
-import MediaFX.Mixers
+import MediaFX.Transition
 import "sequence.js" as Sequence
 
 /*!
     \qmltype MediaSequence
     \inqmlmodule MediaFX
-    \brief Plays a sequence of \l {MediaClip}s in order, with \l MediaMixer transitions between them.
+    \brief Plays a sequence of \l {MediaClip}s in order, with \l MediaTransition transitions between them.
 
     \quotefile sequence.qml
 
-    \sa MediaMixer
+    \sa MediaTransition
 */
 Item {
     id: root
@@ -21,10 +21,10 @@ Item {
     default required property list<MediaClip> mediaClips
 
     /*!
-        A list of MediaMixers to apply to each transition.
-        If there are more clips than mixers, then mixers will be reused.
+        A list of MediaTransition to apply to each transition.
+        If there are more clips than \a mediaTransitions, then \a mediaTransitions will be reused.
     */
-    required property list<MediaMixer> mediaMixers
+    required property list<MediaTransition> mediaTransitions
 
     /*!
         \qmlproperty enumeration MediaSequence::fillMode
@@ -44,8 +44,8 @@ Item {
         id: internal
 
         property int currentClipIndex: 0
-        property int currentMixerIndex: 0
-        property int mixStartTime
+        property int currentTransitionIndex: 0
+        property int transitionStartTime
 
         anchors.fill: parent
 
@@ -54,35 +54,38 @@ Item {
                 name: "video"
 
                 PropertyChanges {
-                    mediaClip: root.mediaClips[internal.currentClipIndex]
-                    target: video
+                    video {
+                        mediaClip: root.mediaClips[internal.currentClipIndex]
+                    }
                 }
                 PropertyChanges {
-                    target: root.mediaMixers[internal.currentMixerIndex]
+                    target: root.mediaTransitions[internal.currentTransitionIndex]
                     visible: false
                 }
             },
             State {
-                name: "mixer"
+                name: "transition"
 
                 PropertyChanges {
-                    mediaClip: root.mediaClips[internal.currentClipIndex]
-                    target: video
+                    video {
+                        mediaClip: root.mediaClips[internal.currentClipIndex]
+                    }
                 }
                 PropertyChanges {
-                    mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
-                    target: auxVideo
+                    auxVideo {
+                        mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
+                    }
                 }
                 ParentChange {
                     parent: root
-                    target: root.mediaMixers[internal.currentMixerIndex]
+                    target: root.mediaTransitions[internal.currentTransitionIndex]
                 }
                 PropertyChanges {
                     anchors.fill: root
                     source: video
                     dest: auxVideo
                     visible: true
-                    target: root.mediaMixers[internal.currentMixerIndex]
+                    target: root.mediaTransitions[internal.currentTransitionIndex]
                 }
             }
         ]
@@ -91,6 +94,7 @@ Item {
 
         VideoRenderer {
             id: video
+            anchors.fill: internal
         }
         VideoRenderer {
             id: auxVideo
@@ -98,6 +102,7 @@ Item {
             fillMode: video.fillMode
             orientation: video.orientation
             visible: false
+            anchors.fill: internal
         }
     }
 }

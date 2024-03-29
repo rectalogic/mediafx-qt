@@ -6,7 +6,7 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-macro(add_compile_shaders)
+function(add_compile_shaders)
     cmake_parse_arguments(QSB_COMMAND "" "" "SHADERS" ${ARGN})
 
     foreach(SHADER ${QSB_COMMAND_SHADERS})
@@ -20,9 +20,9 @@ macro(add_compile_shaders)
 
     list(TRANSFORM QSB_COMMAND_SHADERS APPEND ".qsb")
     add_custom_target(shaders DEPENDS ${QSB_COMMAND_SHADERS})
-endmacro()
+endfunction()
 
-macro(add_qml_test)
+function(add_qml_test)
     cmake_parse_arguments(QML_TEST "" "NAME;OUTPUTSPEC;QMLFILE;OUTPUTFILE;THRESHOLD" "" ${ARGN})
     add_test(NAME ${QML_TEST_NAME} COMMAND
         ${CMAKE_CURRENT_SOURCE_DIR}/qmltest.sh
@@ -33,7 +33,7 @@ macro(add_qml_test)
         ${QML_TEST_THRESHOLD}
     )
     set_tests_properties(${QML_TEST_NAME} PROPERTIES DEPENDS "tst_shaders")
-endmacro()
+endfunction()
 
 add_compile_shaders(SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/qml/grayscale.frag)
 

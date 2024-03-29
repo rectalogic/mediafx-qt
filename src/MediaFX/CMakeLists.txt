@@ -68,7 +68,7 @@ qt_add_qml_module(mediafx
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::libavformat PkgConfig::libavcodec PkgConfig::libavfilter PkgConfig::libavutil Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
-target_link_libraries(mediafx PRIVATE mediafxplugin mixersplugin)
+target_link_libraries(mediafx PRIVATE mediafxplugin transitionplugin viewerplugin)
 
 if(${Qt6WebEngineQuick_FOUND})
     target_link_libraries(mediafx PUBLIC Qt6::WebEngineQuick)
@@ -79,5 +79,6 @@ target_link_libraries(mediafxtool PRIVATE mediafx)
 
 install(TARGETS mediafxtool RUNTIME DESTINATION)
 
-add_subdirectory(Mixers)
+add_subdirectory(Transition)
+add_subdirectory(Viewer)
 add_subdirectory(doc)

@@ -8,6 +8,6 @@
     \l{MediaFX} QML types
     \generatelist{qmltypesbymodule MediaFX}
 
-    \l{MediaFX.Mixers} qml types
-    \generatelist{qmltypesbymodule MediaFX.Mixers}
+    \l{MediaFX.Transition} qml types
+    \generatelist{qmltypesbymodule MediaFX.Transition}
 */

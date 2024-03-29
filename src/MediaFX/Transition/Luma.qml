@@ -5,12 +5,12 @@ import QtQuick
 import MediaFX
 
 /*!
-    \qmltype LumaMixer
-    \inherits MediaMixer
-    \inqmlmodule MediaFX.Mixers
+    \qmltype Luma
+    \inherits MediaTransition
+    \inqmlmodule MediaFX.Transition
     \brief Crossfade/wipe source to dest using a greyscale luma "map" image.
 */
-MediaMixer {
+MediaTransition {
     id: root
 
     /*! The item to use as the greyscale luma image. */
@@ -20,34 +20,19 @@ MediaMixer {
     /*! Invert the luma. */
     property alias invert: shader.invert
 
-    MediaMixerShaderEffect {
+    TransitionShaderEffect {
         id: shader
 
-        default required property Item luma
+        required property Item luma
         property real softness: 0.0
         readonly property real softTime: root.time * (root.softness + 1.0)
         property bool invert: false
 
+        children: shader.luma
         source: root.source
         dest: root.dest
         time: root.time
         fragmentShader: "qrc:/shaders/luma.frag.qsb"
         anchors.fill: parent
-    }
-
-    state: "default"
-
-    states: State {
-        name: "default"
-
-        PropertyChanges {
-            x: root.x
-            y: root.y
-            width: root.width
-            height: root.height
-            layer.enabled: true
-            visible: false
-            target: root.luma
-        }
     }
 }

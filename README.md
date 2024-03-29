@@ -73,10 +73,10 @@ See [Qt signals and slots](https://doc.qt.io/qt-6/qtqml-syntax-signals.html#conn
 
 To run this and generate a video:
 ```sh-session
-$ mediafx demo.qml output.nut
+$ mediafx encoder demo.qml output.nut
 ```
 This will create a NUT format video with raw audio and video.
 To encode to another format, pipe into `ffmpeg`, e.g.
 ```sh-session
-$ mediafx demo.qml - | ffmpeg -i - output.mp4
+$ mediafx encoder demo.qml - | ffmpeg -i - output.mp4
 ```

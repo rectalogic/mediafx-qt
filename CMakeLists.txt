@@ -31,4 +31,3 @@ add_link_options($<$<CONFIG:Debug>:-fsanitize=address>)
 
 add_subdirectory(src/MediaFX)
 add_subdirectory(tests)
-add_subdirectory(tools/viewer)

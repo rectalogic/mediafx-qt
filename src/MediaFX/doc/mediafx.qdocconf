@@ -15,7 +15,7 @@ depends = qtquick qtmultimedia
 sources.fileextensions = "*.cpp *.qdoc *.qml"
 headers.fileextensions = "*.h"
 
-sourcedirs += ../ ../Mixers/
+sourcedirs += ../ ../Transition/
 headerdirs += ../
 exampledirs += ../../../tests/qml/
 

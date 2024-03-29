@@ -4,14 +4,15 @@
 import MediaFX
 
 /*!
-    \qmltype CrossFadeMixer
-    \inqmlmodule MediaFX.Mixers
+    \qmltype CrossFade
+    \inherits MediaTransition
+    \inqmlmodule MediaFX.Transition
     \brief Fades out the source video as it fades in the destination video.
 */
-MediaMixer {
+MediaTransition {
     id: root
 
-    MediaMixerShaderEffect {
+    TransitionShaderEffect {
         source: root.source
         dest: root.dest
         time: root.time

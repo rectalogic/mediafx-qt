@@ -5,15 +5,15 @@ import QtQuick3D
 import QtQuick.Timeline
 import QtMultimedia
 import MediaFX
-import MediaFX.Mixers
+import MediaFX.Transition
 
-MediaMixer {
+MediaTransition {
     id: root
 
     View3D {
         id: view3D
 
-        anchors.fill: parent
+        anchors.fill: root
 
         environment: SceneEnvironment {
             clearColor: "skyblue"

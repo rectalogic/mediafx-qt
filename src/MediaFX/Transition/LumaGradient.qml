@@ -6,12 +6,12 @@ import QtQuick.Shapes
 import MediaFX
 
 /*!
-    \qmltype LumaGradientMixer
-    \inherits LumaMixer
-    \inqmlmodule MediaFX.Mixers
-    \brief LumaMixer that uses a ShapeGradient as the luma map.
+    \qmltype LumaGradient
+    \inherits Luma
+    \inqmlmodule MediaFX.Transition
+    \brief \l Luma that uses a ShapeGradient as the luma map.
 */
-LumaMixer {
+Luma {
     id: root
 
     /*!
@@ -21,7 +21,8 @@ LumaMixer {
     property alias fillGradient: path.fillGradient
 
     Shape {
-        parent: root.parent
+        anchors.fill: parent
+        layer.enabled: true
         visible: false
 
         ShapePath {

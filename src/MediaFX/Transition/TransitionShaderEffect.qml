@@ -1,5 +1,14 @@
+// Copyright (C) 2024 Andrew Wason
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import QtQuick
 
+/*!
+    \qmltype TransitionShaderEffect
+    \inherits ShaderEffect
+    \inqmlmodule MediaFX.Transition
+    \brief \l MediaTransition subclasses that internally use a \l ShaderEffect should use a subclass of this class.
+*/
 ShaderEffect {
     id: root
 
@@ -10,6 +19,7 @@ ShaderEffect {
     states: [
         State {
             name: "active"
+            when: root.source && root.dest
 
             PropertyChanges {
                 layer.enabled: true
@@ -21,7 +31,4 @@ ShaderEffect {
             }
         }
     ]
-
-    onSourceChanged: root.dest ? root.state = "active" : root.state = ""
-    onDestChanged: root.source ? root.state = "active" : root.state = ""
 }
