@@ -5,8 +5,12 @@
         "context": "../builders",
         "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
         "args": {
-            "QT_VER": "6.6.2"
-        }
+            "QT_VER": "6.7.0"
+        },
+        "options": [
+            "--platform",
+            "linux/amd64"
+        ]
     },
     "init": true,
     "customizations": {
@@ -23,7 +27,7 @@
                 "ms-azuretools.vscode-docker"
             ],
             "settings": {
-                "cmake.installPrefix": "/usr/local/Qt/6.6.2/gcc_64",
+                "cmake.installPrefix": "/usr/local/Qt/${containerEnv:QT_VER}/gcc_64",
                 "cmake.buildDirectory": "${workspaceFolder}/build/Linux/vscode",
                 "cmake.configureSettings": {
                     "CMAKE_BUILD_TYPE": "Debug"

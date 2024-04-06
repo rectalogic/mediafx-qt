@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(mediaFX VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick ShaderTools QUIET OPTIONAL_COMPONENTS WebEngineQuick)
+find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick ShaderTools QUIET)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)

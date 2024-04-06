@@ -1,32 +1,42 @@
 # Copyright (C) 2023 Andrew Wason
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# syntax = docker/dockerfile:1.2
+# syntax = docker/dockerfile:1.4
 
 ARG UBUNTU=noble
 
-# linux arm64 not supported by Qt https://doc.qt.io/qt-6/supported-platforms.html
-FROM --platform=linux/amd64 ubuntu:${UBUNTU} as qt
+FROM ubuntu:${UBUNTU} as qt
 
 ARG QT_VER
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-RUN apt-get -y update \
-    && apt-get -y install python3 python3-pip python3-venv
+RUN apt-get -y update && apt-get -y install python3 python3-pip python3-venv git curl
 
 COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
-RUN python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
-    && venv/bin/python3 -m aqt install-qt linux desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
+ARG TARGETPLATFORM
+RUN <<EOF
+    if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then
+        ARCH=gcc_arm64
+        HOST=linux_arm64
+    else
+        ARCH=gcc_64
+        HOST=linux
+    fi
+    python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
+    && venv/bin/python3 -m aqt install-qt ${HOST} desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
     && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
-    && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete
+    && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete \
+    && curl -o iwyu-mapgen-qt.py https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_17/mapgen/iwyu-mapgen-qt.py \
+    && python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/${ARCH}/include > "/usr/local/Qt/${QT_VER}/qt.imp"
+EOF
 
 
-FROM --platform=linux/amd64 ubuntu:jammy as jammy
+FROM ubuntu:jammy as jammy
 
 
-FROM --platform=linux/amd64 ubuntu:noble as noble
+FROM ubuntu:noble as noble
 RUN apt-get -y update && apt-get -y install \
     clang-format \
     clang-tidy \
@@ -34,7 +44,7 @@ RUN apt-get -y update && apt-get -y install \
     iwyu
 
 
-FROM --platform=linux/amd64 ${UBUNTU} as mediafx
+FROM ${UBUNTU} as mediafx
 LABEL maintainer=rectalogic
 ARG QT_VER
 
@@ -91,8 +101,20 @@ RUN apt-get -y update  && apt-get -y install \
     xz-utils
 
 COPY --from=qt /usr/local/Qt /usr/local/Qt/
-ENV QTDIR /usr/local/Qt/${QT_VER}/gcc_64
-ENV PATH /usr/local/Qt/${QT_VER}/gcc_64/bin:$PATH
+
+ARG TARGETPLATFORM
+RUN <<EOF
+if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then
+    QTDIR=/usr/local/Qt/${QT_VER}/gcc_arm64
+else
+    QTDIR=/usr/local/Qt/${QT_VER}/gcc_64
+fi
+mkdir -p /entrypoint
+echo QTDIR=${QTDIR} >> /entrypoint/environment
+echo PATH=${QTDIR}/bin:$PATH >> /entrypoint/environment
+chmod +x /entrypoint/environment
+EOF
+
 ENV QT_VER=${QT_VER}
 
 RUN ldconfig

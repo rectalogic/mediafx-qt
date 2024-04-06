@@ -1,4 +1,4 @@
-aqtinstall==3.1.12
+git+https://github.com/rectalogic/aqtinstall.git@65501b1
 beautifulsoup4==4.12.3
 Brotli==1.1.0
 bs4==0.0.2

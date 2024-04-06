@@ -15,5 +15,5 @@ INSTALLDIR=${QTDIR%/*/*}
     "qtvenv/bin/python" -m aqt install-tool mac desktop tools_qtcreator_gui qt.tools.qtcreator_gui -O "${QTDIR}/bin" || exit 1
     "qtvenv/bin/python" -m aqt install-src mac ${QT_VER} --archives qtbase qtdeclarative qtmultimedia qtquicktimeline -O "${INSTALLDIR}" || exit 1
     "qtvenv/bin/python" -m aqt install-doc mac ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia -O "${INSTALLDIR}" || exit 1
-    find "${INSTALLDIR}/Docs/Qt-${QT_VER}" -type f -and -not -name '*.index' -delete || exit
+    find "${INSTALLDIR}/Docs/Qt-${QT_VER}" -type f -and -not -name '*.index' -delete || exit 1
 )

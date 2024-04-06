@@ -35,6 +35,7 @@ using namespace Qt::Literals::StringLiterals;
 
 int encoder(QGuiApplication& app, QCommandLineParser& parser)
 {
+    parser.clearPositionalArguments();
     parser.addPositionalArgument("encoder", "encoder command.", "encoder [encoder_options]");
     parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be integer or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });
     parser.addOption({ { u"r"_s, u"sampleRate"_s }, u"Output audio sample rate (Hz)."_s, u"sampleRate"_s, u"44100"_s });
@@ -123,6 +124,7 @@ int encoder(QGuiApplication& app, QCommandLineParser& parser)
 
 int viewer(QGuiApplication& app, QCommandLineParser& parser)
 {
+    parser.clearPositionalArguments();
     parser.addPositionalArgument("viewer", "viewer command.", "viewer [viewer_options]");
     parser.addOption({ { u"t"_s, u"transition"_s }, u"Transition class name."_s, u"transition"_s });
     parser.addOption({ { u"q"_s, u"qml"_s }, u"Transition QML filename."_s, u"qml"_s });
@@ -187,7 +189,6 @@ int main(int argc, char* argv[])
     if (commandArgs.size() < 1)
         parser.showHelp(1);
     QString command = commandArgs.first();
-    parser.clearPositionalArguments();
     if (command == u"encoder"_s) {
         return encoder(app, parser);
     } else if (command == u"viewer"_s) {

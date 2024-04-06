@@ -11,8 +11,7 @@ MediaSequence {
     id: sequence
 
     mediaTransitions: [
-        T.CrossFade {
-        },
+        T.CrossFade {},
         T.Wipe {
             direction: T.Wipe.Direction.Down
             blindsEffect: 0.05
@@ -25,10 +24,8 @@ MediaSequence {
             direction: T.Wipe.Direction.Left
             blindsEffect: 0.05
         },
-        T.PageCurl {
-        },
-        Demo3DTransition {
-        }
+        T.PageCurl {},
+        Demo3DTransition {}
     ]
 
     Component.onCompleted: {
@@ -55,12 +52,10 @@ MediaSequence {
     MediaClip {
         endTime: 3000
         source: Qt.resolvedUrl("../fixtures/assets/edjustforyou-320x180-15fps-5.2s-44100.nut")
-        audioRenderer: AudioRenderer {
-        }
+        audioRenderer: AudioRenderer {}
     }
     MediaClip {
         source: Qt.resolvedUrl("../fixtures/assets/edquestions-320x180-15fps-2.4s-44100.nut")
-        audioRenderer: AudioRenderer {
-        }
+        audioRenderer: AudioRenderer {}
     }
 }

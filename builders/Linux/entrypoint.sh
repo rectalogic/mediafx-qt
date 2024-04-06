@@ -6,5 +6,7 @@ if [ ! -z "$NEW_UID" -a "$NEW_UID" != "0" -a "$OLD_UID" != "$NEW_UID" ]; then
     usermod -u "$NEW_UID" -o mediafx
 fi
 
+export $(cat /entrypoint/environment)
+
 mkdir -p /mediafx/build/Linux && chown -R mediafx /mediafx/build/Linux
 exec gosu mediafx /entrypoint/xvfb.sh "$@"

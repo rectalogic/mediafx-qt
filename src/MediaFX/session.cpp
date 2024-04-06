@@ -12,6 +12,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QEvent>
+#include <QGuiApplication>
 #include <QMessageLogContext>
 #include <QObject>
 #include <QQmlEngine>

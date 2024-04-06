@@ -8,6 +8,9 @@
     \l{MediaFX} QML types
     \generatelist{qmltypesbymodule MediaFX}
 
+    \l{MediaFX} QML value types
+    \generatelist{qmlvaluetypesbymodule MediaFX}
+
     \l{MediaFX.Transition} qml types
     \generatelist{qmltypesbymodule MediaFX.Transition}
 */

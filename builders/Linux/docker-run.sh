@@ -6,5 +6,5 @@ MOUNT="$(cd "${BASH_SOURCE%/*}/../.."; pwd)"
 
 # opengl or vulkan
 TARGET=${TARGET:-opengl}
-docker run ${DOCKER_OPTS} -e QSG_RHI_BACKEND=${TARGET} --platform linux/amd64 --rm --init \
+docker run ${DOCKER_OPTS} -e QSG_RHI_BACKEND=${TARGET} --rm --init \
     --mount="type=bind,src=${MOUNT},dst=/mediafx,consistency=cached" ghcr.io/rectalogic/mediafx:${UBUNTU:-noble}-$(git branch --show-current) "$@"

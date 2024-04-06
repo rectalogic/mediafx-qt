@@ -10,7 +10,6 @@
 #include <QList>
 #include <QObject>
 #include <QtCore>
-#include <QtQml>
 #include <QtQmlIntegration>
 #include <chrono>
 #include <memory>
@@ -25,6 +24,7 @@ class AudioRenderer;
 class MediaClip;
 class OutputFormat;
 class QQuickView;
+class QQmlEngine;
 class QVideoSink;
 using namespace std::chrono;
 
