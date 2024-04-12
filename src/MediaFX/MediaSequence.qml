@@ -21,10 +21,10 @@ Item {
     default required property list<MediaClip> mediaClips
 
     /*!
-        A list of MediaTransition to apply to each transition.
+        A list of MediaTransition \l {Component}s to apply to each transition.
         If there are more clips than \a mediaTransitions, then \a mediaTransitions will be reused.
     */
-    required property list<MediaTransition> mediaTransitions
+    required property list<Component> mediaTransitions
 
     /*!
         \qmlproperty enumeration MediaSequence::fillMode
@@ -54,44 +54,41 @@ Item {
                 name: "video"
 
                 PropertyChanges {
-                    video {
-                        mediaClip: root.mediaClips[internal.currentClipIndex]
-                    }
-                }
-                PropertyChanges {
-                    target: root.mediaTransitions[internal.currentTransitionIndex]
-                    visible: false
+                    video.mediaClip: root.mediaClips[internal.currentClipIndex]
                 }
             },
             State {
                 name: "transition"
 
                 PropertyChanges {
-                    video {
-                        mediaClip: root.mediaClips[internal.currentClipIndex]
-                    }
+                    video.mediaClip: root.mediaClips[internal.currentClipIndex]
+                    video.visible: false
                 }
                 PropertyChanges {
-                    auxVideo {
-                        mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
-                    }
-                }
-                ParentChange {
-                    parent: root
-                    target: root.mediaTransitions[internal.currentTransitionIndex]
+                    auxVideo.mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
                 }
                 PropertyChanges {
-                    anchors.fill: root
-                    source: video
-                    dest: auxVideo
-                    visible: true
-                    target: root.mediaTransitions[internal.currentTransitionIndex]
+                    transitionLoader.visible: true
+                    transitionLoader.source: video
+                    transitionLoader.dest: auxVideo
                 }
             }
         ]
 
-        Component.onCompleted: Sequence.initializeClip()
+        Loader {
+            id: transitionLoader
+            property Item source
+            property Item dest
 
+            visible: false
+            anchors.fill: internal
+            sourceComponent: root.mediaTransitions[internal.currentTransitionIndex]
+            onLoaded: {
+                transitionLoader.item.source = Qt.binding(() => transitionLoader.source);
+                transitionLoader.item.dest = Qt.binding(() => transitionLoader.dest);
+                Sequence.initializeClip();
+            }
+        }
         VideoRenderer {
             id: video
             anchors.fill: internal

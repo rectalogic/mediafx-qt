@@ -29,8 +29,8 @@ MediaTransition {
         property bool invert: false
 
         children: shader.luma
-        source: root.source
-        dest: root.dest
+        sourceItem: root.source
+        destItem: root.dest
         time: root.time
         fragmentShader: "qrc:/shaders/luma.frag.qsb"
         anchors.fill: parent

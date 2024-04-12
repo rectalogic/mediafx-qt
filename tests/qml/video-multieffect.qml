@@ -23,13 +23,16 @@ Item {
 
         states: MultiEffectState {
             name: "filter"
-            videoRenderer: videoRenderer
+            source: videoRenderer
+            effect: effect
             // From 1-2 sec into the video, switch to greyscale
             when: (videoClip.currentFrameTime.containedBy(1000, 2000))
-
-            MultiEffect {
-                saturation: -1.0
-            }
         }
+    }
+    MultiEffect {
+        id: effect
+        saturation: -1.0
+        visible: false
+        anchors.fill: videoRenderer
     }
 }

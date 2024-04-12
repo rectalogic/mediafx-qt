@@ -12,23 +12,24 @@ import QtQuick
 ShaderEffect {
     id: root
 
-    property Item source
-    property Item dest
+    property alias source: sourceEffect
+    property alias sourceItem: sourceEffect.sourceItem
+    property alias dest: destEffect
+    property alias destItem: destEffect.sourceItem
     property real time
 
-    states: [
-        State {
-            name: "active"
-            when: root.source && root.dest
-
-            PropertyChanges {
-                layer.enabled: true
-                target: root.source
-            }
-            PropertyChanges {
-                layer.enabled: true
-                target: root.dest
-            }
-        }
-    ]
+    ShaderEffectSource {
+        id: sourceEffect
+        hideSource: true
+        visible: false
+        smooth: true
+        anchors.fill: parent
+    }
+    ShaderEffectSource {
+        id: destEffect
+        hideSource: true
+        visible: false
+        smooth: true
+        anchors.fill: parent
+    }
 }

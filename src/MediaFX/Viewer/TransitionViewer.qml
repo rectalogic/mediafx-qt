@@ -19,7 +19,6 @@ ColumnLayout {
             dest: destItem,
             source: sourceItem,
             time: Qt.binding(() => timeSlider.value),
-            visible: true,
             "anchors.fill": transitionContainer
         });
     }
@@ -37,6 +36,7 @@ ColumnLayout {
 
             color: "lightblue"
             anchors.fill: parent
+            visible: false
 
             Shape {
                 anchors.fill: parent
@@ -59,6 +59,7 @@ ColumnLayout {
 
             color: "yellow"
             anchors.fill: parent
+            visible: false
 
             Shape {
                 anchors.fill: parent

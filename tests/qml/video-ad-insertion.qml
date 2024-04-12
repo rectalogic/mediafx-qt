@@ -40,19 +40,13 @@ Item {
                 when: (videoClip.currentFrameTime.contains(4000))
 
                 PropertyChanges {
-                    videoRenderer {
-                        mediaClip: adClip
-                    }
+                    videoRenderer.mediaClip: adClip
                 }
                 PropertyChanges {
-                    adClip {
-                        audioRenderer: audioRenderer
-                    }
+                    adClip.audioRenderer: audioRenderer
                 }
                 PropertyChanges {
-                    videoClip {
-                        audioRenderer: null
-                    }
+                    videoClip.audioRenderer: null
                 }
             }
         ]

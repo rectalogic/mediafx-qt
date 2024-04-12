@@ -11,21 +11,33 @@ MediaSequence {
     id: sequence
 
     mediaTransitions: [
-        T.CrossFade {},
-        T.Wipe {
-            direction: T.Wipe.Direction.Down
-            blindsEffect: 0.05
+        Component {
+            T.CrossFade {}
         },
-        T.Wipe {
-            direction: T.Wipe.Direction.Right
-            softness: 2.0
+        Component {
+            T.Wipe {
+                direction: T.Wipe.Direction.Down
+                blindsEffect: 0.05
+            }
         },
-        T.Wipe {
-            direction: T.Wipe.Direction.Left
-            blindsEffect: 0.05
+        Component {
+            T.Wipe {
+                direction: T.Wipe.Direction.Right
+                softness: 2.0
+            }
         },
-        T.PageCurl {},
-        Demo3DTransition {}
+        Component {
+            T.Wipe {
+                direction: T.Wipe.Direction.Left
+                blindsEffect: 0.05
+            }
+        },
+        Component {
+            T.PageCurl {}
+        },
+        Component {
+            Demo3DTransition {}
+        }
     ]
 
     Component.onCompleted: {

@@ -22,22 +22,4 @@ Item {
     property real time: 0.0
     /*! Optional UI to display in viewer */
     property Component ui
-
-    visible: false
-
-    states: [
-        State {
-            name: "active"
-            when: root.source && root.dest
-
-            PropertyChanges {
-                visible: false
-                target: root.source
-            }
-            PropertyChanges {
-                visible: false
-                target: root.dest
-            }
-        }
-    ]
 }

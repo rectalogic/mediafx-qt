@@ -13,8 +13,8 @@ MediaTransition {
     id: root
 
     TransitionShaderEffect {
-        source: root.source
-        dest: root.dest
+        sourceItem: root.source
+        destItem: root.dest
         time: root.time
         fragmentShader: "qrc:/shaders/crossfade.frag.qsb"
         anchors.fill: parent

@@ -3,7 +3,6 @@
 import QtQuick
 import QtQuick3D
 import QtQuick.Timeline
-import QtMultimedia
 import MediaFX
 import MediaFX.Transition
 

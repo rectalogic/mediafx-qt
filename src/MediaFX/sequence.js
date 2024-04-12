@@ -9,7 +9,7 @@ function onCurrentFrameTimechanged() {
     const clip = root.mediaClips[internal.currentClipIndex];
     if (clip.currentFrameTime.start >= internal.transitionStartTime) {
         internal.state = "transition";
-        root.mediaTransitions[internal.currentTransitionIndex].time = (clip.currentFrameTime.start - internal.transitionStartTime) / (clip.endTime - internal.transitionStartTime);
+        transitionLoader.item.time = (clip.currentFrameTime.start - internal.transitionStartTime) / (clip.endTime - internal.transitionStartTime);
     }
 };
 
@@ -20,10 +20,8 @@ function nextClip() {
         clip.currentFrameTimeChanged.disconnect(onCurrentFrameTimechanged);
         clip.clipEnded.disconnect(onClipEnded);
         internal.currentClipIndex += 1;
-        initializeClip();
     }
     internal.currentTransitionIndex = (internal.currentTransitionIndex + 1) % root.mediaTransitions.length;
-    root.mediaTransitions[internal.currentTransitionIndex].time = 0;
 };
 
 function initializeClip() {
@@ -33,7 +31,7 @@ function initializeClip() {
         clip.onClipEnded.connect(root.mediaSequenceEnded)
     }
     else {
-        const transition = root.mediaTransitions[internal.currentTransitionIndex];
+        const transition = transitionLoader.item;
         const clampedTransitionDuration = Math.min(Math.min(transition.duration, clip.duration), root.mediaClips[internal.currentClipIndex + 1].duration);
         internal.transitionStartTime = clip.endTime - clampedTransitionDuration;
         clip.currentFrameTimeChanged.connect(onCurrentFrameTimechanged);

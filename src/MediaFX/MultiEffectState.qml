@@ -17,28 +17,18 @@ State {
     id: root
 
     /*! The effect instance to apply to the video */
-    default required property MultiEffect effect
+    required property MultiEffect effect
 
-    /*! The video to apply the effect to */
-    required property VideoRenderer videoRenderer
+    /*! The item to apply the effect to */
+    required property Item source
 
-    Component.onCompleted: root.effect.visible = false
-
-    ParentChange {
-        parent: root.videoRenderer.parent
-        target: root.effect
-    }
-    PropertyChanges {
-        x: root.videoRenderer.x
-        y: root.videoRenderer.y
-        width: root.videoRenderer.width
-        height: root.videoRenderer.height
-        source: root.videoRenderer
-        visible: true
-        target: root.effect
-    }
     PropertyChanges {
         visible: false
-        target: root.videoRenderer
+        target: root.source
+    }
+    PropertyChanges {
+        visible: true
+        source: root.source
+        target: root.effect
     }
 }
