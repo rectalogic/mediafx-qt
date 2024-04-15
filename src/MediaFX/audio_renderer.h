@@ -6,23 +6,24 @@
 #include <QAudioBuffer>
 #include <QList>
 #include <QObject>
+#include <QQmlParserStatus>
 #include <QtQmlIntegration>
 
-class AudioRenderer : public QObject {
+class AudioRenderer : public QObject, public QQmlParserStatus {
     Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged FINAL)
-    Q_PROPERTY(AudioRenderer* nextRenderer READ nextRenderer WRITE setNextRenderer NOTIFY nextRendererChanged FINAL)
+    Q_PROPERTY(AudioRenderer* upstreamRenderer READ upstreamRenderer WRITE setUpstreamRenderer NOTIFY upstreamRendererChanged FINAL)
     QML_ELEMENT
 
 signals:
     void volumeChanged();
-    void nextRendererChanged();
+    void upstreamRendererChanged();
 
 public:
     using QObject::QObject;
 
     explicit AudioRenderer(QObject* parent = nullptr);
-    AudioRenderer(bool isRoot, QObject* parent = nullptr);
     AudioRenderer(AudioRenderer&&) = delete;
     AudioRenderer& operator=(AudioRenderer&&) = delete;
     ~AudioRenderer() override;
@@ -30,21 +31,27 @@ public:
     float volume() const { return m_volume; };
     void setVolume(float volume);
 
-    AudioRenderer* nextRenderer() const { return m_nextRenderer; };
-    void setNextRenderer(AudioRenderer* nextRenderer);
+    AudioRenderer* upstreamRenderer() const { return m_upstreamRenderer; };
+    void setUpstreamRenderer(AudioRenderer* upstreamRenderer);
 
     void addAudioBuffer(QAudioBuffer audioBuffer);
     QAudioBuffer mix();
 
+protected:
+    void classBegin() override;
+    void componentComplete() override {};
+
 private:
     Q_DISABLE_COPY(AudioRenderer);
 
-    AudioRenderer* nextRendererInternal() const;
-    void addParentRenderer(AudioRenderer* parent);
-    void removeParentRenderer(AudioRenderer* parent);
+    AudioRenderer* rootAudioRenderer();
+    AudioRenderer* upstreamRendererInternal();
+    void addDownstreamRenderer(AudioRenderer* parent);
+    void removeDownstreamRenderer(AudioRenderer* parent);
 
     float m_volume = 1.0;
     QList<QAudioBuffer> audioBuffers;
-    AudioRenderer* m_nextRenderer = nullptr;
-    QList<AudioRenderer*> m_parentRenderers;
+    AudioRenderer* m_upstreamRenderer = nullptr;
+    QList<AudioRenderer*> m_downstreamRenderers;
+    AudioRenderer* m_rootAudioRenderer = nullptr;
 };

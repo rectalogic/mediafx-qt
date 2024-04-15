@@ -12,7 +12,7 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/red-640x360-30fps-4s-rms44100.nut")
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(MediaManager.finishEncoding);
+            videoClip.clipEnded.connect(RenderSession.endSession);
         }
     }
     MediaClip {

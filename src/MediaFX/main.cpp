@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "application.h"
-#include "encoder.h"
-#include "media_manager.h"
-#include "output_format.h"
-#include "session.h"
+#include "render_context.h"
+#include "render_session.h"
 #include "version.h"
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -14,14 +12,16 @@
 #include <QGuiApplication>
 #include <QMessageLogContext>
 #include <QObject>
+#include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
-#include <QQuickView>
 #include <QSize>
 #include <QString>
 #include <QStringBuilder>
 #include <QStringList>
 #include <QUrl>
+#include <Qt>
+#include <QtAssert>
 #include <array>
 extern "C" {
 #include <libavutil/log.h>
@@ -36,7 +36,7 @@ using namespace Qt::Literals::StringLiterals;
 int encoder(QGuiApplication& app, QCommandLineParser& parser)
 {
     parser.clearPositionalArguments();
-    parser.addPositionalArgument("encoder", "encoder command.", "encoder [encoder_options]");
+    parser.addPositionalArgument(u"encoder"_s, u"encoder command."_s, u"encoder [encoder_options]"_s);
     parser.addOption({ { u"f"_s, u"fps"_s }, u"Output frames per second, can be integer or rational e.g. 30000/1001."_s, u"fps"_s, u"30"_s });
     parser.addOption({ { u"r"_s, u"sampleRate"_s }, u"Output audio sample rate (Hz)."_s, u"sampleRate"_s, u"44100"_s });
     parser.addOption({ { u"s"_s, u"size"_s }, u"Output video frame size, WxH."_s, u"size"_s, u"640x360"_s });
@@ -98,26 +98,22 @@ int encoder(QGuiApplication& app, QCommandLineParser& parser)
     if (args.size() != 3 || args.first() != u"encoder"_s)
         parser.showHelp(1);
 
-    QUrl url(args.at(1));
+    QUrl url(QUrl::fromLocalFile(args.at(1)));
     QString output(args.at(2));
     if (output == u"-"_s)
         output = u"pipe:"_s;
 
-    OutputFormat outputFormat(frameSize, frameRate, sampleRate);
-    Encoder encoder(output, outputFormat);
-    if (!encoder.isValid()) {
-        qCritical("Failed to initialize encoder");
-        return 1;
-    }
-    Session session(outputFormat, url, parser.isSet(u"exitOnWarning"_s));
-    if (!session.isValid()) {
-        qCritical("Failed to initialize session");
-        return 1;
-    }
+    QQmlApplicationEngine engine;
+    RenderContext renderContext(url, output, frameSize, frameRate, sampleRate);
+    RenderSession* renderSession = engine.singletonInstance<RenderSession*>("MediaFX", "RenderSession");
+    Q_ASSERT(renderSession);
+    renderSession->initialize(renderContext);
 
-    QObject::connect(&session, &Session::frameReady, &encoder, &Encoder::encode);
-    QObject::connect(&session, &Session::sessionFinished, &encoder, &Encoder::finish);
-    QObject::connect(&encoder, &Encoder::encodingError, MediaManager::singletonInstance(), &MediaManager::fatalError);
+    if (parser.isSet(u"exitOnWarning"_s)) {
+        QObject::connect(&engine, &QQmlApplicationEngine::warnings, renderSession, &RenderSession::fatalError, Qt::QueuedConnection);
+    }
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, renderSession, &RenderSession::fatalError, Qt::QueuedConnection);
+    engine.load(QUrl(u"qrc:/qt/qml/MediaFX/app-encoder.qml"_s));
 
     return app.exec();
 }
@@ -125,7 +121,7 @@ int encoder(QGuiApplication& app, QCommandLineParser& parser)
 int viewer(QGuiApplication& app, QCommandLineParser& parser)
 {
     parser.clearPositionalArguments();
-    parser.addPositionalArgument("viewer", "viewer command.", "viewer [viewer_options]");
+    parser.addPositionalArgument(u"viewer"_s, u"viewer command."_s, u"viewer [viewer_options]"_s);
     parser.addOption({ { u"t"_s, u"transition"_s }, u"Transition class name."_s, u"transition"_s });
     parser.addOption({ { u"q"_s, u"qml"_s }, u"Transition QML filename."_s, u"qml"_s });
     parser.process(app);
@@ -135,23 +131,20 @@ int viewer(QGuiApplication& app, QCommandLineParser& parser)
         parser.showHelp(1);
     }
 
-    QQuickView quickView;
-    QQmlComponent component(quickView.engine());
+    QQmlApplicationEngine engine;
+    QQmlComponent component(&engine);
     if (parser.isSet(u"transition"_s)) {
-        component.loadFromModule("MediaFX.Transition", parser.value(u"transition"_s));
+        component.loadFromModule(u"MediaFX.Transition"_s, parser.value(u"transition"_s));
     } else if (parser.isSet(u"qml"_s)) {
         component.loadUrl(QUrl::fromLocalFile(parser.value(u"qml"_s)));
     } else {
         qCritical() << "Must specify transition name or QML path.";
         parser.showHelp(1);
     }
-    quickView.rootContext()->setContextProperty(u"transitionComponent"_s, &component);
+    engine.rootContext()->setContextProperty(u"transitionComponent"_s, &component);
 
-    OutputFormat outputFormat(QSize(), AVRational { 30, 1 }, 44100); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
-    MediaManager manager(outputFormat, &quickView);
-    quickView.setSource(QUrl(u"qrc:/qt/qml/MediaFX/Viewer/TransitionViewer.qml"_s));
-    quickView.setResizeMode(QQuickView::ResizeMode::SizeRootObjectToView);
-    quickView.show();
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, &QCoreApplication::quit, Qt::QueuedConnection);
+    engine.load(QUrl(u"qrc:/qt/qml/MediaFX/app-viewer.qml"_s));
 
     return app.exec();
 }

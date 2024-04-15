@@ -16,7 +16,10 @@ VideoOutput {
     property MediaClip mediaClip
 
     onMediaClipChanged: {
-        MediaManager.updateVideoSinks(internal.previousMediaClip, root.mediaClip, root.videoSink);
+        if (internal.previousMediaClip)
+            internal.previousMediaClip.removeVideoSink(root.videoSink);
+        if (root.mediaClip)
+            root.mediaClip.addVideoSink(root.videoSink);
         internal.previousMediaClip = root.mediaClip;
     }
 

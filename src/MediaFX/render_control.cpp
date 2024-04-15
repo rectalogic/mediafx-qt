@@ -12,13 +12,18 @@
 #include <QtCore>
 #include <rhi/qrhi.h>
 
-bool RenderControl::install(QQuickWindow* window)
+bool RenderControl::reconfigure()
 {
-    if (!initialize()) {
-        qCritical() << "Failed to initialize render control";
+    if (!window())
         return false;
-    }
-    QSize size = window->size();
+    QSize size = window()->size();
+    if (texture && texture->pixelSize() == size)
+        return true;
+
+    texture.reset();
+    stencilBuffer.reset();
+    textureRenderTarget.reset();
+    renderPassDescriptor.reset();
 
     QRhi* rhi = this->rhi();
     if (!rhi) {
@@ -56,13 +61,16 @@ bool RenderControl::install(QQuickWindow* window)
         renderTarget.setMirrorVertically(true);
 
     // redirect Qt Quick rendering into our texture
-    window->setRenderTarget(renderTarget);
+    window()->setRenderTarget(renderTarget);
 
     return true;
 }
 
 QByteArray RenderControl::renderVideoFrame()
 {
+    if (!reconfigure())
+        return QByteArray();
+
     QCoreApplication::processEvents();
     polishItems();
     beginFrame();

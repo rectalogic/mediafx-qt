@@ -7,5 +7,5 @@ import MediaFX
 Rectangle {
     color: "red"
 
-    Component.onCompleted: MediaManager.finishEncoding()
+    Component.onCompleted: RenderSession.endSession()
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "encoder.h"
-#include "output_format.h"
+#include "render_context.h"
 #include "util.h"
 #include <QAudioBuffer>
 #include <QAudioFormat>
@@ -12,9 +12,11 @@
 #include <QFile>
 #include <QIODevice>
 #include <QObject>
+#include <QSignalSpy>
 #include <QSize>
 #include <QString>
 #include <QSysInfo>
+#include <QUrl>
 #include <QtCore>
 #include <QtTest>
 #include <chrono>
@@ -47,22 +49,25 @@ private slots:
 
         QFile encodedFile(outputDir.filePath("encoder.nut"));
 
-        constexpr OutputFormat outputFormat(QSize(160, 120), AVRational { 5, 1 }, 44100);
-        Encoder encoder(encodedFile.fileName(), outputFormat);
-        QVERIFY(encoder.isValid());
+        const RenderContext renderContext(QUrl(), encodedFile.fileName(), QSize(160, 120), AVRational { 5, 1 }, 44100);
+        Encoder encoder;
+        QSignalSpy spy(&encoder, SIGNAL(encodingError()));
+        QVERIFY(spy.isValid());
+        encoder.setOutputFileName(renderContext.outputFileName());
+        encoder.initialize(renderContext);
 
         QAudioFormat audioFormat;
         audioFormat.setSampleFormat(QAudioFormat::Float);
         audioFormat.setChannelConfig(QAudioFormat::ChannelConfigStereo);
-        audioFormat.setSampleRate(outputFormat.sampleRate());
-        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(outputFormat.frameRate()).count()), audioFormat);
+        audioFormat.setSampleRate(renderContext.sampleRate());
+        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(renderContext.frameRate()).count()), audioFormat);
 
-        QByteArray videoData(static_cast<qsizetype>(outputFormat.frameSize().width() * outputFormat.frameSize().height() * 4), Qt::Uninitialized);
+        QByteArray videoData(static_cast<qsizetype>(renderContext.frameSize().width() * renderContext.frameSize().height() * 4), Qt::Uninitialized);
 
-        const int frames = static_cast<const int>(2.0 * av_q2d(outputFormat.frameRate())); // 2 seconds
+        const int frames = static_cast<const int>(2.0 * av_q2d(renderContext.frameRate())); // 2 seconds
         double audioTime = 0;
-        double audioIncr = 2 * M_PI * 110.0 / outputFormat.sampleRate();
-        constexpr double audioIncr2 = 2 * M_PI * 110.0 / outputFormat.sampleRate() / outputFormat.sampleRate();
+        double audioIncr = 2 * M_PI * 110.0 / renderContext.sampleRate();
+        double audioIncr2 = 2 * M_PI * 110.0 / renderContext.sampleRate() / renderContext.sampleRate();
 
         for (int i = 0; i < frames; i++) {
             // Audio sine wave
@@ -75,12 +80,12 @@ private slots:
                 audioIncr += audioIncr2;
             }
             // Video RGBA colors
-            int step = static_cast<int>(av_q2d(outputFormat.frameRate()) * i);
-            for (int y = 0; y < outputFormat.frameSize().height(); y++) {
-                for (int x = 0; x < outputFormat.frameSize().width(); x++) {
+            int step = static_cast<int>(av_q2d(renderContext.frameRate()) * i);
+            for (int y = 0; y < renderContext.frameSize().height(); y++) {
+                for (int x = 0; x < renderContext.frameSize().width(); x++) {
                     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[static_cast<ptrdiff_t>((y * outputFormat.frameSize().width() + x) * 4)]));
+                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[static_cast<ptrdiff_t>((y * renderContext.frameSize().width() + x) * 4)]));
                     pixel[0] = x + y + step * 3;
                     pixel[1] = 128 + y + step * 2;
                     pixel[2] = 64 + x + step * 5;
@@ -92,6 +97,7 @@ private slots:
             QVERIFY(encoder.encode(audioBuffer, videoData));
         }
         QVERIFY(encoder.finish());
+        QVERIFY(spy.empty());
 
         QVERIFY(encodedFile.open(QIODevice::ReadOnly));
         QByteArray encodedData(encodedFile.readAll());

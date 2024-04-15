@@ -8,7 +8,6 @@
 #include <QQuickRenderControl>
 #include <memory>
 #include <rhi/qrhi.h>
-class QQuickWindow;
 
 class RenderControl : public QQuickRenderControl {
     Q_OBJECT
@@ -19,11 +18,12 @@ public:
     RenderControl& operator=(RenderControl&&) = delete;
     ~RenderControl() override = default;
 
-    bool install(QQuickWindow* window);
     QByteArray renderVideoFrame();
 
 private:
     Q_DISABLE_COPY(RenderControl);
+
+    bool reconfigure();
 
     std::unique_ptr<QRhiTexture> texture;
     std::unique_ptr<QRhiRenderBuffer> stencilBuffer;

@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "audio_renderer.h"
-#include "media_manager.h"
+#include "render_session.h"
 #include <QAudioFormat>
 #include <QObject>
+#include <QQmlEngine>
 #include <QQmlInfo>
+#include <QmlTypeAndRevisionsRegistration>
 #include <QtCore>
 
 /*!
@@ -16,19 +18,25 @@
     \brief Renders audio for a \l MediaClip.
 */
 AudioRenderer::AudioRenderer(QObject* parent)
-    : AudioRenderer(false, parent)
-{
-}
-
-AudioRenderer::AudioRenderer(bool isRoot, QObject* parent)
     : QObject(parent)
 {
-    // We default to the root renderer as nextRenderer, unless we are root
-    if (!isRoot)
-        nextRendererInternal()->addParentRenderer(this);
 }
 
 AudioRenderer::~AudioRenderer() = default;
+
+void AudioRenderer::classBegin()
+{
+    // We default to the root renderer as upstreamRenderer, unless we are root.
+    // The root renderer is created in C++ so classBegin() is not called.
+    upstreamRendererInternal()->addDownstreamRenderer(this);
+}
+
+AudioRenderer* AudioRenderer::rootAudioRenderer()
+{
+    if (!m_rootAudioRenderer)
+        m_rootAudioRenderer = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession")->rootAudioRenderer();
+    return m_rootAudioRenderer;
+}
 
 /*!
     \qmlproperty real AudioRenderer::volume
@@ -50,45 +58,45 @@ void AudioRenderer::setVolume(float volume)
 }
 
 /*!
-    \qmlproperty real AudioRenderer::nextRenderer
+    \qmlproperty real AudioRenderer::upstreamRenderer
 
-    The next AudioRenderer in the chain. If not set then the root AudioRenderer is used.
+    The upstream AudioRenderer in the chain. If not set then the root AudioRenderer is used.
 */
-void AudioRenderer::setNextRenderer(AudioRenderer* nextRenderer)
+void AudioRenderer::setUpstreamRenderer(AudioRenderer* upstreamRenderer)
 {
-    if (nextRenderer != m_nextRenderer) {
+    if (upstreamRenderer != m_upstreamRenderer) {
         // Don't allow it to be set on the root renderer
-        if (this == MediaManager::singletonInstance()->audioRenderer())
+        if (this == rootAudioRenderer())
             return;
         // Avoid circular dependencies
-        auto renderer = nextRenderer;
+        auto renderer = upstreamRenderer;
         while (renderer != nullptr) {
             if (renderer == this) {
                 qmlWarning(this) << "Circular dependency in AudioRenderer";
                 return;
             }
-            renderer = renderer->nextRenderer();
+            renderer = renderer->upstreamRenderer();
         }
-        nextRendererInternal()->removeParentRenderer(this);
-        m_nextRenderer = nextRenderer;
-        nextRendererInternal()->addParentRenderer(this);
-        emit nextRendererChanged();
+        upstreamRendererInternal()->removeDownstreamRenderer(this);
+        m_upstreamRenderer = upstreamRenderer;
+        upstreamRendererInternal()->addDownstreamRenderer(this);
+        emit upstreamRendererChanged();
     }
 }
 
-AudioRenderer* AudioRenderer::nextRendererInternal() const
+AudioRenderer* AudioRenderer::upstreamRendererInternal()
 {
-    return m_nextRenderer ? m_nextRenderer : MediaManager::singletonInstance()->audioRenderer();
+    return m_upstreamRenderer ? m_upstreamRenderer : rootAudioRenderer();
 }
 
-void AudioRenderer::addParentRenderer(AudioRenderer* parent)
+void AudioRenderer::addDownstreamRenderer(AudioRenderer* parent)
 {
-    m_parentRenderers.append(parent);
+    m_downstreamRenderers.append(parent);
 }
 
-void AudioRenderer::removeParentRenderer(AudioRenderer* parent)
+void AudioRenderer::removeDownstreamRenderer(AudioRenderer* parent)
 {
-    m_parentRenderers.removeAll(parent);
+    m_downstreamRenderers.removeAll(parent);
 }
 
 void AudioRenderer::addAudioBuffer(QAudioBuffer audioBuffer)
@@ -105,7 +113,7 @@ QAudioBuffer AudioRenderer::mix()
     }
 
     // Mix each parent and add their valid buffers
-    for (auto parent : m_parentRenderers) {
+    for (auto parent : m_downstreamRenderers) {
         QAudioBuffer buffer = parent->mix();
         if (buffer.isValid())
             audioBuffers.append(buffer);

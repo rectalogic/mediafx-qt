@@ -13,7 +13,6 @@ ColumnLayout {
     property MediaTransition mediaTransition
 
     Component.onCompleted: {
-        MediaManager.window.color = MediaManager.window.palette.window;
         // Create the transitionComponent context object set in main.cpp
         root.mediaTransition = transitionComponent.createObject(transitionContainer, {
             dest: destItem,

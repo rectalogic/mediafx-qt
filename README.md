@@ -45,7 +45,7 @@ Item {
         }
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(MediaManager.finishEncoding);
+            videoClip.clipEnded.connect(RenderSession.endSession);
         }
     }
     VideoRenderer {
@@ -67,7 +67,7 @@ and renders one second of the video frames of it's [MediaClip.source](https://me
 The [MultiEffect](https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html)
 filter is applied to the VideoRenderer to desaturate it.
 When the clip finishes, it's [clipEnded](https://mediafx.org/qml-mediafx-mediaclip.html#clipEnded-signal) signal triggers the
-[MediaManager.finishEncoding](https://mediafx.org/qml-mediafx-mediamanager.html#finishEncoding-method) slot to end encoding.
+[RenderSession.endSession](https://mediafx.org/qml-mediafx-rendersession.html#endSession-method) slot to end encoding.
 
 See [Qt signals and slots](https://doc.qt.io/qt-6/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals).
 

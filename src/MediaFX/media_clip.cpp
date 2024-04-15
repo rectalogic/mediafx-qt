@@ -4,12 +4,15 @@
 #include "media_clip.h"
 #include "audio_renderer.h"
 #include "interval.h"
-#include "media_manager.h"
+#include "render_session.h"
 #include "util.h"
 #include <QObject>
+#include <QQmlEngine>
 #include <QQmlInfo>
 #include <QUrl>
 #include <QVideoSink>
+#include <QmlTypeAndRevisionsRegistration>
+#include <QtTypes>
 #include <chrono>
 #include <compare>
 #include <ratio>
@@ -63,8 +66,7 @@ void MediaClip::setStartTime(qint64 ms)
     }
     m_startTime = ms;
 
-    auto manager = MediaManager::singletonInstance();
-    std::chrono::duration<double> frameDuration(frameRateToFrameDuration(manager->outputFrameRate()));
+    std::chrono::duration<double> frameDuration(frameRateToFrameDuration(m_renderSession->outputFrameRate()));
     m_startTimeAdjusted = duration_cast<microseconds>((milliseconds(ms) / frameDuration) * frameDuration);
 
     emit startTimeChanged();
@@ -90,8 +92,7 @@ void MediaClip::setEndTime(const microseconds& us)
     }
     m_endTime = duration_cast<milliseconds>(us).count();
 
-    auto manager = MediaManager::singletonInstance();
-    std::chrono::duration<double> frameDuration(frameRateToFrameDuration(manager->outputFrameRate()));
+    std::chrono::duration<double> frameDuration(frameRateToFrameDuration(m_renderSession->outputFrameRate()));
     m_endTimeAdjusted = duration_cast<microseconds>((us / frameDuration) * frameDuration);
     if (m_endTimeAdjusted < us)
         m_endTimeAdjusted += duration_cast<microseconds>(frameDuration);
@@ -125,12 +126,8 @@ void MediaClip::render()
     if (!isActive())
         return;
 
-    emit currentFrameTimeChanged();
-
-    auto manager = MediaManager::singletonInstance();
-
     if (!m_decoder.decode()) {
-        manager->fatalError();
+        m_renderSession->fatalError();
         return;
     }
 
@@ -142,12 +139,13 @@ void MediaClip::render()
 
     m_frameCount++;
     m_currentFrameTime = m_currentFrameTime.nextInterval(
-        m_startTimeAdjusted + duration_cast<microseconds>(m_frameCount * frameRateToFrameDuration(manager->outputFrameRate())));
+        m_startTimeAdjusted + duration_cast<microseconds>(m_frameCount * frameRateToFrameDuration(m_renderSession->outputFrameRate())));
     if (m_currentFrameTime.start() >= m_endTimeAdjusted) {
         emit clipEnded();
         m_decoder.stop();
         return;
     }
+    emit currentFrameTimeChanged();
 }
 
 /*!
@@ -159,12 +157,6 @@ void MediaClip::setActive(bool active)
 {
     if (m_active != active) {
         m_active = active;
-        auto manager = MediaManager::singletonInstance();
-        if (active) {
-            manager->registerClip(this);
-        } else {
-            manager->unregisterClip(this);
-        }
         emit activeChanged();
     }
 }
@@ -177,7 +169,7 @@ void MediaClip::updateActive()
 
 void MediaClip::addVideoSink(QVideoSink* videoSink)
 {
-    if (!m_videoSinks.contains(videoSink)) {
+    if (videoSink && !m_videoSinks.contains(videoSink)) {
         m_videoSinks.append(videoSink);
         updateActive();
     }
@@ -185,7 +177,7 @@ void MediaClip::addVideoSink(QVideoSink* videoSink)
 
 void MediaClip::removeVideoSink(const QVideoSink* videoSink)
 {
-    if (m_videoSinks.removeOne(videoSink)) {
+    if (videoSink && m_videoSinks.removeOne(videoSink)) {
         updateActive();
     }
 }
@@ -197,20 +189,26 @@ void MediaClip::onDecoderErrorMessage(const QString& message)
 
 void MediaClip::loadMedia()
 {
-    auto manager = MediaManager::singletonInstance();
     if (!source().isValid()) {
         qmlWarning(this) << "MediaClip requires source Url";
-        manager->fatalError();
+        m_renderSession->fatalError();
         return;
     }
     connect(&m_decoder, &Decoder::errorMessage, this, &MediaClip::onDecoderErrorMessage);
-    auto mediaManager = manager;
-    if (m_decoder.open(source().toLocalFile(), mediaManager->outputFrameRate(), mediaManager->outputAudioFormat(), m_startTimeAdjusted) < 0) {
-        manager->fatalError();
+    if (m_decoder.open(source().toLocalFile(), m_renderSession->outputFrameRate(), m_renderSession->outputAudioFormat(), m_startTimeAdjusted) < 0) {
+        m_renderSession->fatalError();
         return;
     }
 
     updateActive();
+}
+
+void MediaClip::classBegin()
+{
+    m_renderSession = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession");
+    connect(
+        m_renderSession, &RenderSession::renderMediaClips,
+        this, &MediaClip::render);
 }
 
 void MediaClip::componentComplete()
@@ -222,7 +220,8 @@ void MediaClip::componentComplete()
     if (endTime() < 0) {
         setEndTime(m_decoder.duration());
     }
-    m_currentFrameTime = Interval(m_startTimeAdjusted, m_startTimeAdjusted + frameRateToFrameDuration<microseconds>(MediaManager::singletonInstance()->outputFrameRate()));
+    m_currentFrameTime = Interval(m_startTimeAdjusted, m_startTimeAdjusted + frameRateToFrameDuration<microseconds>(m_renderSession->outputFrameRate()));
+    emit currentFrameTimeChanged();
 }
 
 /*!

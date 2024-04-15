@@ -10,7 +10,7 @@ outputformats = HTML
 language = QML
 syntaxhighlighting = true
 
-depends = qtquick qtmultimedia
+depends = qtqml qtquick qtmultimedia
 
 sources.fileextensions = "*.cpp *.qdoc *.qml"
 headers.fileextensions = "*.h"

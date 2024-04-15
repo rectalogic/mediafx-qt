@@ -26,7 +26,7 @@ RUN <<EOF
     fi
     python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
     && venv/bin/python3 -m aqt install-qt ${HOST} desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
-    && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtquick qtmultimedia --outputdir /usr/local/Qt \
+    && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtqml qtquick qtmultimedia --outputdir /usr/local/Qt \
     && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete \
     && curl -o iwyu-mapgen-qt.py https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_17/mapgen/iwyu-mapgen-qt.py \
     && python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/${ARCH}/include > "/usr/local/Qt/${QT_VER}/qt.imp"

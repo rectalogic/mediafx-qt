@@ -10,11 +10,13 @@
 #include <QQmlParserStatus>
 #include <QString>
 #include <QUrl>
+#include <QtCore>
 #include <QtQmlIntegration>
-#include <QtTypes>
 #include <chrono>
+Q_MOC_INCLUDE(<QVideoSink>)
 class AudioRenderer;
 class QVideoSink;
+class RenderSession;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
@@ -70,15 +72,15 @@ public:
     bool hasAudio() const { return m_decoder.hasAudio(); }
     bool hasVideo() const { return m_decoder.hasVideo(); }
 
-    void addVideoSink(QVideoSink* videoSink);
-    void removeVideoSink(const QVideoSink* videoSink);
+    Q_INVOKABLE void addVideoSink(QVideoSink* videoSink);
+    Q_INVOKABLE void removeVideoSink(const QVideoSink* videoSink);
 
     void render();
 
     void updateActive();
 
 protected:
-    void classBegin() override {};
+    void classBegin() override;
     void componentComplete() override;
 
     void loadMedia();
@@ -94,6 +96,7 @@ private:
 
     bool m_componentComplete = false;
     bool m_active = false;
+    RenderSession* m_renderSession = nullptr;
     QUrl m_source;
     qint64 m_startTime = -1;
     microseconds m_startTimeAdjusted { -1 };

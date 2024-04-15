@@ -19,11 +19,11 @@ ColumnLayout {
         source: Qt.resolvedUrl("../fixtures/assets/ednotsafe-320x180-15fps-1.53s-44100.nut")
 
         function resumeRendering() {
-            MediaManager.resumeRendering();
+            RenderSession.resumeRendering();
         }
         onCurrentFrameTimeChanged: function () {
             if (videoClipA.currentFrameTime.contains(500)) {
-                MediaManager.pauseRendering();
+                RenderSession.pauseRendering();
                 Qt.callLater(resumeRendering);
             }
         }
@@ -47,6 +47,6 @@ ColumnLayout {
     }
 
     Component.onCompleted: {
-        videoClipA.clipEnded.connect(MediaManager.finishEncoding);
+        videoClipA.clipEnded.connect(RenderSession.endSession);
     }
 }

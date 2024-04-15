@@ -24,8 +24,8 @@ configure_file("version.h.in" "version.h")
 
 qt_add_library(mediafx STATIC
     application.cpp
-    session.cpp
-    media_manager.cpp
+    render_context.cpp
+    render_session.cpp
     decoder.cpp
     stream.cpp
     audio_stream.cpp
@@ -33,6 +33,7 @@ qt_add_library(mediafx STATIC
     encoder.cpp
     output_stream.cpp
     render_control.cpp
+    render_window.cpp
     media_clip.cpp
     audio_renderer.cpp
     interval.cpp
@@ -60,6 +61,8 @@ set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)
 qt_add_qml_module(mediafx
     URI MediaFX
     QML_FILES
+    app-encoder.qml
+    app-viewer.qml
     VideoRenderer.qml
     sequence.js
     MediaSequence.qml

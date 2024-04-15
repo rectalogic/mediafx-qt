@@ -19,7 +19,7 @@ Item {
     transitions: Transition {
         onRunningChanged: {
             if (!running)
-                MediaManager.finishEncoding();
+                RenderSession.endSession();
         }
 
         AnchorAnimation {

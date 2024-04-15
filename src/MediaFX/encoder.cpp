@@ -10,14 +10,18 @@
 
 #include "encoder.h"
 #include "formats.h"
-#include "output_format.h"
 #include "output_stream.h"
+#include "render_context.h"
+#include "render_session.h"
 #include "util.h"
 #include <QAudioBuffer>
 #include <QByteArray>
 #include <QDebug>
 #include <QObject>
+#include <QQmlEngine>
+#include <QQmlInfo>
 #include <QSize>
+#include <QmlTypeAndRevisionsRegistration>
 #include <QtLogging>
 #include <stdint.h>
 extern "C" {
@@ -37,13 +41,36 @@ extern "C" {
 
 // NOLINTBEGIN(bugprone-assignment-in-if-condition)
 
-Encoder::Encoder(const QString& outputFile, const OutputFormat& outputFormat)
-    : QObject()
-    , m_outputFile(outputFile)
+Encoder::Encoder(QObject* parent)
+    : QObject(parent)
+{
+}
+
+Encoder::~Encoder()
+{
+    m_audioStream.reset();
+    m_videoStream.reset();
+    if (m_formatContext)
+        avformat_free_context(m_formatContext);
+}
+
+void Encoder::setOutputFileName(const QString& outputFileName)
+{
+    if (!m_outputFileName.isNull()) {
+        qmlWarning(this) << "Encoder outputFileName is a write-once property and cannot be changed";
+        return;
+    }
+    if (m_outputFileName != outputFileName) {
+        m_outputFileName = outputFileName;
+        emit outputFileNameChanged();
+    }
+}
+
+void Encoder::initialize(const RenderContext& renderContext)
 {
     int ret = 0;
     // Select nut format
-    if ((ret = avformat_alloc_output_context2(&m_formatContext, nullptr, "nut", qUtf8Printable(m_outputFile))) < 0) {
+    if ((ret = avformat_alloc_output_context2(&m_formatContext, nullptr, "nut", qUtf8Printable(m_outputFileName))) < 0) {
         qCritical() << "Could not allocate an output context, error:" << av_err2qstring(ret);
         return;
     }
@@ -54,9 +81,9 @@ Encoder::Encoder(const QString& outputFile, const OutputFormat& outputFormat)
         return;
     AVCodecContext* videoCodecContext = video->codecContext();
     videoCodecContext->pix_fmt = VideoPixelFormat_FFMPEG;
-    videoCodecContext->width = outputFormat.frameSize().width();
-    videoCodecContext->height = outputFormat.frameSize().height();
-    AVRational timeBase(av_inv_q(outputFormat.frameRate()));
+    videoCodecContext->width = renderContext.frameSize().width();
+    videoCodecContext->height = renderContext.frameSize().height();
+    AVRational timeBase(av_inv_q(renderContext.frameRate()));
     int64_t gcd = av_gcd(FFABS(timeBase.num), FFABS(timeBase.den));
     if (gcd) {
         timeBase.num = FFABS(timeBase.num) / gcd;
@@ -72,7 +99,7 @@ Encoder::Encoder(const QString& outputFile, const OutputFormat& outputFormat)
         return;
     AVCodecContext* audioCodecContext = audio->codecContext();
     audioCodecContext->sample_fmt = AudioSampleFormat_FFMPEG;
-    audioCodecContext->sample_rate = outputFormat.sampleRate();
+    audioCodecContext->sample_rate = renderContext.sampleRate();
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 37, 100)
     audioCodecContext->channel_layout = AudioChannelLayout_FFMPEG;
     audioCodecContext->channels = av_get_channel_layout_nb_channels(audioCodecContext->channel_layout);
@@ -90,8 +117,8 @@ Encoder::Encoder(const QString& outputFile, const OutputFormat& outputFormat)
     m_videoStream.swap(video);
 
     if (!(m_formatContext->flags & AVFMT_NOFILE)) {
-        if ((ret = avio_open(&m_formatContext->pb, qUtf8Printable(m_outputFile), AVIO_FLAG_WRITE)) < 0) {
-            qCritical() << "Could not open output file" << m_outputFile << ", avio_open:" << av_err2qstring(ret);
+        if ((ret = avio_open(&m_formatContext->pb, qUtf8Printable(m_outputFileName), AVIO_FLAG_WRITE)) < 0) {
+            qCritical() << "Could not open output file" << m_outputFileName << ", avio_open:" << av_err2qstring(ret);
             return;
         }
     }
@@ -108,18 +135,20 @@ Encoder::Encoder(const QString& outputFile, const OutputFormat& outputFormat)
     }
 
     m_isValid = true;
-};
+}
 
-Encoder::~Encoder()
+void Encoder::componentComplete()
 {
-    m_audioStream.reset();
-    m_videoStream.reset();
-    if (m_formatContext)
-        avformat_free_context(m_formatContext);
+    const RenderContext& renderContext = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession")->renderContext();
+    initialize(renderContext);
 }
 
 bool Encoder::encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData)
 {
+    if (!m_isValid) {
+        emit encodingError();
+        return false;
+    }
     AVPacket* videoPacket = m_videoStream->packet();
     videoPacket->flags |= AV_PKT_FLAG_KEY;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast, cppcoreguidelines-pro-type-reinterpret-cast)
