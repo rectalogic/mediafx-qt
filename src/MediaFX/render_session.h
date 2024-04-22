@@ -8,40 +8,49 @@
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QObject>
+#include <QQuickItem>
+#include <QRectF>
+#include <QUrl>
 #include <QtCore>
 #include <QtQmlIntegration>
 #include <chrono>
 #include <memory>
-extern "C" {
-#include <libavutil/rational.h>
-}
 class AnimationDriver;
 class AudioRenderer;
+class RenderSessionAttached;
 using namespace std::chrono;
 
-class RenderSession : public QObject {
+class RenderSession : public QQuickItem {
     Q_OBJECT
+    Q_PROPERTY(QUrl sourceUrl READ sourceUrl WRITE setSourceUrl NOTIFY sourceUrlChanged FINAL REQUIRED)
     Q_PROPERTY(IntervalGadget currentRenderTime READ currentRenderTime NOTIFY currentRenderTimeChanged FINAL)
-    Q_PROPERTY(RenderContext renderContext READ renderContext CONSTANT)
+    Q_PROPERTY(Rational frameRate READ frameRate WRITE setFrameRate NOTIFY frameRateChanged FINAL)
+    Q_PROPERTY(int sampleRate READ sampleRate WRITE setSampleRate NOTIFY sampleRateChanged FINAL)
+    QML_ATTACHED(RenderSessionAttached)
     QML_ELEMENT
-    QML_SINGLETON
 
 public:
-    RenderSession(QObject* parent = nullptr);
+    RenderSession(QQuickItem* parent = nullptr);
     RenderSession(RenderSession&&) = delete;
     RenderSession& operator=(RenderSession&&) = delete;
     ~RenderSession() override;
 
-    void initialize(const RenderContext& renderContext);
-
-    const RenderContext& renderContext() const { return *m_renderContext.get(); }
+    static RenderSessionAttached* qmlAttachedProperties(QObject* object);
 
     Q_INVOKABLE IntervalGadget createInterval(qint64 start, qint64 end) const
     {
         return IntervalGadget(start, end);
     };
 
-    const AVRational& outputFrameRate() const { return renderContext().frameRate(); }
+    const QUrl& sourceUrl() const { return m_sourceUrl; }
+    void setSourceUrl(const QUrl& url);
+
+    const Rational& frameRate() const { return m_frameRate; }
+    void setFrameRate(const Rational& frameRate);
+
+    int sampleRate() const { return m_sampleRate; }
+    void setSampleRate(int sampleRate);
+
     const QAudioFormat& outputAudioFormat() const { return m_outputAudioFormat; }
     const IntervalGadget currentRenderTime() const { return IntervalGadget(m_currentRenderTime); }
 
@@ -56,7 +65,12 @@ public:
     bool isRenderingPaused() const { return m_pauseRendering > 0; }
     bool isSessionEnded() const { return m_sessionEnded; }
 
+    static RenderSession* findSession(QObject* object);
+
 signals:
+    void sourceUrlChanged();
+    void frameRateChanged();
+    void sampleRateChanged();
     void currentRenderTimeChanged();
     void sessionEnded();
     void renderMediaClips();
@@ -69,11 +83,19 @@ public slots:
 
 protected:
     void postRenderEvent();
+    void classBegin() override { }
+    void componentComplete() override;
+    void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
     Q_DISABLE_COPY(RenderSession);
 
-    std::unique_ptr<RenderContext> m_renderContext;
+    static const QString SessionContextProperty;
+
+    QUrl m_sourceUrl;
+    QQuickItem* m_loadedItem = nullptr;
+    Rational m_frameRate = DefaultFrameRate;
+    int m_sampleRate = DefaultSampleRate;
     QAudioFormat m_outputAudioFormat;
     Interval<microseconds> m_currentRenderTime;
     int m_frameCount = 1;
@@ -84,4 +106,18 @@ private:
     std::unique_ptr<AnimationDriver> m_animationDriver;
     bool m_isRenderEventPosted = false;
     bool m_isResumingRender = false;
+};
+
+class RenderSessionAttached : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(RenderSession* session READ session CONSTANT)
+    QML_ANONYMOUS
+public:
+    explicit RenderSessionAttached(RenderSession* session, QObject* parent = nullptr)
+        : QObject(parent)
+        , m_session(session) {};
+    RenderSession* session() const { return m_session; };
+
+private:
+    RenderSession* m_session = nullptr;
 };

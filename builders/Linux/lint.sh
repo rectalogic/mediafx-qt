@@ -15,5 +15,7 @@ cmake --build "${MEDIAFX_BUILD}" --target tst_encoder_autogen/fast tst_decoder_a
 cd /mediafx
 git config --global --add safe.directory /mediafx
 FILES=$(git ls-files '**/*.cpp' '**/*.h')
+echo clang-tidy
 /usr/bin/clang-tidy -p "${MEDIAFX_BUILD}" $FILES || exit 1
-/usr/bin/clazy-standalone -p "${MEDIAFX_BUILD}/compile_commands.json" $FILES || exit 1
+echo clazy
+/usr/bin/clazy-standalone -p "${MEDIAFX_BUILD}/compile_commands.json" $FILES 2>&1 | (! grep warning || exit 1)

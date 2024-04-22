@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMessageLogContext>
 #include <QQmlEngine>
+#include <QQmlInfo>
 #include <QQuickItem>
 #include <QmlTypeAndRevisionsRegistration>
 #ifdef MEDIAFX_ENABLE_VULKAN
@@ -59,13 +60,19 @@ void RenderWindow::componentComplete()
     // QQuickWindow does not resize contentItem
     // https://bugreports.qt.io/browse/QTBUG-55028
     contentItem()->setSize(size());
+
+    if (!m_renderSession) {
+        qmlWarning(this) << "RenderWindow renderSession is a required property";
+        emit qmlEngine(this)->exit(1);
+    }
 }
 
-RenderSession* RenderWindow::renderSession()
+void RenderWindow::setRenderSession(RenderSession* renderSession)
 {
-    if (!m_renderSession)
-        m_renderSession = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession");
-    return m_renderSession;
+    if (renderSession != m_renderSession) {
+        m_renderSession = renderSession;
+        emit renderSessionChanged();
+    }
 }
 
 void RenderWindow::render()

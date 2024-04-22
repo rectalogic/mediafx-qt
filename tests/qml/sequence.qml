@@ -41,7 +41,7 @@ MediaSequence {
     ]
 
     Component.onCompleted: {
-        sequence.mediaSequenceEnded.connect(RenderSession.endSession);
+        sequence.mediaSequenceEnded.connect(sequence.RenderSession.session.endSession);
     }
 
     MediaClip {

@@ -6,6 +6,8 @@ import QtQuick.Layouts
 import MediaFX
 
 ColumnLayout {
+    id: root
+
     spacing: 0
 
     AudioRenderer {
@@ -19,11 +21,11 @@ ColumnLayout {
         source: Qt.resolvedUrl("../fixtures/assets/ednotsafe-320x180-15fps-1.53s-44100.nut")
 
         function resumeRendering() {
-            RenderSession.resumeRendering();
+            root.RenderSession.session.resumeRendering();
         }
         onCurrentFrameTimeChanged: function () {
             if (videoClipA.currentFrameTime.contains(500)) {
-                RenderSession.pauseRendering();
+                root.RenderSession.session.pauseRendering();
                 Qt.callLater(resumeRendering);
             }
         }
@@ -47,6 +49,6 @@ ColumnLayout {
     }
 
     Component.onCompleted: {
-        videoClipA.clipEnded.connect(RenderSession.endSession);
+        videoClipA.clipEnded.connect(root.RenderSession.session.endSession);
     }
 }

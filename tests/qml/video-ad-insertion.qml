@@ -16,7 +16,7 @@ Item {
 
         Component.onCompleted: {
             // End encoding when main videoClip finishes
-            videoClip.clipEnded.connect(RenderSession.endSession);
+            videoClip.clipEnded.connect(videoClip.RenderSession.session.endSession);
         }
     }
     MediaClip {

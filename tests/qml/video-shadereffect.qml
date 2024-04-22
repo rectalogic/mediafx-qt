@@ -11,7 +11,7 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/blue-320x180-30fps-3s-awb44100.nut")
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(RenderSession.endSession);
+            videoClip.clipEnded.connect(videoClip.RenderSession.session.endSession);
         }
     }
     VideoRenderer {

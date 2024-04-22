@@ -12,7 +12,7 @@ Item {
         source: Qt.resolvedUrl("../fixtures/assets/red-320x180-15fps-8s-kal1624000.nut")
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(RenderSession.endSession);
+            videoClip.clipEnded.connect(videoClip.RenderSession.session.endSession);
         }
     }
     VideoRenderer {

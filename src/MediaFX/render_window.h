@@ -23,6 +23,7 @@ class RenderSession;
 class RenderWindow : public QQuickWindow, public QQmlParserStatus {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
+    Q_PROPERTY(RenderSession* renderSession READ renderSession WRITE setRenderSession NOTIFY renderSessionChanged REQUIRED FINAL)
     QML_ELEMENT
 
 public:
@@ -33,7 +34,11 @@ public:
     RenderWindow& operator=(RenderWindow&&) = delete;
     ~RenderWindow() override;
 
+    RenderSession* renderSession() const { return m_renderSession; }
+    void setRenderSession(RenderSession* renderSession);
+
 signals:
+    void renderSessionChanged();
     void frameReady(const QAudioBuffer& audioBuffer, const QByteArray& videoData);
 
 public slots:
@@ -47,8 +52,6 @@ private:
     Q_DISABLE_COPY(RenderWindow);
 
     RenderWindow(RenderControl* renderControl);
-
-    RenderSession* renderSession();
 
     RenderSession* m_renderSession = nullptr;
 #ifdef MEDIAFX_ENABLE_VULKAN

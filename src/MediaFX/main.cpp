@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "render_context.h"
-#include "render_session.h"
 #include "version.h"
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -26,7 +25,6 @@
 extern "C" {
 #include <libavutil/log.h>
 #include <libavutil/parseutils.h>
-#include <libavutil/rational.h>
 }
 #ifdef EVENTLOGGER
 #include "event_logger.h"
@@ -84,7 +82,7 @@ int encoder(QGuiApplication& app, QCommandLineParser& parser)
     } else
         av_log_set_level(AV_LOG_WARNING);
 
-    AVRational frameRate { 0 };
+    Rational frameRate { 0 };
     if (av_parse_video_rate(&frameRate, qUtf8Printable(parser.value(u"fps"_s))) < 0)
         parser.showHelp(1);
     int width = 0, height = 0;
@@ -104,15 +102,21 @@ int encoder(QGuiApplication& app, QCommandLineParser& parser)
         output = u"pipe:"_s;
 
     QQmlApplicationEngine engine;
-    RenderContext renderContext(url, output, frameSize, frameRate, sampleRate);
-    RenderSession* renderSession = engine.singletonInstance<RenderSession*>("MediaFX", "RenderSession");
-    Q_ASSERT(renderSession);
-    renderSession->initialize(renderContext);
+    RenderContext* renderContext = engine.singletonInstance<RenderContext*>("MediaFX", "RenderContext");
+    Q_ASSERT(renderContext);
+    renderContext->setSourceUrl(url);
+    renderContext->setOutputFileName(output);
+    renderContext->setFrameSize(frameSize);
+    renderContext->setFrameRate(frameRate);
+    renderContext->setSampleRate(sampleRate);
 
+    auto fatalExit = [&engine]() {
+        emit engine.exit(1);
+    };
     if (parser.isSet(u"exitOnWarning"_s)) {
-        QObject::connect(&engine, &QQmlApplicationEngine::warnings, renderSession, &RenderSession::fatalError, Qt::QueuedConnection);
+        QObject::connect(&engine, &QQmlApplicationEngine::warnings, &engine, fatalExit, Qt::QueuedConnection);
     }
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, renderSession, &RenderSession::fatalError, Qt::QueuedConnection);
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &engine, fatalExit, Qt::QueuedConnection);
     engine.load(QUrl(u"qrc:/qt/qml/MediaFX/app-encoder.qml"_s));
 
     return app.exec();

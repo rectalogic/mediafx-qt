@@ -38,16 +38,15 @@ public:
     QAudioBuffer mix();
 
 protected:
-    void classBegin() override;
-    void componentComplete() override {};
+    void classBegin() override {};
+    void componentComplete() override;
 
 private:
     Q_DISABLE_COPY(AudioRenderer);
 
     AudioRenderer* rootAudioRenderer();
-    AudioRenderer* upstreamRendererInternal();
-    void addDownstreamRenderer(AudioRenderer* parent);
-    void removeDownstreamRenderer(AudioRenderer* parent);
+    void addDownstreamRenderer(AudioRenderer* downstreamRenderer);
+    void removeDownstreamRenderer(AudioRenderer* downstreamRenderer);
 
     float m_volume = 1.0;
     QList<QAudioBuffer> audioBuffers;

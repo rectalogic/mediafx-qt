@@ -19,7 +19,7 @@ Item {
     transitions: Transition {
         onRunningChanged: {
             if (!running)
-                RenderSession.endSession();
+                container.RenderSession.session.endSession();
         }
 
         AnchorAnimation {

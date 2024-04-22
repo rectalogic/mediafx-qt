@@ -5,30 +5,31 @@ import QtQuick
 
 RenderWindow {
     id: renderWindow
-    width: RenderSession.renderContext.frameSize.width
-    height: RenderSession.renderContext.frameSize.height
+    width: RenderContext.frameSize.width
+    height: RenderContext.frameSize.height
+    renderSession: renderSession
 
     Component.onCompleted: {
         renderWindow.contentItem.enabled = false;
         renderWindow.frameReady.connect(encoder.encode);
-        RenderSession.renderScene.connect(renderWindow.render);
-        RenderSession.sessionEnded.connect(encoder.finish);
-        encoder.encodingError.connect(RenderSession.fatalError);
-        RenderSession.beginSession();
+        renderSession.renderScene.connect(renderWindow.render);
+        renderSession.sessionEnded.connect(encoder.finish);
+        encoder.encodingError.connect(renderSession.fatalError);
+        renderSession.beginSession();
     }
 
-    Loader {
-        id: loader
-        source: RenderSession.renderContext.sourceUrl
+    RenderSession {
+        id: renderSession
+        sourceUrl: RenderContext.sourceUrl
+        frameRate: RenderContext.frameRate
+        sampleRate: RenderContext.sampleRate
         anchors.fill: parent
-        Component.onCompleted: {
-            if (loader.status == Loader.Error)
-                RenderSession.fatalError();
-        }
     }
-
     Encoder {
         id: encoder
-        outputFileName: RenderSession.renderContext.outputFileName
+        outputFileName: RenderContext.outputFileName
+        frameSize: RenderContext.frameSize
+        frameRate: RenderContext.frameRate
+        sampleRate: RenderContext.sampleRate
     }
 }

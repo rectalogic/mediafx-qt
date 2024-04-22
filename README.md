@@ -45,7 +45,7 @@ Item {
         }
 
         Component.onCompleted: {
-            videoClip.clipEnded.connect(RenderSession.endSession);
+            videoClip.clipEnded.connect(videoClip.RenderSession.session.endSession);
         }
     }
     VideoRenderer {
@@ -65,9 +65,9 @@ Item {
 MediaClip is attached to [VideoRenderer.mediaClip](https://mediafx.org/qml-mediafx-videorenderer.html#mediaClip-prop)
 and renders one second of the video frames of it's [MediaClip.source](https://mediafx.org/qml-mediafx-mediaclip.html#source-prop).
 The [MultiEffect](https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html)
-filter is applied to the VideoRenderer to desaturate it.
+filter is applied to the `VideoRenderer` to desaturate it.
 When the clip finishes, it's [clipEnded](https://mediafx.org/qml-mediafx-mediaclip.html#clipEnded-signal) signal triggers the
-[RenderSession.endSession](https://mediafx.org/qml-mediafx-rendersession.html#endSession-method) slot to end encoding.
+[RenderSession.endSession](https://mediafx.org/qml-mediafx-rendersession.html#endSession-method) slot via the [RenderSession.session](https://mediafx.org/qml-mediafx-rendersession.html#session-attached-prop) attached property to end encoding.
 
 See [Qt signals and slots](https://doc.qt.io/qt-6/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals).
 
@@ -75,7 +75,7 @@ To run this and generate a video:
 ```sh-session
 $ mediafx encoder demo.qml output.nut
 ```
-This will create a NUT format video with raw audio and video.
+This will create a <a href="https://ffmpeg.org/ffmpeg-formats.html#nut">NUT</a> format video with raw audio and video.
 To encode to another format, pipe into `ffmpeg`, e.g.
 ```sh-session
 $ mediafx encoder demo.qml - | ffmpeg -i - output.mp4

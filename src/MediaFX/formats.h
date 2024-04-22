@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "render_context.h"
 #include <QAudioFormat>
 #include <QString>
 #include <QVideoFrameFormat>

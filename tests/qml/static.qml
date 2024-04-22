@@ -5,7 +5,9 @@ import QtQuick
 import MediaFX
 
 Rectangle {
+    id: root
+
     color: "red"
 
-    Component.onCompleted: RenderSession.endSession()
+    Component.onCompleted: root.RenderSession.session.endSession()
 }

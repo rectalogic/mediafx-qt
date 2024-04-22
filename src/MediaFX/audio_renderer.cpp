@@ -24,17 +24,26 @@ AudioRenderer::AudioRenderer(QObject* parent)
 
 AudioRenderer::~AudioRenderer() = default;
 
-void AudioRenderer::classBegin()
+void AudioRenderer::componentComplete()
 {
-    // We default to the root renderer as upstreamRenderer, unless we are root.
-    // The root renderer is created in C++ so classBegin() is not called.
-    upstreamRendererInternal()->addDownstreamRenderer(this);
+    if (!m_upstreamRenderer) {
+        // We default to the root renderer as upstreamRenderer, unless we are root.
+        // The root renderer is created in C++ so classBegin() is not called.
+        setUpstreamRenderer(rootAudioRenderer());
+    }
 }
 
 AudioRenderer* AudioRenderer::rootAudioRenderer()
 {
-    if (!m_rootAudioRenderer)
-        m_rootAudioRenderer = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession")->rootAudioRenderer();
+    if (!m_rootAudioRenderer) {
+        RenderSession* renderSession = RenderSession::findSession(this);
+        if (renderSession) {
+            m_rootAudioRenderer = renderSession->rootAudioRenderer();
+        } else {
+            qmlWarning(this) << "AudioRenderer could not find renderSession in context";
+            emit qmlEngine(this)->exit(1);
+        }
+    }
     return m_rootAudioRenderer;
 }
 
@@ -65,9 +74,6 @@ void AudioRenderer::setVolume(float volume)
 void AudioRenderer::setUpstreamRenderer(AudioRenderer* upstreamRenderer)
 {
     if (upstreamRenderer != m_upstreamRenderer) {
-        // Don't allow it to be set on the root renderer
-        if (this == rootAudioRenderer())
-            return;
         // Avoid circular dependencies
         auto renderer = upstreamRenderer;
         while (renderer != nullptr) {
@@ -77,26 +83,23 @@ void AudioRenderer::setUpstreamRenderer(AudioRenderer* upstreamRenderer)
             }
             renderer = renderer->upstreamRenderer();
         }
-        upstreamRendererInternal()->removeDownstreamRenderer(this);
+        if (m_upstreamRenderer)
+            m_upstreamRenderer->removeDownstreamRenderer(this);
         m_upstreamRenderer = upstreamRenderer;
-        upstreamRendererInternal()->addDownstreamRenderer(this);
+        if (m_upstreamRenderer)
+            m_upstreamRenderer->addDownstreamRenderer(this);
         emit upstreamRendererChanged();
     }
 }
 
-AudioRenderer* AudioRenderer::upstreamRendererInternal()
+void AudioRenderer::addDownstreamRenderer(AudioRenderer* downstreamRenderer)
 {
-    return m_upstreamRenderer ? m_upstreamRenderer : rootAudioRenderer();
+    m_downstreamRenderers.append(downstreamRenderer);
 }
 
-void AudioRenderer::addDownstreamRenderer(AudioRenderer* parent)
+void AudioRenderer::removeDownstreamRenderer(AudioRenderer* downstreamRenderer)
 {
-    m_downstreamRenderers.append(parent);
-}
-
-void AudioRenderer::removeDownstreamRenderer(AudioRenderer* parent)
-{
-    m_downstreamRenderers.removeAll(parent);
+    m_downstreamRenderers.removeAll(downstreamRenderer);
 }
 
 void AudioRenderer::addAudioBuffer(QAudioBuffer audioBuffer)
@@ -112,9 +115,9 @@ QAudioBuffer AudioRenderer::mix()
         return QAudioBuffer();
     }
 
-    // Mix each parent and add their valid buffers
-    for (auto parent : m_downstreamRenderers) {
-        QAudioBuffer buffer = parent->mix();
+    // Mix each downstream and add their valid buffers
+    for (auto downstream : m_downstreamRenderers) {
+        QAudioBuffer buffer = downstream->mix();
         if (buffer.isValid())
             audioBuffers.append(buffer);
     }

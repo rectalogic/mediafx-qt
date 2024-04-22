@@ -12,16 +12,14 @@
 #include "formats.h"
 #include "output_stream.h"
 #include "render_context.h"
-#include "render_session.h"
 #include "util.h"
 #include <QAudioBuffer>
+#include <QAudioFormat>
 #include <QByteArray>
 #include <QDebug>
 #include <QObject>
-#include <QQmlEngine>
 #include <QQmlInfo>
 #include <QSize>
-#include <QmlTypeAndRevisionsRegistration>
 #include <QtLogging>
 #include <stdint.h>
 extern "C" {
@@ -56,22 +54,66 @@ Encoder::~Encoder()
 
 void Encoder::setOutputFileName(const QString& outputFileName)
 {
-    if (!m_outputFileName.isNull()) {
-        qmlWarning(this) << "Encoder outputFileName is a write-once property and cannot be changed";
-        return;
-    }
     if (m_outputFileName != outputFileName) {
+        if (!m_outputFileName.isEmpty()) {
+            qmlWarning(this) << "Encoder outputFileName is a write-once property and cannot be changed";
+            return;
+        }
         m_outputFileName = outputFileName;
         emit outputFileNameChanged();
     }
 }
 
-void Encoder::initialize(const RenderContext& renderContext)
+void Encoder::setFrameSize(const QSize& frameSize)
 {
+    if (m_frameSize != frameSize) {
+        if (!m_frameSize.isEmpty()) {
+            qmlWarning(this) << "Encoder frameSize is a write-once property and cannot be changed";
+            return;
+        }
+        m_frameSize = frameSize;
+        m_frameByteSize = frameSize.width() * frameSize.height() * 4;
+        emit frameSizeChanged();
+    }
+}
+
+void Encoder::setFrameRate(const Rational& frameRate)
+{
+    if (m_frameRate != frameRate) {
+        if (m_frameRate != DefaultFrameRate) {
+            qmlWarning(this) << "Encoder frameRate is a write-once property and cannot be changed";
+            return;
+        }
+        m_frameRate = frameRate;
+        emit frameRateChanged();
+    }
+}
+
+void Encoder::setSampleRate(int sampleRate)
+{
+    if (m_sampleRate != sampleRate) {
+        if (m_sampleRate != DefaultSampleRate) {
+            qmlWarning(this) << "Encoder sampleRate is a write-once property and cannot be changed";
+            return;
+        }
+        m_sampleRate = sampleRate;
+        emit sampleRateChanged();
+    }
+}
+
+void Encoder::initialize()
+{
+    if (m_outputFileName.isEmpty() || m_frameSize.isEmpty()) {
+        qmlWarning(this) << "Encoder not initialized";
+        emit encodingError();
+        return;
+    }
+
     int ret = 0;
+
     // Select nut format
-    if ((ret = avformat_alloc_output_context2(&m_formatContext, nullptr, "nut", qUtf8Printable(m_outputFileName))) < 0) {
-        qCritical() << "Could not allocate an output context, error:" << av_err2qstring(ret);
+    if ((ret = avformat_alloc_output_context2(&m_formatContext, nullptr, "nut", qUtf8Printable(outputFileName()))) < 0) {
+        qmlWarning(this) << "Could not allocate an output context, error:" << av_err2qstring(ret);
         return;
     }
 
@@ -81,9 +123,9 @@ void Encoder::initialize(const RenderContext& renderContext)
         return;
     AVCodecContext* videoCodecContext = video->codecContext();
     videoCodecContext->pix_fmt = VideoPixelFormat_FFMPEG;
-    videoCodecContext->width = renderContext.frameSize().width();
-    videoCodecContext->height = renderContext.frameSize().height();
-    AVRational timeBase(av_inv_q(renderContext.frameRate()));
+    videoCodecContext->width = frameSize().width();
+    videoCodecContext->height = frameSize().height();
+    AVRational timeBase(av_inv_q(frameRate()));
     int64_t gcd = av_gcd(FFABS(timeBase.num), FFABS(timeBase.den));
     if (gcd) {
         timeBase.num = FFABS(timeBase.num) / gcd;
@@ -99,13 +141,13 @@ void Encoder::initialize(const RenderContext& renderContext)
         return;
     AVCodecContext* audioCodecContext = audio->codecContext();
     audioCodecContext->sample_fmt = AudioSampleFormat_FFMPEG;
-    audioCodecContext->sample_rate = renderContext.sampleRate();
+    audioCodecContext->sample_rate = sampleRate();
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 37, 100)
     audioCodecContext->channel_layout = AudioChannelLayout_FFMPEG;
     audioCodecContext->channels = av_get_channel_layout_nb_channels(audioCodecContext->channel_layout);
 #else
     if ((ret = av_channel_layout_copy(&audioCodecContext->ch_layout, &AudioChannelLayout_FFMPEG)) < 0) {
-        qCritical() << "Could not copy channel layout, error:" << av_err2qstring(ret);
+        qmlWarning(this) << "Could not copy channel layout, error:" << av_err2qstring(ret);
         return;
     }
 #endif
@@ -117,20 +159,20 @@ void Encoder::initialize(const RenderContext& renderContext)
     m_videoStream.swap(video);
 
     if (!(m_formatContext->flags & AVFMT_NOFILE)) {
-        if ((ret = avio_open(&m_formatContext->pb, qUtf8Printable(m_outputFileName), AVIO_FLAG_WRITE)) < 0) {
-            qCritical() << "Could not open output file" << m_outputFileName << ", avio_open:" << av_err2qstring(ret);
+        if ((ret = avio_open(&m_formatContext->pb, qUtf8Printable(outputFileName()), AVIO_FLAG_WRITE)) < 0) {
+            qmlWarning(this) << "Could not open output file" << outputFileName() << ", avio_open:" << av_err2qstring(ret);
             return;
         }
     }
     AVDictionary* opt = nullptr;
     if ((ret = av_dict_set(&opt, "fflags", "bitexact", 0)) < 0) {
-        qCritical() << "Could not set options, av_dict_set:" << av_err2qstring(ret);
+        qmlWarning(this) << "Could not set options, av_dict_set:" << av_err2qstring(ret);
         return;
     }
     ret = avformat_write_header(m_formatContext, &opt);
     av_dict_free(&opt);
     if (ret < 0) {
-        qCritical() << "Could not open output file, avio_open:" << av_err2qstring(ret);
+        qmlWarning(this) << "Could not open output file, avio_open:" << av_err2qstring(ret);
         return;
     }
 
@@ -139,13 +181,22 @@ void Encoder::initialize(const RenderContext& renderContext)
 
 void Encoder::componentComplete()
 {
-    const RenderContext& renderContext = qmlEngine(this)->singletonInstance<RenderSession*>("MediaFX", "RenderSession")->renderContext();
-    initialize(renderContext);
+    initialize();
 }
 
 bool Encoder::encode(const QAudioBuffer& audioBuffer, const QByteArray& videoData)
 {
     if (!m_isValid) {
+        emit encodingError();
+        return false;
+    }
+    if (audioBuffer.format().sampleRate() != sampleRate()) {
+        qmlWarning(this) << "Audio buffer has incorrect sampleRate";
+        emit encodingError();
+        return false;
+    }
+    if (videoData.size() != m_frameByteSize) {
+        qmlWarning(this) << "Video buffer has incorrect byte size";
         emit encodingError();
         return false;
     }

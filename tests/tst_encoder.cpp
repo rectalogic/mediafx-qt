@@ -16,7 +16,6 @@
 #include <QSize>
 #include <QString>
 #include <QSysInfo>
-#include <QUrl>
 #include <QtCore>
 #include <QtTest>
 #include <chrono>
@@ -49,25 +48,28 @@ private slots:
 
         QFile encodedFile(outputDir.filePath("encoder.nut"));
 
-        const RenderContext renderContext(QUrl(), encodedFile.fileName(), QSize(160, 120), AVRational { 5, 1 }, 44100);
         Encoder encoder;
         QSignalSpy spy(&encoder, SIGNAL(encodingError()));
         QVERIFY(spy.isValid());
-        encoder.setOutputFileName(renderContext.outputFileName());
-        encoder.initialize(renderContext);
+        encoder.setOutputFileName(encodedFile.fileName());
+        encoder.setFrameSize(QSize(160, 120));
+        encoder.setFrameRate(Rational { 5, 1 });
+        encoder.setSampleRate(44100);
+        encoder.initialize();
+        QVERIFY(spy.empty());
 
         QAudioFormat audioFormat;
         audioFormat.setSampleFormat(QAudioFormat::Float);
         audioFormat.setChannelConfig(QAudioFormat::ChannelConfigStereo);
-        audioFormat.setSampleRate(renderContext.sampleRate());
-        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(renderContext.frameRate()).count()), audioFormat);
+        audioFormat.setSampleRate(encoder.sampleRate());
+        QAudioBuffer audioBuffer(audioFormat.framesForDuration(frameRateToFrameDuration<microseconds>(encoder.frameRate()).count()), audioFormat);
 
-        QByteArray videoData(static_cast<qsizetype>(renderContext.frameSize().width() * renderContext.frameSize().height() * 4), Qt::Uninitialized);
+        QByteArray videoData(static_cast<qsizetype>(encoder.frameSize().width() * encoder.frameSize().height() * 4), Qt::Uninitialized);
 
-        const int frames = static_cast<const int>(2.0 * av_q2d(renderContext.frameRate())); // 2 seconds
+        const int frames = static_cast<const int>(2.0 * av_q2d(encoder.frameRate())); // 2 seconds
         double audioTime = 0;
-        double audioIncr = 2 * M_PI * 110.0 / renderContext.sampleRate();
-        double audioIncr2 = 2 * M_PI * 110.0 / renderContext.sampleRate() / renderContext.sampleRate();
+        double audioIncr = 2 * M_PI * 110.0 / encoder.sampleRate();
+        double audioIncr2 = 2 * M_PI * 110.0 / encoder.sampleRate() / encoder.sampleRate();
 
         for (int i = 0; i < frames; i++) {
             // Audio sine wave
@@ -80,12 +82,12 @@ private slots:
                 audioIncr += audioIncr2;
             }
             // Video RGBA colors
-            int step = static_cast<int>(av_q2d(renderContext.frameRate()) * i);
-            for (int y = 0; y < renderContext.frameSize().height(); y++) {
-                for (int x = 0; x < renderContext.frameSize().width(); x++) {
+            int step = static_cast<int>(av_q2d(encoder.frameRate()) * i);
+            for (int y = 0; y < encoder.frameSize().height(); y++) {
+                for (int x = 0; x < encoder.frameSize().width(); x++) {
                     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[static_cast<ptrdiff_t>((y * renderContext.frameSize().width() + x) * 4)]));
+                    uint8_t* pixel = reinterpret_cast<uint8_t*>(&(videoData.data()[static_cast<ptrdiff_t>((y * encoder.frameSize().width() + x) * 4)]));
                     pixel[0] = x + y + step * 3;
                     pixel[1] = 128 + y + step * 2;
                     pixel[2] = 64 + x + step * 5;
