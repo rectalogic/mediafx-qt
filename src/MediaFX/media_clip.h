@@ -3,19 +3,19 @@
 
 #pragma once
 
+#include "audio_renderer.h"
 #include "decoder.h"
 #include "interval.h"
 #include <QList>
 #include <QObject>
+#include <QPointer>
 #include <QQmlParserStatus>
 #include <QString>
 #include <QUrl>
+#include <QVideoSink> // IWYU pragma: keep
 #include <QtCore>
 #include <QtQmlIntegration>
 #include <chrono>
-Q_MOC_INCLUDE(<QVideoSink>)
-class AudioRenderer;
-class QVideoSink;
 class RenderSession;
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -96,7 +96,7 @@ private:
 
     bool m_componentComplete = false;
     bool m_active = false;
-    RenderSession* m_renderSession = nullptr;
+    QPointer<RenderSession> m_renderSession;
     QUrl m_source;
     qint64 m_startTime = -1;
     microseconds m_startTimeAdjusted { -1 };
@@ -107,6 +107,6 @@ private:
     Interval<microseconds> m_currentFrameTime { -1us, -1us };
 
     Decoder m_decoder;
-    QList<QVideoSink*> m_videoSinks;
-    AudioRenderer* m_audioRenderer = nullptr;
+    QList<QPointer<QVideoSink>> m_videoSinks;
+    QPointer<AudioRenderer> m_audioRenderer;
 };

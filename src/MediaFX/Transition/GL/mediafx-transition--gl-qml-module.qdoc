@@ -1,0 +1,17 @@
+// Copyright (C) 2024 Andrew Wason
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+/*!
+    \qmlmodule MediaFX.Transition.GL
+    \noautolist
+    \title MediaTransition GL QML Types
+    \ingroup qmlmodules
+    \brief Provides QML \l MediaTransition types for MediaFX \l MediaSequence, based on \l {https://gl-transitions.com/} {gl-transitions.com}.
+
+    \section1 QML Types
+
+    MediaFX.Transition.GL QML types can be imported into your application using the
+    \c{import MediaFX.Transition.GL} statement in your .qml file.
+
+    \generatelist qmltypesbymodule MediaFX.Transition.GL
+*/

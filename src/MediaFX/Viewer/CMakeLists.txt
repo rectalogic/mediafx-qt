@@ -13,4 +13,6 @@ qt_add_qml_module(viewer
     UIRealSpinBox.qml
     UISlider.qml
     UIComboBox.qml
+    UIRealTextInput.qml
+    UIColorDialog.qml
 )

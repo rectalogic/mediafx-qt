@@ -116,6 +116,8 @@ LumaGradient {
                         text: "right"
                     }
                 ]
+                textRole: "text"
+                valueRole: "value"
                 Component.onCompleted: root.direction = Qt.binding(() => value)
             }
             UICheckBox {

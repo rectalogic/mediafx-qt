@@ -71,7 +71,7 @@ qt_add_qml_module(mediafx
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::libavformat PkgConfig::libavcodec PkgConfig::libavfilter PkgConfig::libavutil Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
-target_link_libraries(mediafx PRIVATE mediafxplugin transitionplugin viewerplugin)
+target_link_libraries(mediafx PRIVATE mediafxplugin transitionplugin gltransitionplugin viewerplugin)
 
 target_link_libraries(mediafxtool PRIVATE mediafx)
 

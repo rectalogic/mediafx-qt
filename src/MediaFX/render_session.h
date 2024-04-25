@@ -8,6 +8,7 @@
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QObject>
+#include <QPointer>
 #include <QQuickItem>
 #include <QRectF>
 #include <QUrl>
@@ -93,7 +94,7 @@ private:
     static const QString SessionContextProperty;
 
     QUrl m_sourceUrl;
-    QQuickItem* m_loadedItem = nullptr;
+    QPointer<QQuickItem> m_loadedItem;
     Rational m_frameRate = DefaultFrameRate;
     int m_sampleRate = DefaultSampleRate;
     QAudioFormat m_outputAudioFormat;

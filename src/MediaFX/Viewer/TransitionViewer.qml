@@ -50,6 +50,13 @@ ColumnLayout {
                     PathPolyline {
                         path: [Qt.point(80, 0), Qt.point(130, 160), Qt.point(0, 55), Qt.point(160, 55), Qt.point(30, 160), Qt.point(80, 0),]
                     }
+                    PathText {
+                        x: 0
+                        y: font.pixelSize
+                        font.family: "Arial"
+                        font.pixelSize: 40
+                        text: "Source"
+                    }
                 }
             }
         }
@@ -76,6 +83,13 @@ ColumnLayout {
                         radiusY: 100
                         sweepAngle: 360
                     }
+                    PathText {
+                        x: 100
+                        y: font.pixelSize
+                        font.family: "Arial"
+                        font.pixelSize: 40
+                        text: "Dest"
+                    }
                 }
             }
         }
@@ -99,7 +113,12 @@ ColumnLayout {
 
         TapHandler {
             acceptedModifiers: Qt.ShiftModifier
-            onTapped: root.dumpItemTree()
+            onTapped: {
+                console.log("root item tree");
+                root.dumpItemTree();
+                console.log("drawer item tree");
+                drawer.contentItem.dumpItemTree();
+            }
         }
         TapHandler {
             acceptedModifiers: Qt.NoModifier
@@ -107,6 +126,7 @@ ColumnLayout {
         }
     }
     Drawer {
+        id: drawer
         edge: Qt.TopEdge
         closePolicy: Popup.NoAutoClose
         modal: false

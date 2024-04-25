@@ -5,6 +5,7 @@
 #include "render_session.h"
 #include <QAudioFormat>
 #include <QObject>
+#include <QPointer>
 #include <QQmlEngine>
 #include <QQmlInfo>
 #include <QmlTypeAndRevisionsRegistration>
@@ -17,12 +18,6 @@
 
     \brief Renders audio for a \l MediaClip.
 */
-AudioRenderer::AudioRenderer(QObject* parent)
-    : QObject(parent)
-{
-}
-
-AudioRenderer::~AudioRenderer() = default;
 
 void AudioRenderer::componentComplete()
 {

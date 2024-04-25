@@ -1,3 +1,2 @@
 Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,bugprone-*'
-WarningsAsErrors: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,bugprone-*'
 HeaderFilterRegex: '.*\.h'

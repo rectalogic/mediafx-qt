@@ -64,6 +64,7 @@ add_qml_test(NAME tst_qml_video_shadereffect OUTPUTSPEC 30:320x180 QMLFILE video
 add_qml_test(NAME tst_qml_sequence OUTPUTSPEC 15:320x180 QMLFILE sequence.qml OUTPUTFILE sequence.nut THRESHOLD 98.999)
 add_qml_test(NAME tst_qml_demo OUTPUTSPEC 15:320x180 QMLFILE demo.qml OUTPUTFILE demo.nut THRESHOLD 99.999)
 add_qml_test(NAME tst_qml_async OUTPUTSPEC 15:320x180 QMLFILE async.qml OUTPUTFILE async.nut THRESHOLD 99.999)
+add_qml_test(NAME tst_qml_gl_transitions OUTPUTSPEC 15:320x240 QMLFILE gl-transitions.qml OUTPUTFILE gl-transitions.nut THRESHOLD 98.999)
 
 # Label tests that require a GPU
-set_tests_properties(tst_qml_static tst_qml_animated tst_qml_video_clipstart tst_qml_multisink tst_qml_video_ad_insertion tst_qml_video_multieffect tst_qml_video_shadereffect tst_qml_sequence PROPERTIES LABELS GPU)
+set_tests_properties(tst_qml_static tst_qml_animated tst_qml_video_clipstart tst_qml_multisink tst_qml_video_ad_insertion tst_qml_video_multieffect tst_qml_video_shadereffect tst_qml_sequence tst_qml_gl_transitions PROPERTIES LABELS GPU)

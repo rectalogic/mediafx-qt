@@ -6,6 +6,7 @@
 #include <QAudioBuffer>
 #include <QList>
 #include <QObject>
+#include <QPointer>
 #include <QQmlParserStatus>
 #include <QtQmlIntegration>
 
@@ -23,10 +24,13 @@ signals:
 public:
     using QObject::QObject;
 
-    explicit AudioRenderer(QObject* parent = nullptr);
+    explicit AudioRenderer(QObject* parent = nullptr)
+        : QObject(parent)
+    {
+    }
     AudioRenderer(AudioRenderer&&) = delete;
     AudioRenderer& operator=(AudioRenderer&&) = delete;
-    ~AudioRenderer() override;
+    ~AudioRenderer() override = default;
 
     float volume() const { return m_volume; };
     void setVolume(float volume);
@@ -50,7 +54,7 @@ private:
 
     float m_volume = 1.0;
     QList<QAudioBuffer> audioBuffers;
-    AudioRenderer* m_upstreamRenderer = nullptr;
-    QList<AudioRenderer*> m_downstreamRenderers;
-    AudioRenderer* m_rootAudioRenderer = nullptr;
+    QPointer<AudioRenderer> m_upstreamRenderer;
+    QList<QPointer<AudioRenderer>> m_downstreamRenderers;
+    QPointer<AudioRenderer> m_rootAudioRenderer;
 };

@@ -26,6 +26,9 @@ Item {
     */
     required property list<Component> mediaTransitions
 
+    /*! The currently active MediaTransition */
+    property MediaTransition currentTransition
+
     /*!
         \qmlproperty enumeration MediaSequence::fillMode
         \sa {VideoOutput::fillMode}
@@ -71,6 +74,9 @@ Item {
                     transitionLoader.visible: true
                     transitionLoader.source: video
                     transitionLoader.dest: auxVideo
+                }
+                PropertyChanges {
+                    root.currentTransition: transitionLoader.item
                 }
             }
         ]

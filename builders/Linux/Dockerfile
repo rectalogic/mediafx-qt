@@ -57,8 +57,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 RUN apt-get -y update  && apt-get -y install \
+    bash \
     build-essential \
-    cmake \
     curl \
     ffmpeg \
     fontconfig \
@@ -99,6 +99,8 @@ RUN apt-get -y update  && apt-get -y install \
     sudo \
     xvfb \
     xz-utils
+
+RUN curl -L https://github.com/Kitware/CMake/releases/download/v3.29.2/cmake-3.29.2-linux-$(uname --machine).tar.gz | tar xfz - --strip-components=1 -C /usr/local
 
 COPY --from=qt /usr/local/Qt /usr/local/Qt/
 

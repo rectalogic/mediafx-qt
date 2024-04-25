@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "render_session.h"
 #include <QObject>
+#include <QPointer>
 #include <QQmlParserStatus>
 #include <QQuickWindow>
 #include <QtCore>
@@ -18,7 +20,6 @@
 #endif
 class QAudioBuffer;
 class RenderControl;
-class RenderSession;
 
 class RenderWindow : public QQuickWindow, public QQmlParserStatus {
     Q_OBJECT
@@ -53,7 +54,7 @@ private:
 
     RenderWindow(RenderControl* renderControl);
 
-    RenderSession* m_renderSession = nullptr;
+    QPointer<RenderSession> m_renderSession;
 #ifdef MEDIAFX_ENABLE_VULKAN
     QVulkanInstance m_vulkanInstance;
 #endif

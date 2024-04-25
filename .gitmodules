@@ -1,3 +1,6 @@
 [submodule "tests/fixtures"]
 	path = tests/fixtures
 	url = git@github.com:rectalogic/mediafx-fixtures.git
+[submodule "src/MediaFX/Transition/gl-transitions"]
+	path = src/MediaFX/Transition/GL/gl-transitions
+	url = git@github.com:gl-transitions/gl-transitions.git

@@ -13,4 +13,7 @@
 
     \l{MediaFX.Transition} qml types
     \generatelist{qmltypesbymodule MediaFX.Transition}
+
+    \l{MediaFX.Transition.GL} qml types
+    \generatelist{qmltypesbymodule MediaFX.Transition.GL}
 */

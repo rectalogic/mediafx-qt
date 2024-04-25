@@ -17,12 +17,14 @@ ShaderEffect {
     property alias dest: destEffect
     property alias destItem: destEffect.sourceItem
     property real time
+    property int textureMirroring: ShaderEffectSource.MirrorVertically
 
     ShaderEffectSource {
         id: sourceEffect
         hideSource: true
         visible: false
         smooth: true
+        textureMirroring: root.textureMirroring
         anchors.fill: parent
     }
     ShaderEffectSource {
@@ -30,6 +32,7 @@ ShaderEffect {
         hideSource: true
         visible: false
         smooth: true
+        textureMirroring: root.textureMirroring
         anchors.fill: parent
     }
 }

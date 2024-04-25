@@ -8,12 +8,12 @@
 #include <QQmlParserStatus>
 #include <QSize>
 #include <QString>
-#include <QtCore>
 #include <QtQmlIntegration>
 #include <chrono>
 #include <memory>
 class OutputStream;
 class QAudioBuffer;
+class QByteArray;
 struct AVFormatContext;
 using namespace std::chrono;
 

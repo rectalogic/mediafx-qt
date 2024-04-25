@@ -10,15 +10,20 @@
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QCoreApplication>
+#include <QDebug>
 #include <QEvent>
+#include <QList>
 #include <QObject>
+#include <QPointer>
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QQmlError>
 #include <QQmlInfo>
 #include <QString>
 #include <QVariant>
 #include <QmlTypeAndRevisionsRegistration>
+#include <QtLogging>
 using namespace Qt::Literals::StringLiterals;
 
 /*!
@@ -101,10 +106,16 @@ void RenderSession::componentComplete()
     m_outputAudioFormat.setSampleRate(sampleRate());
 
     QQmlComponent component(qmlEngine(this), m_sourceUrl);
+    if (component.isError()) {
+        for (auto& error : component.errors())
+            qCritical() << error;
+        fatalError();
+        return;
+    }
     QQmlContext* creationContext = component.creationContext();
     if (!creationContext)
         creationContext = qmlContext(this);
-    QQmlContext* context = new QQmlContext(creationContext, creationContext); // NOLINT(cppcoreguidelines-owning-memory)
+    QPointer<QQmlContext> context(new QQmlContext(creationContext, creationContext));
     // The RenderSession.session attached property uses this to find the session
     context->setContextProperty(SessionContextProperty, this);
     QObject* object = component.create(context);

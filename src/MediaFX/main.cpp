@@ -9,11 +9,13 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QGuiApplication>
+#include <QList>
 #include <QMessageLogContext>
 #include <QObject>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
+#include <QQmlError>
 #include <QSize>
 #include <QString>
 #include <QStringBuilder>
@@ -22,6 +24,7 @@
 #include <Qt>
 #include <QtAssert>
 #include <array>
+#include <stdlib.h>
 extern "C" {
 #include <libavutil/log.h>
 #include <libavutil/parseutils.h>
@@ -126,7 +129,7 @@ int viewer(QGuiApplication& app, QCommandLineParser& parser)
 {
     parser.clearPositionalArguments();
     parser.addPositionalArgument(u"viewer"_s, u"viewer command."_s, u"viewer [viewer_options]"_s);
-    parser.addOption({ { u"t"_s, u"transition"_s }, u"Transition class name."_s, u"transition"_s });
+    parser.addOption({ { u"t"_s, u"transition"_s }, u"Transition class name (e.g. Wipe, GL.Doorway)."_s, u"transition"_s });
     parser.addOption({ { u"q"_s, u"qml"_s }, u"Transition QML filename."_s, u"qml"_s });
     parser.process(app);
 
@@ -138,12 +141,21 @@ int viewer(QGuiApplication& app, QCommandLineParser& parser)
     QQmlApplicationEngine engine;
     QQmlComponent component(&engine);
     if (parser.isSet(u"transition"_s)) {
-        component.loadFromModule(u"MediaFX.Transition"_s, parser.value(u"transition"_s));
+        QString transitionName = parser.value(u"transition"_s);
+        if (transitionName.startsWith(u"GL."_s))
+            component.loadFromModule(u"MediaFX.Transition.GL"_s, transitionName.remove(0, 3));
+        else
+            component.loadFromModule(u"MediaFX.Transition"_s, transitionName);
     } else if (parser.isSet(u"qml"_s)) {
         component.loadUrl(QUrl::fromLocalFile(parser.value(u"qml"_s)));
     } else {
         qCritical() << "Must specify transition name or QML path.";
         parser.showHelp(1);
+    }
+    if (component.isError()) {
+        for (auto& error : component.errors())
+            qCritical() << error;
+        exit(1);
     }
     engine.rootContext()->setContextProperty(u"transitionComponent"_s, &component);
 

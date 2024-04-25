@@ -7,11 +7,10 @@ LabeledControl {
     property alias value: comboBox.currentValue
     property alias currentIndex: comboBox.currentIndex
     property alias model: comboBox.model
+    property alias textRole: comboBox.textRole
+    property alias valueRole: comboBox.valueRole
 
     ComboBox {
         id: comboBox
-
-        textRole: "text"
-        valueRole: "value"
     }
 }
