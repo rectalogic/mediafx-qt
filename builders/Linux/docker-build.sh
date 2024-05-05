@@ -4,4 +4,18 @@
 
 CURRENT=${BASH_SOURCE%/*}
 source "$CURRENT/../versions"
-docker buildx build --build-arg UBUNTU=${UBUNTU:-noble} --build-arg QT_VER=${QT_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:${UBUNTU:-noble}-$(git branch --show-current) --file "${CURRENT}/Dockerfile" "${CURRENT}/.."
+
+# https://doc.qt.io/qt-6/get-and-install-qt-cli.html#providing-login-information
+if [[ ! $QTACCOUNT ]]; then
+    if [ $(uname) == "Darwin" ]; then
+        QTACCOUNT=~/Library/Application\ Support/Qt/qtaccount.ini
+    elif [ $(uname) == "Linux" ]; then
+        QTACCOUNT=~/.local/share/Qt/qtaccount.ini
+    fi
+    if [ ! -f "$QTACCOUNT" ]; then
+        echo "Must set QTACCOUNT to qtaccount.ini credentials"
+        exit 1
+    fi
+fi
+
+docker buildx build --secret id=qtaccount,src="$QTACCOUNT" --build-arg UBUNTU=${UBUNTU:-noble} --build-arg QT_VER=${QT_VER:?} --build-arg QT_INSTALLER_VER=${QT_INSTALLER_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:${UBUNTU:-noble}-$(git branch --show-current) --file "${CURRENT}/Dockerfile" "${CURRENT}/.."

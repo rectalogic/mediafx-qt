@@ -5,46 +5,76 @@
 
 ARG UBUNTU=noble
 
-FROM ubuntu:${UBUNTU} as qt
+FROM ubuntu:${UBUNTU} as base
 
-ARG QT_VER
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-RUN apt-get -y update && apt-get -y install python3 python3-pip python3-venv git curl
+RUN apt-get -y update && apt-get -y install \
+    curl \
+    libx11-xcb1 \
+    libxcb-cursor0 \
+    libxcb-glx0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-randr0 \
+    libxcb-render-util0 \
+    libxcb-shape0 \
+    libxcb-shm0 \
+    libxcb-sync1 \
+    libxcb-xfixes0 \
+    libxcb-xkb1 \
+    libxcb1 \
+    libxkbcommon-x11-0
 
-COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
+
+FROM base as qt
+
+ARG QT_VER
+ARG QT_INSTALLER_VER
+ENV container docker
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=C.UTF-8
+RUN apt-get -y install \
+    libdbus-1-3 \
+    libfontconfig1 \
+    libfreetype6 \
+    libglib2.0-bin \
+    libx11-6 \
+    python3
+
+SHELL ["/bin/bash", "-c"]
 ARG TARGETPLATFORM
-RUN <<EOF
+RUN --mount=type=secret,id=qtaccount,target=/root/.local/share/Qt/qtaccount.ini <<EOF
     if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then
-        ARCH=gcc_arm64
-        HOST=linux_arm64
+        ARCH=arm64
     else
-        ARCH=gcc_64
-        HOST=linux
+        ARCH=x64
     fi
-    python3 -m venv venv && venv/bin/pip3 install --requirement /tmp/aqtinstall-requirements.txt \
-    && venv/bin/python3 -m aqt install-qt ${HOST} desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning debug_info --archives qtbase icu qttools qtdeclarative qtmultimedia qtquick3d qtquicktimeline --outputdir /usr/local/Qt \
-    && venv/bin/python3 -m aqt install-doc linux ${QT_VER} --modules qtmultimedia --archives qtqml qtquick qtmultimedia --outputdir /usr/local/Qt \
+    QTSPEC=qt6.${QT_VER//.}
+    curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run \
+    && chmod +x qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run \
+    && ./qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run --root /usr/local/Qt --accept-licenses --accept-obligations --default-answer --confirm-command \
+      --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
+      install \
+      qt.${QTSPEC}.linux_gcc_64 \
+      qt.${QTSPEC}.qtquick3d \
+      qt.${QTSPEC}.qtquicktimeline \
+      qt.${QTSPEC}.addons.qtpositioning \
+      qt.${QTSPEC}.addons.qtwebchannel \
+      qt.${QTSPEC}.addons.qtwebengine \
+      qt.${QTSPEC}.addons.qtmultimedia \
+      qt.${QTSPEC}.qtshadertools \
     && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete \
     && curl -o iwyu-mapgen-qt.py https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_17/mapgen/iwyu-mapgen-qt.py \
-    && python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/${ARCH}/include > "/usr/local/Qt/${QT_VER}/qt.imp"
+    && python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/*/include > "/usr/local/Qt/${QT_VER}/qt.imp"
 EOF
 
 
-FROM ubuntu:jammy as jammy
-
-
-FROM ubuntu:noble as noble
-RUN apt-get -y update && apt-get -y install \
-    clang-format \
-    clang-tidy \
-    clazy \
-    iwyu
-
-
-FROM ${UBUNTU} as mediafx
+FROM base as mediafx
 LABEL maintainer=rectalogic
 ARG QT_VER
 
@@ -56,49 +86,43 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-RUN apt-get -y update  && apt-get -y install \
-    bash \
-    build-essential \
-    curl \
-    ffmpeg \
-    fontconfig \
-    fonts-liberation \
-    git \
-    gosu \
-    libavcodec-dev \
-    libavfilter-dev \
-    libavformat-dev \
-    libavutil-dev \
-    libglvnd-dev \
-    libglx-mesa0 \
-    libnss3 \
-    libpulse-dev \
-    libvulkan-dev \
-    libx11-xcb1 \
-    libxcb-cursor0 \
-    libxcb-glx0 \
-    libxcb-icccm4 \
-    libxcb-image0 \
-    libxcb-keysyms1 \
-    libxcb-render-util0 \
-    libxcb-shape0 \
-    libxcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxi6 \
-    libxkbcommon-dev \
-    libxkbcommon-x11-0 \
-    libxrandr2 \
-    libxrender1 \
-    libxtst6 \
-    mesa-vulkan-drivers \
-    ninja-build \
-    pkg-config \
-    python3 \
-    python3-pip \
-    sudo \
-    xvfb \
-    xz-utils
+RUN <<EOF
+    if [ "${UBUNTU}" == "noble" ]; then
+        EXTRA_PKGS="clang-format clang-tidy clazy iwyu"
+    fi
+    apt-get -y install \
+        bash \
+        build-essential \
+        ffmpeg \
+        fontconfig \
+        fonts-liberation \
+        git \
+        gosu \
+        libavcodec-dev \
+        libavfilter-dev \
+        libavformat-dev \
+        libavutil-dev \
+        libglvnd-dev \
+        libglx-mesa0 \
+        libnss3 \
+        libpulse0 \
+        libvulkan-dev \
+        libxcomposite1 \
+        libxdamage1 \
+        libxkbcommon-dev \
+        libxi6 \
+        libxrandr2 \
+        libxrender1 \
+        libxtst6 \
+        mesa-vulkan-drivers \
+        ninja-build \
+        pkg-config \
+        python3 \
+        python3-pip \
+        sudo \
+        xvfb \
+        xz-utils ${EXTRA_PKGS}
+EOF
 
 RUN curl -L https://github.com/Kitware/CMake/releases/download/v3.29.2/cmake-3.29.2-linux-$(uname --machine).tar.gz | tar xfz - --strip-components=1 -C /usr/local
 

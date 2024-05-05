@@ -9,11 +9,23 @@ source "$CURRENT/../versions"
 INSTALLDIR=${QTDIR%/*/*}
 (
     cd "$BUILD_ROOT"
-    python3 -m venv --clear "qtvenv" || exit 1
-    "qtvenv/bin/pip" install --requirement "${CURRENT}/../aqtinstall-requirements.txt" || exit 1
-    "qtvenv/bin/python" -m aqt install-qt mac desktop ${QT_VER} --modules qtmultimedia qtquick3d qtshadertools qtquicktimeline qtwebengine qtwebchannel qtpositioning qtquickeffectmaker -O "${INSTALLDIR}" || exit 1
-    "qtvenv/bin/python" -m aqt install-tool mac desktop tools_qtcreator_gui qt.tools.qtcreator_gui -O "${QTDIR}/bin" || exit 1
-    "qtvenv/bin/python" -m aqt install-src mac ${QT_VER} --archives qtbase qtdeclarative qtmultimedia qtquicktimeline -O "${INSTALLDIR}" || exit 1
-    "qtvenv/bin/python" -m aqt install-doc mac ${QT_VER} --modules qtmultimedia --archives qtqml qtquick qtmultimedia -O "${INSTALLDIR}" || exit 1
-    find "${INSTALLDIR}/Docs/Qt-${QT_VER}" -type f -and -not -name '*.index' -delete || exit 1
+    QTSPEC=qt6.${QT_VER//.}
+    curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.dmg \
+    && hdiutil attach qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.dmg \
+    && /Volumes/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.app/Contents/MacOS/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online \
+        --root "${INSTALLDIR}" --accept-licenses --accept-obligations --default-answer --confirm-command \
+        --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
+        install \
+        qt.${QTSPEC}.clang_64 \
+        qt.${QTSPEC}.qtquick3d \
+        qt.${QTSPEC}.qtquicktimeline \
+        qt.${QTSPEC}.addons.qtpositioning \
+        qt.${QTSPEC}.addons.qtwebchannel \
+        qt.${QTSPEC}.addons.qtwebengine \
+        qt.${QTSPEC}.addons.qtmultimedia \
+        qt.${QTSPEC}.qtshadertools \
+        qt.${QTSPEC}.addons.qtquickeffectmaker \
+        qt.tools.qtcreator_gui \
+    && hdiutil detach /Volumes/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online \
+    && find "${INSTALLDIR}/Docs/Qt-${QT_VER}" -type f -and -not -name '*.index' -delete
 )

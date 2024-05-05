@@ -43,6 +43,7 @@ jobs:
       run: |
         source builders/versions
         echo "QT_VER=${QT_VER}" >> $GITHUB_ENV
+        echo "QT_INSTALLER_VER=${QT_INSTALLER_VER}" >> $GITHUB_ENV
     - name: Build mediafx image
       uses: docker/build-push-action@v5
       with:
@@ -52,8 +53,11 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         push: true
         target: mediafx
+        secrets: |
+          "qtaccount=${{ secrets.QTACCOUNT }}"
         build-args: |
           "QT_VER=${{ env.QT_VER }}"
+          "QT_INSTALLER_VER=${{ env.QT_INSTALLER_VER }}"
           "UBUNTU=${{ matrix.ubuntu }}"
         cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
         cache-to: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max
@@ -124,6 +128,8 @@ jobs:
     - name: Build installation
       if: steps.restore-cache.outputs.cache-hit != 'true'
       run: |
+        mkdir -p ~/Library/Application\ Support/Qt
+        echo "${{ secrets.QTACCOUNT }}" > ~/Library/Application\ Support/Qt/qtaccount.ini
         builders/Darwin/install-qt6.sh
     - name: Save cached installation
       uses: actions/cache/save@v4

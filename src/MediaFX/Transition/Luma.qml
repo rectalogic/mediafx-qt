@@ -14,19 +14,19 @@ MediaTransition {
     id: root
 
     /*! The item to use as the greyscale luma image. */
-    default property alias luma: shader.luma
+    default required property Item luma
     /*! Softness of the wipe, 0.0 is a hard wipe, larger values are softer. */
-    property alias softness: shader.softness
+    property real softness: 0.0
     /*! Invert the luma. */
-    property alias invert: shader.invert
+    property bool invert: false
 
     TransitionShaderEffect {
         id: shader
 
-        required property Item luma
-        property real softness: 0.0
+        property alias luma: root.luma
+        property alias softness: root.softness
         readonly property real softTime: root.time * (root.softness + 1.0)
-        property bool invert: false
+        property alias invert: root.invert
 
         children: shader.luma
         sourceItem: root.source
