@@ -15,6 +15,7 @@ qt_add_shaders(transition "shaders"
     crossfade.frag
     luma.frag
     pageCurl.frag
+    displacement.frag
     OUTPUT_TARGETS shader_output_targets
 )
 
@@ -32,6 +33,9 @@ qt_add_qml_module(transition
     LumaGradient.qml
     PageCurl.qml
     Wipe.qml
+    Displacement.qml
+    TextDisplacement.qml
+    SamKolderWipe.qml
 )
 
 add_subdirectory(GL)

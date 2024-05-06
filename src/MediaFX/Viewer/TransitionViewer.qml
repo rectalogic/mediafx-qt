@@ -30,6 +30,11 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
+        Image {
+            id: sourceImage
+            anchors.fill: parent
+            visible: false
+        }
         Rectangle {
             id: sourceItem
 
@@ -59,6 +64,11 @@ ColumnLayout {
                     }
                 }
             }
+        }
+        Image {
+            id: destImage
+            anchors.fill: parent
+            visible: false
         }
         Rectangle {
             id: destItem
@@ -102,11 +112,30 @@ ColumnLayout {
         to: 1
         value: 0.5
     }
-    CheckBox {
-        id: controlsCheckBox
+    RowLayout {
+        CheckBox {
+            id: controlsCheckBox
 
-        text: "Show Controls"
-        enabled: loader.item
+            Layout.fillWidth: true
+            text: "Show Controls"
+            enabled: loader.item
+        }
+        UIFileDialog {
+            label: "source:"
+            nameFilters: ["Image files (*.jpg *.png *.svg)"]
+            onSelectedFileChanged: {
+                sourceImage.source = selectedFile;
+                root.mediaTransition.source = sourceImage;
+            }
+        }
+        UIFileDialog {
+            label: "dest:"
+            nameFilters: ["Image files (*.jpg *.png *.svg)"]
+            onSelectedFileChanged: {
+                destImage.source = selectedFile;
+                root.mediaTransition.dest = destImage;
+            }
+        }
     }
     Button {
         text: "Dump Transition"

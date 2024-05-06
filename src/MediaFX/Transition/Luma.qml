@@ -20,15 +20,17 @@ MediaTransition {
     /*! Invert the luma. */
     property bool invert: false
 
+    readonly property TransitionShaderEffect effect: shaderEffect
+
     TransitionShaderEffect {
-        id: shader
+        id: shaderEffect
 
         property alias luma: root.luma
         property alias softness: root.softness
         readonly property real softTime: root.time * (root.softness + 1.0)
         property alias invert: root.invert
 
-        children: shader.luma
+        children: root.luma
         sourceItem: root.source
         destItem: root.dest
         time: root.time

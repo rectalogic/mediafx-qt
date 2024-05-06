@@ -15,4 +15,6 @@ qt_add_qml_module(viewer
     UIComboBox.qml
     UIRealTextInput.qml
     UIColorDialog.qml
+    UIFileDialog.qml
+    UITextField.qml
 )

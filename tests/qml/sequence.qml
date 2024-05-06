@@ -37,6 +37,17 @@ MediaSequence {
         },
         Component {
             Demo3DTransition {}
+        },
+        Component {
+            T.SamKolderWipe {}
+        },
+        Component {
+            T.Displacement {
+                displacementMapSource: Qt.resolvedUrl("../fixtures/assets/displacement.svg")
+            }
+        },
+        Component {
+            T.TextDisplacement {}
         }
     ]
 
@@ -68,6 +79,21 @@ MediaSequence {
     }
     MediaClip {
         source: Qt.resolvedUrl("../fixtures/assets/edquestions-320x180-15fps-2.4s-44100.nut")
+        audioRenderer: AudioRenderer {}
+    }
+    MediaClip {
+        endTime: 3000
+        source: Qt.resolvedUrl("../fixtures/assets/cosmoswolf-320x180-15fps-4.1s-44100.nut")
+        audioRenderer: AudioRenderer {}
+    }
+    MediaClip {
+        endTime: 3000
+        source: Qt.resolvedUrl("../fixtures/assets/ednotsafe-320x180-15fps-1.53s-44100.nut")
+        audioRenderer: AudioRenderer {}
+    }
+    MediaClip {
+        endTime: 3000
+        source: Qt.resolvedUrl("../fixtures/assets/bbbjumprope-320x180-15fps-5.5s-44100.nut")
         audioRenderer: AudioRenderer {}
     }
 }
