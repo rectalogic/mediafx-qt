@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Copy README
         run: cp README.md .github/workflows/doc
       - name: Build with jekyll
