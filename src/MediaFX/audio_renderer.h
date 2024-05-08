@@ -30,7 +30,7 @@ public:
     }
     AudioRenderer(AudioRenderer&&) = delete;
     AudioRenderer& operator=(AudioRenderer&&) = delete;
-    ~AudioRenderer() override = default;
+    ~AudioRenderer() override;
 
     float volume() const { return m_volume; };
     void setVolume(float volume);

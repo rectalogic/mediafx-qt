@@ -7,9 +7,9 @@ source "$CURRENT/../versions"
 
 # https://doc.qt.io/qt-6/get-and-install-qt-cli.html#providing-login-information
 if [[ ! $QTACCOUNT ]]; then
-    if [ $(uname) == "Darwin" ]; then
+    if [ $(uname) = "Darwin" ]; then
         QTACCOUNT=~/Library/Application\ Support/Qt/qtaccount.ini
-    elif [ $(uname) == "Linux" ]; then
+    elif [ $(uname) = "Linux" ]; then
         QTACCOUNT=~/.local/share/Qt/qtaccount.ini
     fi
     if [ ! -f "$QTACCOUNT" ]; then

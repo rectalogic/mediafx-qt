@@ -66,14 +66,22 @@ qt_add_qml_module(mediafx
     VideoRenderer.qml
     sequence.js
     MediaSequence.qml
+    MediaSequenceClip.qml
     MultiEffectState.qml
     ShaderEffectState.qml
+    DEPENDENCIES
+    QtQuick
+    QtQuick.Controls
+    QtQuick.Effects
+    QtMultimedia
+    MediaFX.Viewer
+    MediaFX.Transition
+    MediaFX.Transition.GL
 )
 
 target_link_libraries(mediafx PUBLIC PkgConfig::libavformat PkgConfig::libavcodec PkgConfig::libavfilter PkgConfig::libavutil Qt6::Core Qt6::Gui Qt6::GuiPrivate Qt6::Multimedia Qt6::Qml Qt6::Quick)
-target_link_libraries(mediafx PRIVATE mediafxplugin transitionplugin gltransitionplugin viewerplugin)
 
-target_link_libraries(mediafxtool PRIVATE mediafx)
+target_link_libraries(mediafxtool PRIVATE mediafx mediafxplugin transitionplugin gltransitionplugin viewerplugin)
 
 install(TARGETS mediafxtool RUNTIME DESTINATION)
 

@@ -107,7 +107,7 @@ jobs:
           - ffmpeg: "ffmpeg@6"
             test: "builders/mediafx-test.sh --verbose"
     env:
-      XCODE_VER: "15.2"
+      XCODE_VER: "15.3"
     steps:
     - name: Brew ffmpeg
       run: |

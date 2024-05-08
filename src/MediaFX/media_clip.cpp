@@ -3,6 +3,7 @@
 
 #include "media_clip.h"
 #include "audio_renderer.h"
+#include "decoder.h"
 #include "interval.h"
 #include "render_context.h"
 #include "render_session.h"
@@ -28,6 +29,7 @@ using namespace std::chrono_literals;
 */
 MediaClip::MediaClip(QObject* parent)
     : QObject(parent)
+    , m_decoder(std::make_unique<Decoder>())
 {
 }
 
@@ -126,23 +128,24 @@ void MediaClip::render()
     if (!isActive())
         return;
 
-    if (!m_decoder.decode()) {
+    if (!m_decoder->decode()) {
         m_renderSession->fatalError();
         return;
     }
 
     for (auto videoSink : m_videoSinks) {
-        videoSink->setVideoFrame(m_decoder.outputVideoFrame());
+        videoSink->setVideoFrame(m_decoder->outputVideoFrame());
     }
     if (m_audioRenderer && hasAudio())
-        m_audioRenderer->addAudioBuffer(m_decoder.outputAudioBuffer());
+        m_audioRenderer->addAudioBuffer(m_decoder->outputAudioBuffer());
 
     m_frameCount++;
     m_currentFrameTime = m_currentFrameTime.nextInterval(
         m_startTimeAdjusted + duration_cast<microseconds>(m_frameCount * frameRateToFrameDuration(m_renderSession->frameRate())));
     if (m_currentFrameTime.start() >= m_endTimeAdjusted) {
         emit clipEnded();
-        m_decoder.stop();
+        m_decoder.reset();
+        updateActive();
         return;
     }
     emit currentFrameTimeChanged();
@@ -164,7 +167,7 @@ void MediaClip::setActive(bool active)
 void MediaClip::updateActive()
 {
     // We are active if we are rendering video, or we have no video track but do have audio
-    setActive((hasVideo() && !m_videoSinks.isEmpty()) || (!hasVideo() && hasAudio()));
+    setActive(m_decoder && ((hasVideo() && !m_videoSinks.isEmpty()) || (!hasVideo() && hasAudio())));
 }
 
 void MediaClip::addVideoSink(QVideoSink* videoSink)
@@ -194,8 +197,8 @@ void MediaClip::loadMedia()
         m_renderSession->fatalError();
         return;
     }
-    connect(&m_decoder, &Decoder::errorMessage, this, &MediaClip::onDecoderErrorMessage);
-    if (m_decoder.open(source().toLocalFile(), m_renderSession->frameRate(), m_renderSession->outputAudioFormat(), m_startTimeAdjusted) < 0) {
+    connect(m_decoder.get(), &Decoder::errorMessage, this, &MediaClip::onDecoderErrorMessage);
+    if (m_decoder->open(source().toLocalFile(), m_renderSession->frameRate(), m_renderSession->outputAudioFormat(), m_startTimeAdjusted) < 0) {
         m_renderSession->fatalError();
         return;
     }
@@ -223,7 +226,7 @@ void MediaClip::componentComplete()
         setStartTime(0);
     loadMedia();
     if (endTime() < 0) {
-        setEndTime(m_decoder.duration());
+        setEndTime(m_decoder->duration());
     }
     m_currentFrameTime = Interval(m_startTimeAdjusted, m_startTimeAdjusted + frameRateToFrameDuration<microseconds>(m_renderSession->frameRate()));
     emit currentFrameTimeChanged();

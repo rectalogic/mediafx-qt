@@ -82,15 +82,6 @@ Decoder::Decoder(QObject* parent)
 
 Decoder::~Decoder()
 {
-    stop();
-}
-
-void Decoder::stop()
-{
-    m_audioStream.reset();
-    m_videoStream.reset();
-    m_formatContext.reset();
-    m_packet.reset();
 }
 
 int Decoder::open(const QString& sourceFile, const AVRational& outputFrameRate, const QAudioFormat& outputAudioFormat, const microseconds& startTime)

@@ -77,6 +77,7 @@ EOF
 FROM base as mediafx
 LABEL maintainer=rectalogic
 ARG QT_VER
+ARG UBUNTU=noble
 
 ENV GALLIUM_DRIVER=softpipe
 ENV LIBGL_ALWAYS_SOFTWARE=1
@@ -87,7 +88,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 RUN <<EOF
-    if [ "${UBUNTU}" == "noble" ]; then
+    if [ "${UBUNTU}" = "noble" ]; then
         EXTRA_PKGS="clang-format clang-tidy clazy iwyu"
     fi
     apt-get -y install \

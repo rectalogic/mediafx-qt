@@ -8,7 +8,8 @@ import "sequence.js" as Sequence
 /*!
     \qmltype MediaSequence
     \inqmlmodule MediaFX
-    \brief Plays a sequence of \l {MediaClip}s in order, with \l MediaTransition transitions between them.
+    \inherits Item
+    \brief Plays a sequence of \l MediaSequenceClip components in order, with \l MediaTransition transitions between them.
 
     \quotefile sequence.qml
 
@@ -17,14 +18,8 @@ import "sequence.js" as Sequence
 Item {
     id: root
 
-    /*! The sequence of MediaClips to play in order. */
-    default required property list<MediaClip> mediaClips
-
-    /*!
-        A list of MediaTransition \l {Component}s to apply to each transition.
-        If there are more clips than \a mediaTransitions, then \a mediaTransitions will be reused.
-    */
-    required property list<Component> mediaTransitions
+    /*! The sequence of \l MediaSequenceClip components to play in order. */
+    default required property list<Component> mediaClips
 
     /*! The currently active MediaTransition */
     property MediaTransition currentTransition
@@ -33,77 +28,42 @@ Item {
         \qmlproperty enumeration MediaSequence::fillMode
         \sa {VideoOutput::fillMode}
     */
-    property alias fillMode: video.fillMode
+    property alias fillMode: _mainVideoRenderer.fillMode
 
     /*!
         \qmlproperty int MediaSequence::orientation
         \sa {VideoOutput::orientation}
     */
-    property alias orientation: video.orientation
+    property alias orientation: _mainVideoRenderer.orientation
 
     signal mediaSequenceEnded
 
     Item {
         id: internal
 
+        property MediaSequenceClip currentClip
+        property MediaSequenceClip nextClip
+
         property int currentClipIndex: 0
-        property int currentTransitionIndex: 0
         property int transitionStartTime
 
         anchors.fill: parent
 
-        states: [
-            State {
-                name: "video"
+        Component.onCompleted: Sequence.initializeClip()
 
-                PropertyChanges {
-                    video.mediaClip: root.mediaClips[internal.currentClipIndex]
-                }
-            },
-            State {
-                name: "transition"
-
-                PropertyChanges {
-                    video.mediaClip: root.mediaClips[internal.currentClipIndex]
-                    video.visible: false
-                }
-                PropertyChanges {
-                    auxVideo.mediaClip: (internal.currentClipIndex + 1 >= root.mediaClips.length) ? null : root.mediaClips[internal.currentClipIndex + 1]
-                }
-                PropertyChanges {
-                    transitionLoader.visible: true
-                    transitionLoader.source: video
-                    transitionLoader.dest: auxVideo
-                }
-                PropertyChanges {
-                    root.currentTransition: transitionLoader.item
-                }
-            }
-        ]
-
-        Loader {
-            id: transitionLoader
-            property Item source
-            property Item dest
-
+        Item {
+            id: _transitionContainer
             visible: false
             anchors.fill: internal
-            sourceComponent: root.mediaTransitions[internal.currentTransitionIndex]
-            onLoaded: {
-                transitionLoader.item.source = Qt.binding(() => transitionLoader.source);
-                transitionLoader.item.dest = Qt.binding(() => transitionLoader.dest);
-                Sequence.initializeClip();
-            }
         }
         VideoRenderer {
-            id: video
+            id: _mainVideoRenderer
             anchors.fill: internal
         }
         VideoRenderer {
-            id: auxVideo
-
-            fillMode: video.fillMode
-            orientation: video.orientation
+            id: _auxVideoRenderer
+            fillMode: _mainVideoRenderer.fillMode
+            orientation: _mainVideoRenderer.orientation
             visible: false
             anchors.fill: internal
         }

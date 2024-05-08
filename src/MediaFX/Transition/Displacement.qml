@@ -16,6 +16,8 @@ MediaTransition {
     /*! Item to use as displacement map, default is an \l Image */
     default property Item displacementMap: Image {
         anchors.fill: parent
+        sourceSize.width: width
+        sourceSize.height: height
         source: root.displacementMapSource
         visible: false
     }

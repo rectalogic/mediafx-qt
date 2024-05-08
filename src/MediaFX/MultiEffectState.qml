@@ -7,6 +7,7 @@ import QtQuick.Effects
 /*!
     \qmltype MultiEffectState
     \inqmlmodule MediaFX
+    \inherits State
     \brief A State that applies a MultiEffect to a video when active.
 
     \quotefile video-multieffect.qml

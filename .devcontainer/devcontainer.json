@@ -5,11 +5,14 @@
         "context": "../builders",
         "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
         "args": {
-            "QT_VER": "6.7.0"
+            "QT_VER": "6.7.0",
+            "QT_INSTALLER_VER": "4.7.0"
         },
         "options": [
             "--platform",
-            "linux/amd64"
+            "linux/amd64",
+            "--secret",
+            "id=qtaccount,src=${localEnv:HOME}/Library/Application Support/Qt/qtaccount.ini"
         ]
     },
     "init": true,

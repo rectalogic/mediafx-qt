@@ -31,6 +31,8 @@ class RenderSession : public QQuickItem {
     QML_ELEMENT
 
 public:
+    using QQuickItem::QQuickItem;
+
     RenderSession(QQuickItem* parent = nullptr);
     RenderSession(RenderSession&&) = delete;
     RenderSession& operator=(RenderSession&&) = delete;
@@ -114,11 +116,18 @@ class RenderSessionAttached : public QObject {
     Q_PROPERTY(RenderSession* session READ session CONSTANT)
     QML_ANONYMOUS
 public:
+    using QObject::QObject;
+
     explicit RenderSessionAttached(RenderSession* session, QObject* parent = nullptr)
         : QObject(parent)
         , m_session(session) {};
+    RenderSessionAttached(RenderSessionAttached&&) = delete;
+    RenderSessionAttached& operator=(RenderSessionAttached&&) = delete;
+    ~RenderSessionAttached() override = default;
+
     RenderSession* session() const { return m_session; };
 
 private:
+    Q_DISABLE_COPY(RenderSessionAttached);
     RenderSession* m_session = nullptr;
 };

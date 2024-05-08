@@ -44,7 +44,6 @@ public:
 
     int open(const QString& sourceFile, const AVRational& outputFrameRate, const QAudioFormat& outputAudioFormat, const microseconds& startTime = 0us);
     bool decode();
-    void stop();
 
     const microseconds duration() const;
 

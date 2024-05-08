@@ -16,6 +16,7 @@
 #include <QtCore>
 #include <QtQmlIntegration>
 #include <chrono>
+#include <memory>
 class RenderSession;
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -69,8 +70,8 @@ public:
     void setActive(bool active);
     bool isActive() const { return m_active; };
 
-    bool hasAudio() const { return m_decoder.hasAudio(); }
-    bool hasVideo() const { return m_decoder.hasVideo(); }
+    bool hasAudio() const { return m_decoder && m_decoder->hasAudio(); }
+    bool hasVideo() const { return m_decoder && m_decoder->hasVideo(); }
 
     Q_INVOKABLE void addVideoSink(QVideoSink* videoSink);
     Q_INVOKABLE void removeVideoSink(const QVideoSink* videoSink);
@@ -106,7 +107,7 @@ private:
     int m_frameCount = 1;
     Interval<microseconds> m_currentFrameTime { -1us, -1us };
 
-    Decoder m_decoder;
+    std::unique_ptr<Decoder> m_decoder;
     QList<QPointer<QVideoSink>> m_videoSinks;
     QPointer<AudioRenderer> m_audioRenderer;
 };

@@ -19,6 +19,12 @@
     \brief Renders audio for a \l MediaClip.
 */
 
+AudioRenderer::~AudioRenderer()
+{
+    if (m_upstreamRenderer)
+        m_upstreamRenderer->removeDownstreamRenderer(this);
+}
+
 void AudioRenderer::componentComplete()
 {
     if (!m_upstreamRenderer) {

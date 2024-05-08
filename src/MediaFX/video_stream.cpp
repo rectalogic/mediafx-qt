@@ -107,6 +107,7 @@ void VideoStream::processFrame(AVFrame* frame)
     Q_ASSERT(videoFrame.mappedBytes(0) == frame->linesize[0] * frame->height);
     std::memcpy(videoFrame.bits(0), frame->data[0], videoFrame.mappedBytes(0));
     videoFrame.unmap();
+    videoFrame.setStartTime(frame->pts); // For debugging
 }
 
 void VideoStream::logAVFrame(void* context, int level, const AVFrame* frame) const

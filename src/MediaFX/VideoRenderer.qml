@@ -7,6 +7,7 @@ import QtMultimedia
 /*!
     \qmltype VideoRenderer
     \inqmlmodule MediaFX
+    \inherits VideoOutput
     \brief Renders video frames from a MediaClip.
 */
 VideoOutput {
