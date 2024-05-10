@@ -69,6 +69,7 @@ qt_add_qml_module(mediafx
     MediaSequenceClip.qml
     MultiEffectState.qml
     ShaderEffectState.qml
+    Transformer.qml
     DEPENDENCIES
     QtQuick
     QtQuick.Controls

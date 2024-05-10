@@ -56,16 +56,40 @@ Item {
             visible: false
             anchors.fill: internal
         }
-        VideoRenderer {
-            id: _mainVideoRenderer
-            anchors.fill: internal
+        VideoContainer {
+            id: _mainVideoContainer
+            VideoRenderer {
+                id: _mainVideoRenderer
+                anchors.fill: parent
+                mediaClip: _mainVideoContainer.mediaClip
+                transform: _mainVideoContainer.mediaClip?.transformer?.transform || null
+            }
         }
-        VideoRenderer {
-            id: _auxVideoRenderer
-            fillMode: _mainVideoRenderer.fillMode
-            orientation: _mainVideoRenderer.orientation
+        VideoContainer {
+            id: _auxVideoContainer
             visible: false
-            anchors.fill: internal
+            VideoRenderer {
+                id: _auxVideoRenderer
+                fillMode: _mainVideoRenderer.fillMode
+                orientation: _mainVideoRenderer.orientation
+                anchors.fill: parent
+                mediaClip: _auxVideoContainer.mediaClip
+                transform: _auxVideoContainer.mediaClip?.transformer?.transform || null
+            }
+        }
+    }
+
+    component VideoContainer: Item {
+        property MediaSequenceClip mediaClip
+
+        clip: true
+        anchors.fill: internal
+
+        onMediaClipChanged: {
+            if (mediaClip && mediaClip.transformer) {
+                mediaClip.transformer.width = Qt.binding(() => width);
+                mediaClip.transformer.height = Qt.binding(() => height);
+            }
         }
     }
 }

@@ -10,15 +10,19 @@ function onCurrentFrameTimechanged() {
     if (internal.transitionStartTime > 0 && clip.currentFrameTime.start >= internal.transitionStartTime) {
         if (clip.endTransition) {
             if (!clip.endTransition.parent) {
+                if (!internal.nextClip && internal.currentClipIndex < root.mediaClips.length - 1) {
+                    internal.nextClip = root.mediaClips[internal.currentClipIndex + 1].createObject(null);
+                }
+
                 clip.endTransition.parent = _transitionContainer;
                 clip.endTransition.anchors.fill = _transitionContainer;
-                clip.endTransition.source = _mainVideoRenderer;
-                clip.endTransition.dest = _auxVideoRenderer;
+                clip.endTransition.source = _mainVideoContainer;
+                clip.endTransition.dest = _auxVideoContainer;
                 root.currentTransition = clip.endTransition;
 
-                _mainVideoRenderer.mediaClip = internal.currentClip;
-                _auxVideoRenderer.mediaClip = internal.nextClip;
-                _mainVideoRenderer.visible = false;
+                _mainVideoContainer.mediaClip = internal.currentClip;
+                _auxVideoContainer.mediaClip = internal.nextClip;
+                _mainVideoContainer.visible = false;
                 _transitionContainer.visible = true;
             }
             clip.endTransition.time = (clip.currentFrameTime.start - internal.transitionStartTime) / (clip.endTime - internal.transitionStartTime);
@@ -56,12 +60,9 @@ function initializeClip() {
         internal.currentClip.clipEnded.connect(root.mediaSequenceEnded)
     }
     else {
-        if (!internal.nextClip) {
-            internal.nextClip = root.mediaClips[internal.currentClipIndex + 1].createObject(null);
-        }
         const transition = internal.currentClip.endTransition;
-        if (transition && internal.nextClip) {
-            const clampedTransitionDuration = Math.min(Math.min(transition.duration, internal.currentClip.duration), internal.nextClip.duration);
+        if (transition) {
+            const clampedTransitionDuration = Math.min(transition.duration, internal.currentClip.duration);
             internal.transitionStartTime = internal.currentClip.endTime - clampedTransitionDuration;
         }
         else {
@@ -71,8 +72,8 @@ function initializeClip() {
         internal.currentClip.clipEnded.connect(onClipEnded);
     }
 
-    _mainVideoRenderer.mediaClip = internal.currentClip;
-    _auxVideoRenderer.mediaClip = null;
-    _mainVideoRenderer.visible = true;
+    _mainVideoContainer.mediaClip = internal.currentClip;
+    _auxVideoContainer.mediaClip = null;
+    _mainVideoContainer.visible = true;
     _transitionContainer.visible = false;
 };

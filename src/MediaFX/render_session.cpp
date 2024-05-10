@@ -122,6 +122,10 @@ void RenderSession::componentComplete()
     m_loadedItem = qobject_cast<QQuickItem*>(object);
     if (!m_loadedItem) {
         qmlWarning(this) << "Failed to load" << m_sourceUrl;
+        if (component.isError()) {
+            for (auto& error : component.errors())
+                qCritical() << error;
+        }
         fatalError();
         return;
     }

@@ -13,4 +13,6 @@ import MediaFX.Transition
 MediaClip {
     /*! The \l MediaTransition to use at the end of this clip to transition to the next clip. */
     property MediaTransition endTransition
+    /*! A \l Transformer to transform the video */
+    property Transformer transformer
 }
