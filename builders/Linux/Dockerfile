@@ -55,9 +55,10 @@ RUN --mount=type=secret,id=qtaccount,target=/root/.local/share/Qt/qtaccount.ini 
         ARCH=x64
     fi
     QTSPEC=qt6.${QT_VER//.}
-    curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run \
-    && chmod +x qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run \
-    && ./qt-unified-linux-${ARCH}-${QT_INSTALLER_VER}-online.run --root /usr/local/Qt --accept-licenses --accept-obligations --default-answer --confirm-command \
+    INSTALLER=qt-online-installer-linux-${ARCH}-${QT_INSTALLER_VER}.run
+    curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/${INSTALLER} \
+    && chmod +x ${INSTALLER} \
+    && ./${INSTALLER} --root /usr/local/Qt --accept-licenses --accept-obligations --default-answer --confirm-command \
       --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
       install \
       qt.${QTSPEC}.linux_gcc_64 \

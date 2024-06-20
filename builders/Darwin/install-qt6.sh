@@ -10,9 +10,10 @@ INSTALLDIR=${QTDIR%/*/*}
 (
     cd "$BUILD_ROOT"
     QTSPEC=qt6.${QT_VER//.}
-    curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.dmg \
-    && hdiutil attach qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.dmg \
-    && /Volumes/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online.app/Contents/MacOS/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online \
+    INSTALLER=qt-online-installer-macOS-x64-${QT_INSTALLER_VER}
+    curl -L -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/${INSTALLER}.dmg \
+    && hdiutil attach ${INSTALLER}.dmg \
+    && /Volumes/${INSTALLER}/${INSTALLER}.app/Contents/MacOS/${INSTALLER} \
         --root "${INSTALLDIR}" --accept-licenses --accept-obligations --default-answer --confirm-command \
         --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
         install \
@@ -26,6 +27,6 @@ INSTALLDIR=${QTDIR%/*/*}
         qt.${QTSPEC}.qtshadertools \
         qt.${QTSPEC}.addons.qtquickeffectmaker \
         qt.tools.qtcreator_gui \
-    && hdiutil detach /Volumes/qt-unified-macOS-x64-${QT_INSTALLER_VER}-online \
+    && hdiutil detach /Volumes/${INSTALLER} \
     && find "${INSTALLDIR}/Docs/Qt-${QT_VER}" -type f -and -not -name '*.index' -delete
 )

@@ -5,8 +5,8 @@
         "context": "../builders",
         "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
         "args": {
-            "QT_VER": "6.7.0",
-            "QT_INSTALLER_VER": "4.7.0"
+            "QT_VER": "6.7.2",
+            "QT_INSTALLER_VER": "4.8.0"
         },
         "options": [
             "--platform",
