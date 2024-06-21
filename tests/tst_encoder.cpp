@@ -105,7 +105,7 @@ private slots:
         QByteArray encodedData(encodedFile.readAll());
         encodedFile.close();
 
-        QString fixturePath = QFINDTESTDATA("fixtures/encoder.nut");
+        QString fixturePath = QFINDTESTDATA("fixtures/output/mediafx-qt/encoder.nut");
         QFile fixtureFile(fixturePath);
         QVERIFY(fixtureFile.open(QIODevice::ReadOnly));
         QByteArray fixtureData(fixtureFile.readAll());

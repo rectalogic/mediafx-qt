@@ -9,6 +9,7 @@ usage="$0 <mediafxpath> <framerate>:<WxH> <qml-file> <output-file> <threshold>"
 BASE=${BASH_SOURCE%/*}
 
 FIXTURES=${BASE}/fixtures
+FIXTURES_OUTPUT=${FIXTURES}/output/mediafx-qt
 ASSETS=${FIXTURES}/assets
 
 MEDIAFX=${1:?$usage}
@@ -39,7 +40,7 @@ function stream_hashes {
 # If framehash is different, then pixel difference each frame.
 # threshold=2 is how much each pixel can differ
 # https://superuser.com/questions/1615310/how-to-use-ffmpeg-blend-difference-filter-mode-to-identify-frame-differences-bet
-FIXTURE=${FIXTURES}/$(basename "${OUTPUT}")
+FIXTURE=${FIXTURES_OUTPUT}/$(basename "${OUTPUT}")
 [ -f "${FIXTURE}.framehash" ] || exit 1
 
 diff <(stream_hashes "${FIXTURE}.framehash" audio) <(stream_hashes "${OUTPUT}.framehash" audio)
