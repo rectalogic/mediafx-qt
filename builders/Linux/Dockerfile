@@ -38,7 +38,7 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
-RUN apt-get -y install \
+RUN apt-get -y update && apt-get -y install \
     libdbus-1-3 \
     libfontconfig1 \
     libfreetype6 \
@@ -92,7 +92,7 @@ RUN <<EOF
     if [ "${UBUNTU}" = "noble" ]; then
         EXTRA_PKGS="clang-format clang-tidy clazy iwyu"
     fi
-    apt-get -y install \
+    apt-get -y update && apt-get -y install \
         bash \
         build-essential \
         ffmpeg \
