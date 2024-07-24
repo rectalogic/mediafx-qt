@@ -14,6 +14,12 @@
 
 bool RenderControl::reconfigure()
 {
+#ifdef MSAA
+    int sampleCount = 4;
+#else
+    int sampleCount = 1;
+#endif
+
     if (!window())
         return false;
     QSize size = window()->size();
@@ -22,6 +28,9 @@ bool RenderControl::reconfigure()
 
     texture.reset();
     stencilBuffer.reset();
+#ifdef MSAA
+    colorBuffer.reset();
+#endif
     textureRenderTarget.reset();
     renderPassDescriptor.reset();
 
@@ -37,18 +46,30 @@ bool RenderControl::reconfigure()
         return false;
     }
 
+#ifdef MSAA
+    colorBuffer.reset(rhi->newRenderBuffer(QRhiRenderBuffer::Color, size, sampleCount));
+    if (!colorBuffer->create()) {
+        qCritical() << "Failed to create color buffer";
+        return false;
+    }
+#endif
+
     // depth-stencil is mandatory with RHI, although strictly speaking the
     // scenegraph could operate without one, but it has no means to figure out
     // the lack of a ds buffer, so just be nice and provide one.
-    stencilBuffer.reset(rhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil, size, 1));
+    stencilBuffer.reset(rhi->newRenderBuffer(QRhiRenderBuffer::DepthStencil, size, sampleCount));
     if (!stencilBuffer->create()) {
         qCritical() << "Failed to create render buffer";
         return false;
     }
 
-    QRhiTextureRenderTargetDescription renderTargetDescription((QRhiColorAttachment(texture.get())));
-    renderTargetDescription.setDepthStencilBuffer(stencilBuffer.get());
-    textureRenderTarget.reset(rhi->newTextureRenderTarget(renderTargetDescription));
+#ifdef MSAA
+    QRhiColorAttachment colorAtt(colorBuffer.get());
+    colorAtt.setResolveTexture(texture.get());
+#else
+    QRhiColorAttachment colorAtt(texture.get());
+#endif
+    textureRenderTarget.reset(rhi->newTextureRenderTarget({ colorAtt, stencilBuffer.get() }));
     renderPassDescriptor.reset(textureRenderTarget->newCompatibleRenderPassDescriptor());
     textureRenderTarget->setRenderPassDescriptor(renderPassDescriptor.get());
     if (!textureRenderTarget->create()) {

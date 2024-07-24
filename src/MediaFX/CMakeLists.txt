@@ -7,8 +7,6 @@ pkg_search_module(libavcodec REQUIRED IMPORTED_TARGET libavcodec>=58.134.100)
 pkg_search_module(libavfilter REQUIRED IMPORTED_TARGET libavfilter>=7.110.100)
 pkg_search_module(libavutil REQUIRED IMPORTED_TARGET libavutil>=56.70.100)
 
-option(EVENT_LOGGER "Enable event logger" OFF)
-
 find_package(Git QUIET)
 
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -44,6 +42,12 @@ target_include_directories(mediafx PRIVATE ${LIBAVFORMAT_INCLUDE_DIRS} ${LIBAVCO
 target_include_directories(mediafx PUBLIC ${LIBAVUTIL_INCLUDE_DIRS})
 target_compile_options(mediafx PRIVATE ${LIBAVFORMAT_CFLAGS} ${LIBAVCODEC_CFLAGS} ${LIBAVFILTER_CFLAGS} ${LIBAVUTIL_CFLAGS})
 
+option(WITH_MSAA "Enable MSAA antialiasing." OFF)
+
+if(WITH_MSAA)
+    target_compile_definitions(mediafx PRIVATE MSAA)
+endif()
+
 qt_add_executable(mediafxtool
     main.cpp
 )
@@ -51,9 +55,11 @@ qt_add_executable(mediafxtool
 # For generated version.h
 target_include_directories(mediafxtool PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
-if(EVENT_LOGGER)
+option(WITH_EVENT_LOGGER "Enable event logger" OFF)
+
+if(WITH_EVENT_LOGGER)
     target_sources(mediafxtool PRIVATE event_logger.h)
-    add_compile_definitions(EVENTLOGGER)
+    target_compile_definitions(mediafxtool PRIVATE EVENTLOGGER)
 endif()
 
 set_property(TARGET mediafxtool PROPERTY OUTPUT_NAME mediafx)

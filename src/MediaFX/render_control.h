@@ -27,6 +27,9 @@ private:
 
     std::unique_ptr<QRhiTexture> texture;
     std::unique_ptr<QRhiRenderBuffer> stencilBuffer;
+#ifdef MSAA
+    std::unique_ptr<QRhiRenderBuffer> colorBuffer;
+#endif
     std::unique_ptr<QRhiTextureRenderTarget> textureRenderTarget;
     std::unique_ptr<QRhiRenderPassDescriptor> renderPassDescriptor;
 };
