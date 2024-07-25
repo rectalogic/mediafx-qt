@@ -14,7 +14,7 @@ and so on.
 
 ## Documentation
 
-See the full [MediaFX documentation](https://mediafx.org/modules.html)
+See the full [MediaFX documentation](https://qt.mediafx.org/modules.html)
 for the QML elements and modules.
 
 ## Dependencies
@@ -62,12 +62,12 @@ Item {
 }
 ```
 
-MediaClip is attached to [VideoRenderer.mediaClip](https://mediafx.org/qml-mediafx-videorenderer.html#mediaClip-prop)
-and renders one second of the video frames of it's [MediaClip.source](https://mediafx.org/qml-mediafx-mediaclip.html#source-prop).
+MediaClip is attached to [VideoRenderer.mediaClip](https://qt.mediafx.org/qml-mediafx-videorenderer.html#mediaClip-prop)
+and renders one second of the video frames of it's [MediaClip.source](https://qt.mediafx.org/qml-mediafx-mediaclip.html#source-prop).
 The [MultiEffect](https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html)
 filter is applied to the `VideoRenderer` to desaturate it.
-When the clip finishes, it's [clipEnded](https://mediafx.org/qml-mediafx-mediaclip.html#clipEnded-signal) signal triggers the
-[RenderSession.endSession](https://mediafx.org/qml-mediafx-rendersession.html#endSession-method) slot via the [RenderSession.session](https://mediafx.org/qml-mediafx-rendersession.html#session-attached-prop) attached property to end encoding.
+When the clip finishes, it's [clipEnded](https://qt.mediafx.org/qml-mediafx-mediaclip.html#clipEnded-signal) signal triggers the
+[RenderSession.endSession](https://qt.mediafx.org/qml-mediafx-rendersession.html#endSession-method) slot via the [RenderSession.session](https://qt.mediafx.org/qml-mediafx-rendersession.html#session-attached-prop) attached property to end encoding.
 
 See [Qt signals and slots](https://doc.qt.io/qt-6/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals).
 
