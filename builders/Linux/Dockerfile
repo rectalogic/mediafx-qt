@@ -5,9 +5,9 @@
 
 ARG UBUNTU=noble
 
-FROM ubuntu:${UBUNTU} as base
+FROM ubuntu:${UBUNTU} AS base
 
-ENV container docker
+ENV container=docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -30,11 +30,11 @@ RUN apt-get -y update && apt-get -y install \
     libxkbcommon-x11-0
 
 
-FROM base as qt
+FROM base AS qt
 
 ARG QT_VER
 ARG QT_INSTALLER_VER
-ENV container docker
+ENV container=docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -54,7 +54,8 @@ RUN --mount=type=secret,id=qtaccount,target=/root/.local/share/Qt/qtaccount.ini 
     else
         ARCH=x64
     fi
-    QTSPEC=qt6.${QT_VER//.}
+    QT_VER_NODOT=${QT_VER//.}
+    QTSPEC=qt6.${QT_VER_NODOT}
     INSTALLER=qt-online-installer-linux-${ARCH}-${QT_INSTALLER_VER}.run
     curl -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/${INSTALLER} \
     && chmod +x ${INSTALLER} \
@@ -62,20 +63,20 @@ RUN --mount=type=secret,id=qtaccount,target=/root/.local/share/Qt/qtaccount.ini 
       --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
       install \
       qt.${QTSPEC}.linux_gcc_64 \
-      qt.${QTSPEC}.qtquick3d \
-      qt.${QTSPEC}.qtquicktimeline \
+      qt.${QTSPEC}.addons.qtquick3d \
+      qt.${QTSPEC}.addons.qtquicktimeline \
       qt.${QTSPEC}.addons.qtpositioning \
       qt.${QTSPEC}.addons.qtwebchannel \
-      qt.${QTSPEC}.addons.qtwebengine \
+      extensions.qtwebengine.${QT_VER_NODOT}.linux_gcc_64 \
       qt.${QTSPEC}.addons.qtmultimedia \
-      qt.${QTSPEC}.qtshadertools \
+      qt.${QTSPEC}.addons.qtshadertools \
     && find /usr/local/Qt/Docs/Qt-${QT_VER} -type f -and -not -name '*.index' -delete \
     && curl -o iwyu-mapgen-qt.py https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/clang_17/mapgen/iwyu-mapgen-qt.py \
     && python3 iwyu-mapgen-qt.py /usr/local/Qt/${QT_VER}/*/include > "/usr/local/Qt/${QT_VER}/qt.imp"
 EOF
 
 
-FROM base as mediafx
+FROM base AS mediafx
 LABEL maintainer=rectalogic
 ARG QT_VER
 ARG UBUNTU=noble
@@ -84,7 +85,7 @@ ENV GALLIUM_DRIVER=softpipe
 ENV LIBGL_ALWAYS_SOFTWARE=1
 ENV DRI_NO_MSAA=1
 
-ENV container docker
+ENV container=docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8

@@ -9,7 +9,8 @@ source "$CURRENT/../versions"
 INSTALLDIR=${QTDIR%/*/*}
 (
     cd "$BUILD_ROOT"
-    QTSPEC=qt6.${QT_VER//.}
+    QT_VER_NODOT=${QT_VER//.}
+    QTSPEC=qt6.${QT_VER_NODOT}
     INSTALLER=qt-online-installer-macOS-x64-${QT_INSTALLER_VER}
     curl -L -O https://qt.mirror.constant.com/archive/online_installers/${QT_INSTALLER_VER%.*}/${INSTALLER}.dmg \
     && hdiutil attach ${INSTALLER}.dmg \
@@ -18,13 +19,13 @@ INSTALLDIR=${QTDIR%/*/*}
         --auto-answer telemetry-question=No --no-default-installations --no-force-installations \
         install \
         qt.${QTSPEC}.clang_64 \
-        qt.${QTSPEC}.qtquick3d \
-        qt.${QTSPEC}.qtquicktimeline \
+        qt.${QTSPEC}.addons.qtquick3d \
+        qt.${QTSPEC}.addons.qtquicktimeline \
         qt.${QTSPEC}.addons.qtpositioning \
         qt.${QTSPEC}.addons.qtwebchannel \
-        qt.${QTSPEC}.addons.qtwebengine \
+        extensions.qtwebengine.${QT_VER_NODOT}.clang_64 \
         qt.${QTSPEC}.addons.qtmultimedia \
-        qt.${QTSPEC}.qtshadertools \
+        qt.${QTSPEC}.addons.qtshadertools \
         qt.${QTSPEC}.addons.qtquickeffectmaker \
         qt.tools.qtcreator_gui \
     && hdiutil detach /Volumes/${INSTALLER} \

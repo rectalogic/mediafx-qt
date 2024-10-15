@@ -19,7 +19,7 @@ for the QML elements and modules.
 
 ## Dependencies
 
-MediaFX use [Qt 6.6](https://doc.qt.io/qt-6/),
+MediaFX use [Qt 6](https://doc.qt.io/qt-6/),
 and [FFmpeg](https://ffmpeg.org/).
 
 ## Example

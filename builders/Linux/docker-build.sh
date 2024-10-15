@@ -18,4 +18,4 @@ if [[ ! $QTACCOUNT ]]; then
     fi
 fi
 
-docker buildx build --secret id=qtaccount,src="$QTACCOUNT" --build-arg UBUNTU=${UBUNTU:-noble} --build-arg QT_VER=${QT_VER:?} --build-arg QT_INSTALLER_VER=${QT_INSTALLER_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx:${UBUNTU:-noble}-$(git branch --show-current) --file "${CURRENT}/Dockerfile" "${CURRENT}/.."
+docker buildx build --secret id=qtaccount,src="$QTACCOUNT" --build-arg UBUNTU=${UBUNTU:-noble} --build-arg QT_VER=${QT_VER:?} --build-arg QT_INSTALLER_VER=${QT_INSTALLER_VER:?} --platform linux/amd64 --memory-swap -1 --load --tag ghcr.io/rectalogic/mediafx-qt:${UBUNTU:-noble}-$(git branch --show-current) --file "${CURRENT}/Dockerfile" "${CURRENT}/.."

@@ -13,7 +13,6 @@
 #include <QQmlInfo>
 #include <QUrl>
 #include <QVideoSink>
-#include <QmlTypeAndRevisionsRegistration>
 #include <chrono>
 #include <compare>
 #include <ratio>

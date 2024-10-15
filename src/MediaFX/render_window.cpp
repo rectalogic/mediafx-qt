@@ -11,7 +11,6 @@
 #include <QQmlEngine>
 #include <QQmlInfo>
 #include <QQuickItem>
-#include <QmlTypeAndRevisionsRegistration>
 #ifdef MEDIAFX_ENABLE_VULKAN
 #include <QQuickGraphicsConfiguration>
 #include <QSGRendererInterface>

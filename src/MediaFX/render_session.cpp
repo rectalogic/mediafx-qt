@@ -22,7 +22,6 @@
 #include <QQmlInfo>
 #include <QString>
 #include <QVariant>
-#include <QmlTypeAndRevisionsRegistration>
 #include <QtLogging>
 using namespace Qt::Literals::StringLiterals;
 

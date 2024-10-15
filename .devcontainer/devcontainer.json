@@ -3,10 +3,10 @@
     "build": {
         "dockerfile": "../builders/Linux/Dockerfile",
         "context": "../builders",
-        "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx:buildcache",
+        "cacheFrom": "type=registry,ref=ghcr.io/rectalogic/mediafx-qt:buildcache",
         "args": {
-            "QT_VER": "6.7.2",
-            "QT_INSTALLER_VER": "4.8.0"
+            "QT_VER": "6.8.0",
+            "QT_INSTALLER_VER": "4.8.1"
         },
         "options": [
             "--platform",

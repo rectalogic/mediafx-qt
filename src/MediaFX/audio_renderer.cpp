@@ -8,7 +8,6 @@
 #include <QPointer>
 #include <QQmlEngine>
 #include <QQmlInfo>
-#include <QmlTypeAndRevisionsRegistration>
 #include <QtCore>
 
 /*!
